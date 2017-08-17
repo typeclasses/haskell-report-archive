@@ -1,0 +1,68 @@
+<!DOCTYPE HTML PUBLIC "-//IETF//DTD HTML//EN">
+<HTML>
+
+<HEAD>
+<TITLE>Changes from Haskell 1.3 to Haskell 1.4</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+<CENTER><H1>Changes from Haskell 1.3 to Haskell 1.4</H1></CENTER>
+
+<ul>
+    <li>List comprehensions have been generalized to arbitrary
+        monads. (See <a
+        href="../haskell-report-1.4-html/exps.html#list-comprehensions">Section
+        3.11</a>). </li>
+    <li>Import and export of class methods and constructors is no
+        longer restricted to `all or nothing' as previously. Any
+        subset of class methods or data constructors may be
+        selected for import or export. Methods and constructors
+        are now entities in their own right. (See <a
+        href="../haskell-report-1.4-html/modules.html#export">Section
+        5.1.1</a>). </li>
+    <li>The defaulting rule now applies to type variables
+        affected by the monomorphism restriction. (All
+        implementations already do this - this officially
+        sanctions the existing practice). (See Section <a
+        href="../haskell-report-1.4-html/decls.html#default-decls">4.3.4</a>).
+    </li>
+    <li>Qualified names may now be used as field names in
+        patterns and updates. </li>
+    <li><tt>Ord</tt> is no longer a superclass of <tt>Enum</tt>.
+        Some of the default methods for <tt>Enum</tt> have
+        changed. </li>
+    <li>Context restrictions on <tt>newtype</tt> declarations
+        have been relaxed. (See section <a
+        href="../haskell-report-1.4-html/decls.html#datatype-renaming">4.2.3</a>).
+    </li>
+    <li>The Prelude is now more explicit about some instances for
+        <tt>Read </tt>and <tt>Show</tt>. </li>
+    <li>The fixity of <tt>&gt;&gt;=</tt> has changed. </li>
+    <li>The report is more explicit about context reduction
+        problems. (See <a
+        href="../haskell-report-1.4-html/decls.html#context-reduction">Section
+        4.5.3</a>). </li>
+    <li>Ratio and Rational have been added to the export list of
+        the prelude. </li>
+    <li>We're now using Unicode. See <a
+        href="../haskell-report-1.4-html/lexemes.html">Lexical
+        Structure</a>. </li>
+    <li>There's an extra warning about character IO (see <a
+        href="../haskell-report-1.4-html/io-13.html">Input/Output</a>)
+    </li>
+</ul>
+
+<p>Haskell 1.4 is generally compatible with 1.3 - most of these
+changes are upward compatible. You may have problems with type
+signatures containing Enum if Ord instances are also used - you
+must add an explicit Ord context now that Enum does not imply
+Ord. The change in the fixity of <font face="Times New Roman"><kbd>&gt;&gt;=</kbd></font>
+may also lead to incompatiblity. Instances which rely on the
+defaults in the class Enum may break.</p>
+
+
+<HR>
+<ADDRESS>Last update: September 16th, 1998</ADDRESS>
+</BODY>
+</HTML>
+
