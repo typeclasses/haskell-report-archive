@@ -1,0 +1,288 @@
+
+<title>The Haskell 98 Report: Preface</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Report</i><br> <a href="index.html">top</a> | back | <a href="intro.html">next</a> | <a href="index98.html">contents</a> | <a href="prelude-index.html">function index</a> <br><hr>
+
+<div align=center><font size=4 ><B>Preface
+</B></font></div><p>
+<blockquote>"<I>Some half dozen persons have written technically on combinatory
+logic, and most of these, including ourselves, have published
+something erroneous.  Since some of our fellow sinners are among the
+most careful and competent logicians on the contemporary scene, we
+regard this as evidence that the subject is refractory.  Thus fullness
+of exposition is necessary for accuracy; and excessive condensation
+would be false economy here, even more than it is ordinarily.</I>"
+<table >
+<tr><td align=right>Haskell B. Curry and Robert Feys </td></tr><tr><td align=right>in the Preface to <I>Combinatory Logic</I> [<a href="haskell.html#$curry&feys:book">2</a>], May 31, 1956
+</td></tr></table>
+
+</blockquote><p>
+
+In September of 1987 a meeting was held at the conference on
+Functional Programming
+Languages and Computer Architecture (FPCA '87) in
+Portland, Oregon, to discuss an unfortunate situation
+in the functional programming community: there had come into being
+more than a dozen non-strict, purely functional programming languages,
+all similar in expressive power and semantic underpinnings.  There
+was a strong consensus at this meeting that more widespread use of
+this class of functional languages was
+being hampered by the lack of a common language.  It was decided
+that a committee should be formed to design such a language, providing
+faster communication of new ideas, a stable foundation for real
+applications development, and a vehicle through which others
+would be encouraged to use functional languages.  This
+document describes the result of that committee's efforts: a purely
+functional programming language called Haskell ,
+
+named after the logician Haskell B. Curry
+whose work provides the logical basis for much of ours.<p>
+<a name="sect1"></a>
+<h3>1<tt>&nbsp;&nbsp;</tt>Goals</h3><p>
+The committee's primary goal was to design a language that
+satisfied these constraints:
+<OL><LI>It should be suitable for teaching, research, and applications,
+      including building large systems.
+<LI>It should be completely described via the publication of a formal
+      syntax and semantics.
+<LI>It should be freely available.  Anyone should be permitted to
+      implement the language and distribute it to whomever they please.
+<LI>It should be based on ideas that enjoy a wide consensus.  
+<LI>It should reduce unnecessary diversity in functional 
+      programming languages.
+</OL>
+The committee hopes that Haskell  can serve as a
+basis for future research in language design.
+We hope that extensions or
+variants of the language may appear, incorporating experimental
+features.<p>
+<a name="sect1.1"></a>
+<h3>1.1<tt>&nbsp;&nbsp;</tt>Haskell 98</h3><p>
+Haskell has evolved continuously since its orignal publication.
+By the middle of 1997, there had been four versions of the language
+(the latest at that point being Haskell 1.4).  At the 1997 Haskell Workshop 
+in Amsterdam, it was decided that a stable variant of Haskell was needed;
+this stable language is the subject of this Report, and is called "Haskell 98".<p>
+Haskell 98 was conceived as a relatively minor tidy-up of Haskell 1.4, making
+some simplifications, and removing some pitfalls for the unwary. It is intended to
+be a "stable" language in sense the <I>implementors are committed to supporting
+Haskell 98 exactly as specified, for the foreseeable future</I>.<p>
+As a separate exercise, Haskell will continue to evolve.  At the time of
+writing there are Haskell implementations that support existential types,
+local universal polymorphism, rank-2 types, multi-parameter type classes,
+pattern guards, exceptions, concurrency, and more besides.  Haskell 98
+does not impede these developments.  Instead, it provides a stable point
+of reference, so that those who wish to write text books, or use Haskell
+for teaching, can do so in the knowledge that Haskell 98 will continue
+to exist.  On the few occasions when we refer to the evolving, future version
+of Haskell, we call it "Haskell 2".<p>
+<a name="sect1.2"></a>
+<h3>1.2<tt>&nbsp;&nbsp;</tt>This Report</h3><p>
+This report is the official specification of Haskell  98
+and should be suitable for writing programs and building
+implementations.  It is <I>not</I> a tutorial on programming in
+Haskell  such as the `Gentle Introduction' [<a href="haskell.html#$tutorial">5</a>], so some
+familiarity with functional languages is assumed. <p>
+Haskell 98 is described in two separate
+documents: the Haskell Language Report (this document) and the Haskell
+Library Report [<a href="haskell.html#$libraries">8</a>].<p>
+<a name="sect1.3"></a>
+<h3>1.3<tt>&nbsp;&nbsp;</tt>Evolutionary Highlights</h3><p>
+For the benefit of those who have some knowledge of earlier
+version of Haskell, we briefly summarise the differences between
+Haskell 98 and its predecessors.<p>
+<a name="sect1.3.1"></a>
+<h4>1.3.1<tt>&nbsp;&nbsp;</tt>Highlights of Haskell 98</h4><p>
+A complete list of the differences between Haskell 1.4 and Haskell 98
+can be found at <tt>http://haskell.org</tt>.
+A summary of the main features is as follows:
+<UL><LI>List comprehensions have reverted to being list comprehensions,
+not monad comprehensions.
+<LI>There are several useful generalisations of the module system:
+name clashes are reported lazily, and distinct modules can share a local
+alias.
+<LI>Fixity declarations can appear anywhere a type signature can,
+and, like type signatures, bind to an entity rather than to its name.
+<LI>"Punning" for records has been removed.
+<LI>The class <tt>Eval</tt> has been removed; <tt>seq</tt> is now polymorphic.
+<LI>The type <tt>Void</tt> has been removed.
+</UL><p>
+<a name="sect1.3.2"></a>
+<h4>1.3.2<tt>&nbsp;&nbsp;</tt>Highlights of Haskell 1.4</h4><p>
+Version 1.4 of the report made the following relatively minor changes to the
+language:
+<UL><LI>The character set has been changed to Unicode.
+<LI>List comprehensions have been generalized to arbitrary
+monads.
+<LI>Import and export of class methods and constructors is no longer
+restricted to `all or nothing' as previously.  Any subset of class
+methods or data constructors may be selected for import or export.
+Also, constructors and class methods can now be named directly on
+import and export lists instead of as components of a type or class.
+<LI>Qualified names may now be used as field names in patterns and
+updates. 
+<LI><tt>Ord</tt> is no longer a superclass of <tt>Enum</tt>.  Some of the default
+methods for <tt>Enum</tt> have changed.
+<LI>Context restrictions on <tt>newtype</tt> declarations have been relaxed.
+
+<LI>The Prelude is now more explicit about some instances for <tt>Read
+</tt>and <tt>Show</tt>.
+<LI>The fixity of <tt>&gt;&gt;=</tt> has changed.
+</UL><p>
+<a name="sect1.3.3"></a>
+<h4>1.3.3<tt>&nbsp;&nbsp;</tt>Highlights of Haskell 1.3</h4><p>
+Version 1.3 of the report made the following substantial 
+changes to the language:<p>
+<UL><LI>Prelude and Library entities were distinguished, 
+and the Library became a separate Report.
+<LI>Monadic I/O was introduced.
+<LI>Monadic programming was made more readable through the
+introduction of a special <tt>do</tt> syntax.
+<LI>Constructor classes were introduced as a 
+natural generalization of the original Haskell 
+type system, supporting polymorphism over type constructors.
+<LI>A number of enhancements were made to Haskell  type
+declarations, including: strictness annotations, labelled fields, and
+<tt>newtype</tt> declarations.
+<LI>A number of changes to the module system were made.
+Instead of renaming, qualified names are used to resolve
+name conflicts.  All names are now redefinable; there is no
+longer a <tt>PreludeCore</tt> module containing names that cannot be
+reused.  Interface files are no longer specified by this report; all
+issues of separate compilation are now left up to the implementation.
+</UL><p>
+<a name="sect1.4"></a>
+<h3>1.4<tt>&nbsp;&nbsp;</tt>The <I>n+k</I> Pattern Controversy</h3>
+
+For technical reasons, many people feel that <I>n</I><tt>+</tt><I>k</I> patterns are
+an incongruous language design feature that should be eliminated
+from Haskell .  On the other hand, they serve as a
+vehicle for teaching introductory programming, in particular
+recursion over natural numbers.  Alternatives to <I>n</I><tt>+</tt><I>k
+</I>patterns have been explored, but are too premature to include in
+Haskell  98.  Thus we decided to retain this feature
+at present but to discourage the use of <I>n</I><tt>+</tt><I>k</I> patterns by Haskell 
+users.  This feature may be altered or removed in Haskell 2, 
+and should be avoided.
+Implementors are encouraged to provide a mechanism for users to
+selectively enable or disable <I>n</I><tt>+</tt><I>k</I> patterns.<p>
+<a name="sect1.5"></a>
+<h3>1.5<tt>&nbsp;&nbsp;</tt>Haskell  Resources</h3><p>
+The Haskell web site
+<tt><br>
+
+<br>
+	http://haskell.org<br>
+
+<br>
+
+</tt>gives access to many useful resources, including:
+<UL><LI>Online versions of the language and library definitions, including
+a complete list of all the differences between Haskell 98 and
+Haskell 1.4.
+<LI>Tutorial material on Haskell.
+<LI>Details of the Haskell mailing list.
+<LI>Implementations of Haskell.
+<LI>Contributed Haskell tools and libraries.
+<LI>Applications of Haskell.
+</UL>
+We welcome your comments, suggestions, and criticisms on the language
+or its presentation in the report, via the Haskell mailing list.<p>
+<h3>Acknowledgements</h3><p>
+We heartily thank these people for their useful contributions
+to this report:
+Kris Aerts,
+Hans Aberg,
+Richard Bird,
+Stephen Blott,
+Tom Blenko,
+Duke Briscoe,
+Magnus Carlsson,
+Franklin Chen,
+Olaf Chitil,
+Chris Clack,
+Guy Cousineau,
+Tony Davie,
+Chris Dornan,
+Chris Fasel,
+Pat Fasel, 
+Sigbjorn Finne,
+Andy Gill, 
+Mike Gunter,
+Cordy Hall,
+Thomas Hallgren,
+Klemens Hemm,
+Bob Hiromoto,
+Nic Holt,
+Ian Holyer, 
+Randy Hudson,
+Alexander Jacobson,
+Simon B. Jones, 
+Stef Joosten, 
+Mike Joy,
+Stefan Kahrs,
+Jerzy Karczmarczuk,
+Kent Karlsson,
+Richard Kelsey,
+Siau-Cheng Khoo, 
+Amir Kishon, 
+Jose Labra,
+Jeff Lewis,
+Mark Lillibridge,
+Sandra Loosemore,
+Olaf Lubeck, 
+Simon Marlow,
+Jim Mattson,
+Sergey Mechveliani,
+Randy Michelsen, 
+Rick Mohr,
+Arthur Norman,
+Nick North,
+Bjarte M. Ostvold,
+Paul Otto, 
+Sven Panne,
+Dave Parrott,
+Larne Pekowsky,
+Rinus Plasmeijer,
+Ian Poole,
+Stephen Price,
+John Robson, 
+Andreas Rossberg,
+Patrick Sansom,
+Felix Schroeter,
+Christian Sievers,
+Libor Skarvada,
+Jan Skibinski,
+Lauren Smith, 
+Raman Sundaresh,
+Satish Thatte,
+Simon Thompson,
+Tom Thomson,
+David Tweed,
+Pradeep Varma,
+Malcolm Wallace,
+Keith Wansbrough,
+Tony Warnock,
+Carl Witty,
+Stuart Wray,
+and Bonnie Yantis.<p>
+We are especially grateful to past members of the Haskell  committee --- Arvind,
+Jon Fairbairn, Andy Gordon, Maria M. Guzman, 
+Dick Kieburtz, Rishiyur Nikhil,
+Mike Reeve, David Wise, and
+Jonathan Young --- for the major contributions they have made to
+previous versions of this report.
+We also thank those who have participated in the lively discussions
+about Haskell  on the FP and Haskell  mailing lists.<p>
+Finally, aside from the important foundational work laid by Church,
+Rosser, Curry, and others on the lambda calculus, we wish to
+acknowledge the influence of many noteworthy programming languages
+developed over the years.  Although it is difficult to pinpoint the
+origin of many ideas, we particularly wish to acknowledge the
+influence of Lisp (and its modern-day incarnations Common Lisp and
+Scheme); Landin's ISWIM; APL; Backus's FP
+[<a href="haskell.html#$back78">1</a>]; ML and Standard ML; Hope and Hope<sup>+</sup>; Clean; Id; Gofer;
+Sisal; and Turner's series of languages culminating in 
+Miranda. (Miranda is a trademark of Research
+Software Ltd.) Without these forerunners Haskell  would not have
+been possible.
+<hr><i>The Haskell 98 Report</i><br><a href="index.html">top</a> | back | <a href="intro.html">next</a> | <a href="index98.html">contents</a> | <a href="prelude-index.html">function index</a> <br><font size=2>1 February, 1999</font>

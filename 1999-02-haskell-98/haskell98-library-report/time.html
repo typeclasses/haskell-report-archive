@@ -1,0 +1,255 @@
+
+<title>The Haskell 98 Library Report: Dates and Times</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Library Report</i><br> <a href="index.html">top</a> | <a href="system.html">back</a> | <a href="locale.html">next</a> | <a href="libindex.html">contents</a> <br><hr>
+<a name="time"></a><a name="sect14"></a>
+<h2>14<tt>&nbsp;&nbsp;</tt>Dates and Times</h2>
+<p>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module&nbsp;Time&nbsp;(<br>
+	ClockTime,&nbsp;<br>
+	Month(January,February,March,April,May,June,<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;July,August,September,October,November,December),<br>
+	Day(Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday),<br>
+	CalendarTime(CalendarTime,&nbsp;ctYear,&nbsp;ctMonth,&nbsp;ctDay,&nbsp;ctHour,&nbsp;ctMin,<br>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctPicosec,&nbsp;ctWDay,&nbsp;ctYDay,&nbsp;ctTZName,&nbsp;ctTZ,&nbsp;ctIsDST),<br>
+	TimeDiff(TimeDiff,&nbsp;tdYear,&nbsp;tdMonth,&nbsp;tdDay,&nbsp;tdHour,<br>
+		&nbsp;tdMin,&nbsp;tdSec,&nbsp;tdPicosec),<br>
+	getClockTime,&nbsp;addToClockTime,&nbsp;diffClockTimes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;toCalendarTime,&nbsp;toUTCTime,&nbsp;toClockTime,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;calendarTimeToString,&nbsp;formatCalendarTime&nbsp;)&nbsp;where<br>
+<br>
+import&nbsp;Ix(Ix)<br>
+<br>
+data&nbsp;ClockTime&nbsp;=&nbsp;...			--&nbsp;Implementation-dependent<br>
+instance&nbsp;Ord&nbsp;&nbsp;ClockTime&nbsp;where&nbsp;...<br>
+instance&nbsp;Eq&nbsp;&nbsp;&nbsp;ClockTime&nbsp;where&nbsp;...<br>
+<br>
+data&nbsp;Month&nbsp;=&nbsp;&nbsp;January&nbsp;&nbsp;&nbsp;|&nbsp;February&nbsp;|&nbsp;March&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;April<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;May&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;June&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;July&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;August<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;September&nbsp;|&nbsp;October&nbsp;&nbsp;|&nbsp;November&nbsp;|&nbsp;December<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Enum,&nbsp;Bounded,&nbsp;Ix,&nbsp;Read,&nbsp;Show)<br>
+<br>
+data&nbsp;Day&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;Sunday&nbsp;|&nbsp;Monday&nbsp;&nbsp;|&nbsp;Tuesday&nbsp;&nbsp;|&nbsp;Wednesday&nbsp;|&nbsp;Thursday&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;Friday&nbsp;|&nbsp;Saturday<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Enum,&nbsp;Bounded,&nbsp;Ix,&nbsp;Read,&nbsp;Show)<br>
+<br>
+data&nbsp;CalendarTime&nbsp;=&nbsp;CalendarTime&nbsp;{<br>
+		ctYear&nbsp;&nbsp;			::&nbsp;Int,<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctMonth&nbsp;			::&nbsp;Month,<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctDay,&nbsp;ctHour,&nbsp;ctMin,&nbsp;ctSec&nbsp;	::&nbsp;Int,<br>
+		ctPicosec			::&nbsp;Integer,<br>
+		ctWDay&nbsp;&nbsp;&nbsp;			::&nbsp;Day,<br>
+		ctYDay		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;		::&nbsp;Int,<br>
+		ctTZName	&nbsp;		::&nbsp;String,<br>
+		ctTZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;			::&nbsp;Int,<br>
+		ctIsDST				::&nbsp;Bool<br>
+	}&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Read,&nbsp;Show)<br>
+<br>
+data&nbsp;TimeDiff&nbsp;=&nbsp;TimeDiff&nbsp;{<br>
+		tdYear,&nbsp;tdMonth,&nbsp;tdDay,&nbsp;tdHour,&nbsp;tdMin,&nbsp;tdSec&nbsp;::&nbsp;Int,<br>
+		tdPicosec				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integer<br>
+	}&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Read,&nbsp;Show)<br>
+
+</tt></td></tr></table>
+
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+--&nbsp;Functions&nbsp;on&nbsp;times<br>
+getClockTime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;ClockTime<br>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+addToClockTime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;TimeDiff&nbsp;&nbsp;-&gt;&nbsp;ClockTime&nbsp;-&gt;&nbsp;ClockTime<br>
+diffClockTimes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;ClockTime&nbsp;-&gt;&nbsp;ClockTime&nbsp;-&gt;&nbsp;TimeDiff<br>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+toCalendarTime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;ClockTime&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;IO&nbsp;CalendarTime<br>
+toUTCTime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;ClockTime&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;CalendarTime<br>
+toClockTime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;CalendarTime&nbsp;-&gt;&nbsp;ClockTime<br>
+calendarTimeToString&nbsp;::&nbsp;CalendarTime&nbsp;-&gt;&nbsp;String<br>
+formatCalendarTime&nbsp;&nbsp;&nbsp;::&nbsp;TimeLocale&nbsp;-&gt;&nbsp;String&nbsp;-&gt;&nbsp;CalendarTime&nbsp;-&gt;&nbsp;String<br>
+
+</tt></td></tr></table>
+<p>
+The <tt>Time</tt> library provides standard functionality for clock times,
+including timezone information. It follows RFC 1129 in its use of
+Coordinated Universal Time (UTC).<p>
+<tt>ClockTime</tt> is an abstract type, used for the system's internal clock
+time.  Clock times may be compared directly or converted to a calendar
+time <tt>CalendarTime</tt> for I/O or other manipulations.
+<tt>CalendarTime</tt> is a user-readable and manipulable representation of
+the internal <tt>ClockTime</tt> type.  The numeric fields have the following
+ranges.
+<table border=2 cellpadding=3>
+<tr><td>
+<table >
+<tr><td>
+</td><td><I>Value</I></td><td></td><td><I>Range</I></td><td></td><td><I>Comments</I> </td></tr><tr></tr><tr><td></td><td>ctYear</td><td></td><td>-maxInt...</td><td>maxInt</td><td>Pre-Gregorian dates are inaccurate </td></tr><tr><td></td><td>ctDay</td><td></td><td>1...</td><td>31 </td></tr><tr><td></td><td>ctHour</td><td></td><td>0...</td><td>23</td></tr><tr><td></td><td>ctMin</td><td></td><td>0...</td><td>59</td></tr><tr><td></td><td>ctSec</td><td></td><td>0...</td><td>61</td><td>Allows for two Leap Seconds</td></tr><tr><td></td><td>ctPicosec</td><td></td><td>0...</td><td>(10<sup>12</sup>)-1 </td></tr><tr><td></td><td>ctYDay</td><td></td><td>0...</td><td>365</td><td>364 in non-Leap years </td></tr><tr><td></td><td>ctTZ</td><td></td><td>-89999...</td><td>89999</td><td>Variation from UTC in seconds
+</td></tr></table>
+
+</td></tr></table>
+
+The <I>ctTZName</I> field is the name of the time zone.  The <I>ctIsDST</I> field
+is <tt>True</tt> if Daylight Savings Time would be in effect, and <tt>False
+</tt>otherwise.
+The <tt>TimeDiff</tt> type records the difference between two clock times in
+a user-readable way.<p>
+Function <tt>getClockTime</tt> returns the current time in its internal
+representation.  The expression
+<tt>addToClockTime</tt> <I>d</I> <I>t</I> adds a time difference <I>d</I> and a
+clock time <I>t</I> to yield a new clock time.  The difference <I>d</I> may be either
+positive or negative.  The expression <tt>diffClockTimes</tt> <I>t1</I> <I>t2
+</I>returns the difference between two clock times <I>t1</I> and <I>t2</I> as a
+<tt>TimeDiff</tt>. <p>
+Function <tt>toCalendarTime</tt> <I>t</I> converts <I>t</I> to a local time, modified
+by the timezone and daylight savings time settings in force at the
+time of conversion.  Because of this dependence on the local environment,
+<tt>toCalendarTime</tt> is in the <tt>IO</tt> monad.<p>
+Function <tt>toUTCTime</tt> <I>t</I> converts <I>t</I> into a <tt>CalendarTime
+</tt>in standard UTC format.
+<tt>toClockTime</tt> <I>l</I> converts <I>l</I> into the corresponding internal
+<tt>ClockTime</tt> ignoring the contents of the <I>ctWDay</I>, <I>ctYDay</I>,
+<I>ctTZName</I>, and <I>ctIsDST</I> fields.<p>
+Function <tt>calendarTimeToString</tt> formats
+calendar times using local conventions and a formatting string.<p>
+<a name="sect14.1"></a>
+<h3>14.1<tt>&nbsp;&nbsp;</tt>Library <tt>Time</tt></h3>
+<tt><br>
+module&nbsp;Time&nbsp;(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ClockTime,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Month(January,February,March,April,May,June,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;July,August,September,October,November,December),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Day(Sunday,Monday,Tuesday,Wednesday,Thursday,Friday,Saturday),<br>
+	CalendarTime(CalendarTime,&nbsp;ctYear,&nbsp;ctMonth,&nbsp;ctDay,&nbsp;ctHour,&nbsp;ctMin,<br>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctPicosec,&nbsp;ctWDay,&nbsp;ctYDay,&nbsp;ctTZName,&nbsp;ctTZ,&nbsp;ctIsDST),<br>
+	TimeDiff(TimeDiff,&nbsp;tdYear,&nbsp;tdMonth,&nbsp;tdDay,&nbsp;<br>
+		&nbsp;tdHour,&nbsp;tdMin,&nbsp;tdSec,&nbsp;tdPicosec),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;getClockTime,&nbsp;addToClockTime,&nbsp;diffClockTimes,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;toCalendarTime,&nbsp;toUTCTime,&nbsp;toClockTime,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;calendarTimeToString,&nbsp;formatCalendarTime&nbsp;)&nbsp;where<br>
+<br>
+import&nbsp;Ix(Ix)<br>
+import&nbsp;Locale(TimeLocale(..),defaultTimeLocale)<br>
+import&nbsp;Char&nbsp;(&nbsp;intToDigit&nbsp;)<br>
+<br>
+data&nbsp;ClockTime&nbsp;=&nbsp;...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Implementation-dependent<br>
+instance&nbsp;Ord&nbsp;&nbsp;ClockTime&nbsp;where&nbsp;...<br>
+instance&nbsp;Eq&nbsp;&nbsp;&nbsp;ClockTime&nbsp;where&nbsp;...<br>
+<br>
+data&nbsp;Month&nbsp;=&nbsp;&nbsp;January&nbsp;&nbsp;&nbsp;|&nbsp;February&nbsp;|&nbsp;March&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;April<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;May&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;June&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;July&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;August<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;September&nbsp;|&nbsp;October&nbsp;&nbsp;|&nbsp;November&nbsp;|&nbsp;December<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Enum,&nbsp;Bounded,&nbsp;Ix,&nbsp;Read,&nbsp;Show)<br>
+<br>
+data&nbsp;Day&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;Sunday&nbsp;|&nbsp;Monday&nbsp;&nbsp;|&nbsp;Tuesday&nbsp;&nbsp;|&nbsp;Wednesday&nbsp;|&nbsp;Thursday&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;Friday&nbsp;|&nbsp;Saturday<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Enum,&nbsp;Bounded,&nbsp;Ix,&nbsp;Read,&nbsp;Show)<br>
+<br>
+data&nbsp;CalendarTime&nbsp;=&nbsp;CalendarTime&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctYear&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctMonth&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Month,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctDay,&nbsp;ctHour,&nbsp;ctMin,&nbsp;ctSec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctPicosec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integer,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctWDay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Day,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctYDay&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctTZName&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;String,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctTZ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ctIsDST&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Read,&nbsp;Show)<br>
+<br>
+data&nbsp;TimeDiff&nbsp;=&nbsp;TimeDiff&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tdYear,&nbsp;tdMonth,&nbsp;tdDay,&nbsp;tdHour,&nbsp;tdMin,&nbsp;tdSec&nbsp;::&nbsp;Int,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;tdPicosec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Read,&nbsp;Show)<br>
+<br>
+<br>
+getClockTime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;ClockTime<br>
+getClockTime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Implementation-dependent<br>
+<br>
+addToClockTime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;TimeDiff&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;ClockTime&nbsp;-&gt;&nbsp;ClockTime<br>
+addToClockTime&nbsp;td&nbsp;ct&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Implementation-dependent<br>
+<br>
+diffClockTimes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;ClockTime&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;ClockTime&nbsp;-&gt;&nbsp;TimeDiff<br>
+diffClockTimes&nbsp;ct1&nbsp;ct2&nbsp;&nbsp;=&nbsp;&nbsp;...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Implementation-dependent<br>
+<br>
+toCalendarTime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;ClockTime&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;IO&nbsp;CalendarTime<br>
+toCalendarTime&nbsp;ct&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Implementation-dependent<br>
+<br>
+toUTCTime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;ClockTime&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;CalendarTime<br>
+toUTCTime&nbsp;ct&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Implementation-dependent<br>
+<br>
+toClockTime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;CalendarTime&nbsp;-&gt;&nbsp;ClockTime<br>
+toClockTime&nbsp;cal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Implementation-dependent<br>
+<br>
+calendarTimeToString&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;CalendarTime&nbsp;-&gt;&nbsp;String<br>
+calendarTimeToString&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;formatCalendarTime&nbsp;defaultTimeLocale&nbsp;"%c"<br>
+<br>
+formatCalendarTime&nbsp;::&nbsp;TimeLocale&nbsp;-&gt;&nbsp;String&nbsp;-&gt;&nbsp;CalendarTime&nbsp;-&gt;&nbsp;String<br>
+formatCalendarTime&nbsp;l&nbsp;fmt&nbsp;ct@(CalendarTime&nbsp;year&nbsp;mon&nbsp;day&nbsp;hour&nbsp;min&nbsp;sec&nbsp;sdec&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;wday&nbsp;yday&nbsp;tzname&nbsp;_&nbsp;_)&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;doFmt&nbsp;fmt<br>
+&nbsp;&nbsp;where&nbsp;doFmt&nbsp;('%':c:cs)&nbsp;=&nbsp;decode&nbsp;c&nbsp;++&nbsp;doFmt&nbsp;cs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;doFmt&nbsp;(c:cs)&nbsp;=&nbsp;c&nbsp;:&nbsp;doFmt&nbsp;cs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;doFmt&nbsp;""&nbsp;=&nbsp;""<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to12&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;Int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to12&nbsp;h&nbsp;=&nbsp;let&nbsp;h'&nbsp;=&nbsp;h&nbsp;`mod`&nbsp;12&nbsp;in&nbsp;if&nbsp;h'&nbsp;==&nbsp;0&nbsp;then&nbsp;12&nbsp;else&nbsp;h'<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'A'&nbsp;=&nbsp;fst&nbsp;(wDays&nbsp;l&nbsp;&nbsp;!!&nbsp;fromEnum&nbsp;wday)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'a'&nbsp;=&nbsp;snd&nbsp;(wDays&nbsp;l&nbsp;&nbsp;!!&nbsp;fromEnum&nbsp;wday)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'B'&nbsp;=&nbsp;fst&nbsp;(months&nbsp;l&nbsp;!!&nbsp;fromEnum&nbsp;mon)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'b'&nbsp;=&nbsp;snd&nbsp;(months&nbsp;l&nbsp;!!&nbsp;fromEnum&nbsp;mon)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'h'&nbsp;=&nbsp;snd&nbsp;(months&nbsp;l&nbsp;!!&nbsp;fromEnum&nbsp;mon)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'C'&nbsp;=&nbsp;show2&nbsp;(year&nbsp;`quot`&nbsp;100)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'c'&nbsp;=&nbsp;doFmt&nbsp;(dateTimeFmt&nbsp;l)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'D'&nbsp;=&nbsp;doFmt&nbsp;"%m/%d/%y"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'d'&nbsp;=&nbsp;show2&nbsp;day<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'e'&nbsp;=&nbsp;show2'&nbsp;day<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'H'&nbsp;=&nbsp;show2&nbsp;hour<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'I'&nbsp;=&nbsp;show2&nbsp;(to12&nbsp;hour)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'j'&nbsp;=&nbsp;show3&nbsp;yday<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'k'&nbsp;=&nbsp;show2'&nbsp;hour<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'l'&nbsp;=&nbsp;show2'&nbsp;(to12&nbsp;hour)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'M'&nbsp;=&nbsp;show2&nbsp;min<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'m'&nbsp;=&nbsp;show2&nbsp;(fromEnum&nbsp;mon+1)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'n'&nbsp;=&nbsp;"\n"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'p'&nbsp;=&nbsp;(if&nbsp;hour&nbsp;&lt;&nbsp;12&nbsp;then&nbsp;fst&nbsp;else&nbsp;snd)&nbsp;(amPm&nbsp;l)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'R'&nbsp;=&nbsp;doFmt&nbsp;"%H:%M"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'r'&nbsp;=&nbsp;doFmt&nbsp;(time12Fmt&nbsp;l)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'T'&nbsp;=&nbsp;doFmt&nbsp;"%H:%M:%S"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'t'&nbsp;=&nbsp;"\t"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'S'&nbsp;=&nbsp;show2&nbsp;sec<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'s'&nbsp;=&nbsp;...&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Implementation-dependent<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'U'&nbsp;=&nbsp;show2&nbsp;((yday&nbsp;+&nbsp;7&nbsp;-&nbsp;fromEnum&nbsp;wday)&nbsp;`div`&nbsp;7)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'u'&nbsp;=&nbsp;show&nbsp;(let&nbsp;n&nbsp;=&nbsp;fromEnum&nbsp;wday&nbsp;in&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;n&nbsp;==&nbsp;0&nbsp;then&nbsp;7&nbsp;else&nbsp;n)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'V'&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;let&nbsp;(week,&nbsp;days)&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(yday&nbsp;+&nbsp;7&nbsp;-&nbsp;if&nbsp;fromEnum&nbsp;wday&nbsp;&gt;&nbsp;0&nbsp;then&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fromEnum&nbsp;wday&nbsp;-&nbsp;1&nbsp;else&nbsp;6)&nbsp;`divMod`&nbsp;7<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;&nbsp;show2&nbsp;(if&nbsp;days&nbsp;&gt;=&nbsp;4&nbsp;then<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;week+1&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else&nbsp;if&nbsp;week&nbsp;==&nbsp;0&nbsp;then&nbsp;53&nbsp;else&nbsp;week)<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'W'&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;show2&nbsp;((yday&nbsp;+&nbsp;7&nbsp;-&nbsp;if&nbsp;fromEnum&nbsp;wday&nbsp;&gt;&nbsp;0&nbsp;then&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;fromEnum&nbsp;wday&nbsp;-&nbsp;1&nbsp;else&nbsp;6)&nbsp;`div`&nbsp;7)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'w'&nbsp;=&nbsp;show&nbsp;(fromEnum&nbsp;wday)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'X'&nbsp;=&nbsp;doFmt&nbsp;(timeFmt&nbsp;l)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'x'&nbsp;=&nbsp;doFmt&nbsp;(dateFmt&nbsp;l)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'Y'&nbsp;=&nbsp;show&nbsp;year<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'y'&nbsp;=&nbsp;show2&nbsp;(year&nbsp;`rem`&nbsp;100)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'Z'&nbsp;=&nbsp;tzname<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;'%'&nbsp;=&nbsp;"%"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;decode&nbsp;c&nbsp;&nbsp;&nbsp;=&nbsp;[c]<br>
+<br>
+show2,&nbsp;show2',&nbsp;show3&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;String<br>
+show2&nbsp;x&nbsp;=&nbsp;[intToDigit&nbsp;(x&nbsp;`quot`&nbsp;10),&nbsp;intToDigit&nbsp;(x&nbsp;`rem`&nbsp;10)]<br>
+<br>
+show2'&nbsp;x&nbsp;=&nbsp;if&nbsp;x&nbsp;&lt;&nbsp;10&nbsp;then&nbsp;[&nbsp;'&nbsp;',&nbsp;intToDigit&nbsp;x]&nbsp;else&nbsp;show2&nbsp;x<br>
+<br>
+show3&nbsp;x&nbsp;=&nbsp;intToDigit&nbsp;(x&nbsp;`quot`&nbsp;100)&nbsp;:&nbsp;show2&nbsp;(x&nbsp;`rem`&nbsp;100)<br>
+<br>
+<p>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Library Report</i><br> <a href="index.html">top</a> | <a href="system.html">back</a> | <a href="locale.html">next</a> | <a href="libindex.html">contents</a> <br><hr>
+</tt>

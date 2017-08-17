@@ -1,0 +1,575 @@
+
+<title>The Haskell 98 Library Report: List Utilities</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Library Report</i><br> <a href="index.html">top</a> | <a href="array.html">back</a> | <a href="maybe.html">next</a> | <a href="libindex.html">contents</a> <br><hr>
+<a name="sect7"></a>
+<h2>7<tt>&nbsp;&nbsp;</tt>List Utilities</h2><p>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module&nbsp;List&nbsp;(&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;elemIndex,&nbsp;elemIndices,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;find,&nbsp;findIndex,&nbsp;findIndices,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nub,&nbsp;nubBy,&nbsp;delete,&nbsp;deleteBy,&nbsp;(\\),&nbsp;deleteFirstsBy,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;union,&nbsp;unionBy,&nbsp;intersect,&nbsp;intersectBy,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;intersperse,&nbsp;transpose,&nbsp;partition,&nbsp;group,&nbsp;groupBy,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;inits,&nbsp;tails,&nbsp;isPrefixOf,&nbsp;isSuffixOf,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mapAccumL,&nbsp;mapAccumR,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sort,&nbsp;sortBy,&nbsp;insert,&nbsp;insertBy,&nbsp;maximumBy,&nbsp;minimumBy,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;genericLength,&nbsp;genericTake,&nbsp;genericDrop,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;genericSplitAt,&nbsp;genericIndex,&nbsp;genericReplicate,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;zip4,&nbsp;zip5,&nbsp;zip6,&nbsp;zip7,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;zipWith4,&nbsp;zipWith5,&nbsp;zipWith6,&nbsp;zipWith7,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;unzip4,&nbsp;unzip5,&nbsp;unzip6,&nbsp;unzip7,&nbsp;unfoldr,<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;...and&nbsp;what&nbsp;the&nbsp;Prelude&nbsp;exports<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[]((:),&nbsp;[]),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;map,&nbsp;(++),&nbsp;concat,&nbsp;filter,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;head,&nbsp;last,&nbsp;tail,&nbsp;init,&nbsp;null,&nbsp;length,&nbsp;(!!),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;foldl,&nbsp;foldl1,&nbsp;scanl,&nbsp;scanl1,&nbsp;foldr,&nbsp;foldr1,&nbsp;scanr,&nbsp;scanr1,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;iterate,&nbsp;repeat,&nbsp;replicate,&nbsp;cycle,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;take,&nbsp;drop,&nbsp;splitAt,&nbsp;takeWhile,&nbsp;dropWhile,&nbsp;span,&nbsp;break,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;lines,&nbsp;words,&nbsp;unlines,&nbsp;unwords,&nbsp;reverse,&nbsp;and,&nbsp;or,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;any,&nbsp;all,&nbsp;elem,&nbsp;notElem,&nbsp;lookup,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sum,&nbsp;product,&nbsp;maximum,&nbsp;minimum,&nbsp;concatMap,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;zip,&nbsp;zip3,&nbsp;zipWith,&nbsp;zipWith3,&nbsp;unzip,&nbsp;unzip3<br>
+&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;where<br>
+<br>
+infix&nbsp;5&nbsp;\\<br>
+<br>
+elemIndex&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;Maybe&nbsp;Int<br>
+elemIndices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[Int]<br>
+find&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;Maybe&nbsp;a<br>
+findIndex&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;Maybe&nbsp;Int<br>
+findIndices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[Int]<br>
+nub&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+nubBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+delete&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+deleteBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+(\\)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+deleteFirstsBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+union&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+unionBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+<br>
+
+</tt></td></tr></table>
+
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+intersect&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+intersectBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+intersperse&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+transpose&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[[a]]&nbsp;-&gt;&nbsp;[[a]]<br>
+partition&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;([a],[a])<br>
+group&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[[a]]<br>
+groupBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[[a]]<br>
+inits&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[[a]]&nbsp;<br>
+tails&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[[a]]&nbsp;<br>
+isPrefixOf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;Bool<br>
+isSuffixOf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;Bool<br>
+mapAccumL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;(a,&nbsp;c))&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;(a,&nbsp;[c])<br>
+mapAccumR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;(a,&nbsp;c))&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;(a,&nbsp;[c])<br>
+unfoldr		&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(b&nbsp;-&gt;&nbsp;Maybe&nbsp;(a,b))&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;[a]<br>
+sort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Ord&nbsp;a&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+sortBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Ordering)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+insert		&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Ord&nbsp;a&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+insertBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Ordering)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+maximumBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Ordering)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;a<br>
+minimumBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Ordering)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;a<br>
+genericLength&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;a<br>
+genericTake	&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;[b]<br>
+genericDrop	&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;[b]<br>
+genericSplitAt	&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;([b],[b])<br>
+genericIndex	&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+genericReplicate&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;[b]<br>
+<br>
+zip4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;[c]&nbsp;-&gt;&nbsp;[d]&nbsp;-&gt;&nbsp;[(a,b,c,d)]<br>
+zip5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;[c]&nbsp;-&gt;&nbsp;[d]&nbsp;-&gt;&nbsp;[e]&nbsp;-&gt;&nbsp;[(a,b,c,d,e)]<br>
+zip6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;[c]&nbsp;-&gt;&nbsp;[d]&nbsp;-&gt;&nbsp;[e]&nbsp;-&gt;&nbsp;[f]&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;[(a,b,c,d,e,f)]<br>
+zip7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;[c]&nbsp;-&gt;&nbsp;[d]&nbsp;-&gt;&nbsp;[e]&nbsp;-&gt;&nbsp;[f]&nbsp;-&gt;&nbsp;[g]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;[(a,b,c,d,e,f,g)]<br>
+zipWith4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a-&gt;b-&gt;c-&gt;d-&gt;e)&nbsp;-&gt;&nbsp;[a]-&gt;[b]-&gt;[c]-&gt;[d]-&gt;[e]<br>
+zipWith5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a-&gt;b-&gt;c-&gt;d-&gt;e-&gt;f)&nbsp;-&gt;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[a]-&gt;[b]-&gt;[c]-&gt;[d]-&gt;[e]-&gt;[f]<br>
+zipWith6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a-&gt;b-&gt;c-&gt;d-&gt;e-&gt;f-&gt;g)&nbsp;-&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[a]-&gt;[b]-&gt;[c]-&gt;[d]-&gt;[e]-&gt;[f]-&gt;[g]<br>
+zipWith7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a-&gt;b-&gt;c-&gt;d-&gt;e-&gt;f-&gt;g-&gt;h)&nbsp;-&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[a]-&gt;[b]-&gt;[c]-&gt;[d]-&gt;[e]-&gt;[f]-&gt;[g]-&gt;[h]<br>
+unzip4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[(a,b,c,d)]&nbsp;-&gt;&nbsp;([a],[b],[c],[d])<br>
+unzip5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[(a,b,c,d,e)]&nbsp;-&gt;&nbsp;([a],[b],[c],[d],[e])<br>
+unzip6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[(a,b,c,d,e,f)]&nbsp;-&gt;&nbsp;([a],[b],[c],[d],[e],[f])<br>
+unzip7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[(a,b,c,d,e,f,g)]&nbsp;-&gt;&nbsp;([a],[b],[c],[d],[e],[f],[g])<br>
+
+</tt></td></tr></table>
+<p>
+This library defines some lesser-used operations over lists.<p>
+<a name="sect7.1"></a>
+<h3>7.1<tt>&nbsp;&nbsp;</tt>Indexing lists</h3><p>
+Function <tt>elemIndex&nbsp;val&nbsp;list</tt> returns the index of
+the first occurrence, if any, of <tt>val</tt>  
+in <tt>list</tt> as <tt>Just&nbsp;index</tt>.  <tt>Nothing</tt> is returned if <tt>not&nbsp;(val&nbsp;`elem`&nbsp;list)</tt>.<p>
+Function <tt>elemIndices&nbsp;val&nbsp;list</tt> returns an
+in-order list of indices, giving the occurrences of <tt>val</tt> in <tt>list</tt>.<p>
+Function <tt>find</tt> returns the first element of a list that satisfies a predicate,
+or Nothing, if there is no such element.
+<tt>findIndex</tt> returns the corresponding index.
+<tt>findIndices</tt> returns a list of all such indices.<p>
+<a name="sect7.2"></a>
+<h3>7.2<tt>&nbsp;&nbsp;</tt>"Set" operations</h3><p>
+There are a number of "set" operations defined over the <tt>List</tt> type.
+<tt>nub</tt> (meaning "essence") removes duplicates elements from a list.
+<tt>delete</tt>, <tt>(\\)</tt>, <tt>union</tt> and <tt>intersect</tt> preserve the invariant that 
+lists don't contain duplicates, provided that their first argument
+contains no duplicates.<p>
+<UL><LI>
+<tt>delete&nbsp;x</tt> removes the first occurrence of <tt>x</tt> from its list argument,
+e.g.,  
+<tt><br>
+
+<br>
+&nbsp;&nbsp;delete&nbsp;'a'&nbsp;"banana"&nbsp;==&nbsp;"bnana"<br>
+
+<br>
+<p>
+</tt><LI>
+<tt>(\\)</tt> is list difference (non-associative).  In the result of <tt>xs&nbsp;\\&nbsp;ys</tt>,
+the first occurrence of each element of <tt>ys</tt> in turn (if any)
+has been removed from <tt>xs</tt>.  Thus, <tt>(xs&nbsp;++&nbsp;ys)&nbsp;\\&nbsp;xs&nbsp;==&nbsp;ys</tt>.
+<tt>union</tt> is list union, e.g., 
+<tt><br>
+
+<br>
+&nbsp;&nbsp;"dog"&nbsp;`union`&nbsp;"cow"&nbsp;==&nbsp;"dogcw"<br>
+
+<br>
+<p>
+</tt><LI>
+<tt>intersect</tt> is list intersection, e.g.,  
+<tt><br>
+
+<br>
+&nbsp;&nbsp;intersect&nbsp;[1,2,3,4]&nbsp;`intersect`&nbsp;[2,4,6,8]&nbsp;==&nbsp;[2,4]<br>
+
+<br>
+
+</tt></UL><p>
+<a name="sect7.3"></a>
+<h3>7.3<tt>&nbsp;&nbsp;</tt>List transformations</h3><p>
+<UL><LI>
+<tt>intersperse&nbsp;sep</tt> inserts <tt>sep</tt> between the elements of its list argument,
+e.g.,  
+<tt><br>
+
+<br>
+&nbsp;&nbsp;intersperse&nbsp;','&nbsp;"abcde"&nbsp;==&nbsp;"a,b,c,d,e"<br>
+
+<br>
+<p>
+</tt><LI>
+<tt>transpose</tt> transposes the rows and columns of its argument,
+e.g., 
+<tt><br>
+
+<br>
+&nbsp;&nbsp;transpose&nbsp;[[1,2,3],[4,5,6]]&nbsp;==&nbsp;[[1,4],[2,5],[3,6]]<br>
+
+<br>
+<p>
+</tt><LI>
+<tt>partition</tt> takes a predicate and a list and returns a pair of lists:
+those elements of the argument list that do and do not satisfy the
+predicate, respectively; i.e.,
+<tt><br>
+
+<br>
+&nbsp;&nbsp;partition&nbsp;p&nbsp;xs&nbsp;==&nbsp;(filter&nbsp;p&nbsp;xs,&nbsp;filter&nbsp;(not&nbsp;.&nbsp;p)&nbsp;xs)<br>
+
+<br>
+<p>
+</tt><LI>
+<tt>sort</tt>/<tt>sortBy</tt> implement a stable sorting algorithm, here specified
+in terms of the <tt>insertBy</tt> function, which inserts objects into a list
+according to the specified ordering relation.<p>
+<LI>
+<tt>group</tt> splits its list argument into a list of lists of equal, adjacent
+elements. For exmaple
+<tt><br>
+
+<br>
+&nbsp;&nbsp;group&nbsp;"Mississippi"&nbsp;==&nbsp;["M","i","ss","i","ss","i","pp","i"]<br>
+
+<br>
+<p>
+</tt><LI>
+<tt>inits</tt> returns the list of initial segments of its argument list, shortest first.
+<tt><br>
+
+<br>
+&nbsp;&nbsp;inits&nbsp;"abc"&nbsp;==&nbsp;["","a","ab","abc"]<br>
+
+<br>
+<p>
+</tt><LI>
+<tt>tails</tt> returns the list of all final segments of its argument list, longest first.
+<tt><br>
+
+<br>
+&nbsp;&nbsp;tails&nbsp;"abc"&nbsp;==&nbsp;["abc",&nbsp;"bc",&nbsp;"c",""]<br>
+<p>
+<br>
+
+</tt><LI>
+<tt>mapAccumL&nbsp;f&nbsp;s&nbsp;l</tt> applies <tt>f</tt> to an accumulating "state" parameter <tt>s
+</tt>and to each element of <tt>l</tt> in turn.<p>
+<LI>
+<tt>mapAccumR</tt> is similar to <tt>mapAccumL</tt> except that the list
+is processed from right-to-left rather than left-to-right.
+</UL><p>
+<a name="sect7.4"></a>
+<h3>7.4<tt>&nbsp;&nbsp;unfoldr</tt></h3><p>
+The <tt>unfoldr</tt> function undoes a <tt>foldr</tt> operation.  Note that,
+in general, only invertible functions can be unfolded.
+<tt><br>
+
+<br>
+&nbsp;&nbsp;unfoldr&nbsp;f'&nbsp;(foldr&nbsp;f&nbsp;z&nbsp;xs)&nbsp;==&nbsp;xs<br>
+
+<br>
+
+</tt>if the following holds:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;f'&nbsp;(f&nbsp;x&nbsp;y)&nbsp;=&nbsp;Just&nbsp;(x,y)<br>
+&nbsp;&nbsp;f'&nbsp;z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Nothing<br>
+
+<br>
+<p>
+</tt><a name="sect7.5"></a>
+<h3>7.5<tt>&nbsp;&nbsp;</tt>Predicates</h3><p>
+<tt>isPrefixOf</tt> and <tt>isSuffixOf</tt> check whether the first argument is a prefix (resp. suffix)
+of the second argument.<p>
+<a name="sect7.6"></a>
+<h3>7.6<tt>&nbsp;&nbsp;</tt>The "<tt>By</tt>" operations</h3><p>
+By convention, overloaded functions have a non-overloaded
+counterpart whose name is suffixed with "<tt>By</tt>".  For example, the
+function <tt>nub</tt> could be defined as follows:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;nub&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Eq&nbsp;a)&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+&nbsp;&nbsp;nub&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+&nbsp;&nbsp;nub&nbsp;(x:xs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;:&nbsp;nub&nbsp;(filter&nbsp;(\y&nbsp;-&gt;&nbsp;x&nbsp;/=&nbsp;y)&nbsp;xs)<br>
+
+<br>
+
+</tt>However, the equality method may not be appropriate in all situations.
+The function:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;nubBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+&nbsp;&nbsp;nubBy&nbsp;eq&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+&nbsp;&nbsp;nubBy&nbsp;eq&nbsp;(x:xs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;:&nbsp;nubBy&nbsp;eq&nbsp;(filter&nbsp;(\y&nbsp;-&gt;&nbsp;not&nbsp;(eq&nbsp;x&nbsp;y))&nbsp;xs)<br>
+
+<br>
+
+</tt>allows the programmer to supply their own equality test.
+When the "<tt>By</tt>" function replaces an <tt>Eq</tt> context by a binary predicate,
+the predicate is assumed to define an equivalence; when the "<tt>By</tt>"
+function replaces an <tt>Ord</tt> context by a binary predicate, the
+predicate is assumed to define a total ordering.<p>
+The "<tt>By</tt>" variants are as follows:
+<tt>nubBy</tt>, <tt>deleteBy</tt>, <tt>unionBy</tt>, <tt>intersectBy</tt>, <tt>groupBy</tt>,
+<tt>sortBy</tt>, <tt>insertBy</tt>, <tt>maximumBy</tt>, <tt>minimumBy</tt>.  The library does not
+provide <tt>elemBy</tt>, because <tt>any&nbsp;(eq&nbsp;x)</tt> does the same job as <tt>elemBy&nbsp;eq&nbsp;x</tt> would.
+A handful of overloaded functions (<tt>elemIndex</tt>, <tt>elemIndices</tt>, <tt>isPrefixOf</tt>, <tt>isSuffixOf</tt>)
+were not considered important enough to have "<tt>By</tt>" variants.<p>
+<a name="sect7.7"></a>
+<h3>7.7<tt>&nbsp;&nbsp;</tt>The "<tt>generic</tt>" operations</h3><p>
+The prefix "<tt>generic</tt>" indicates an overloaded function that is
+a generalised version of a <tt>Prelude</tt> function.  For example,
+<tt><br>
+
+<br>
+&nbsp;&nbsp;genericLength&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;a<br>
+</tt> 
+<tt><br>
+
+</tt>is a generalised verion of <tt>length</tt>.<p>
+The "<tt>generic</tt>" operations are as follows:
+<tt>genericLength</tt>, <tt>genericTake</tt>, <tt>genericDrop</tt>,
+    <tt>genericSplitAt</tt>, <tt>genericIndex</tt>, <tt>genericReplicate</tt>.<a name="List"></a><p>
+
+<a name="sect7.8"></a>
+<h3>7.8<tt>&nbsp;&nbsp;</tt>Library <tt>List</tt></h3>
+
+<tt><br>
+module&nbsp;List&nbsp;(&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;elemIndex,&nbsp;elemIndices,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;find,&nbsp;findIndex,&nbsp;findIndices,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nub,&nbsp;nubBy,&nbsp;delete,&nbsp;deleteBy,&nbsp;(\\),&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;union,&nbsp;unionBy,&nbsp;intersect,&nbsp;intersectBy,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;intersperse,&nbsp;transpose,&nbsp;partition,&nbsp;group,&nbsp;groupBy,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;inits,&nbsp;tails,&nbsp;isPrefixOf,&nbsp;isSuffixOf,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mapAccumL,&nbsp;mapAccumR,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sort,&nbsp;sortBy,&nbsp;insert,&nbsp;insertBy,&nbsp;maximumBy,&nbsp;minimumBy,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;genericLength,&nbsp;genericTake,&nbsp;genericDrop,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;genericSplitAt,&nbsp;genericIndex,&nbsp;genericReplicate,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;zip4,&nbsp;zip5,&nbsp;zip6,&nbsp;zip7,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;zipWith4,&nbsp;zipWith5,&nbsp;zipWith6,&nbsp;zipWith7,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;unzip4,&nbsp;unzip5,&nbsp;unzip6,&nbsp;unzip7,&nbsp;unfoldr,<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;...and&nbsp;what&nbsp;the&nbsp;Prelude&nbsp;exports<br>
+&nbsp;&nbsp;&nbsp;&nbsp;[]((:),&nbsp;[]),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;map,&nbsp;(++),&nbsp;concat,&nbsp;filter,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;head,&nbsp;last,&nbsp;tail,&nbsp;init,&nbsp;null,&nbsp;length,&nbsp;(!!),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;foldl,&nbsp;foldl1,&nbsp;scanl,&nbsp;scanl1,&nbsp;foldr,&nbsp;foldr1,&nbsp;scanr,&nbsp;scanr1,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;iterate,&nbsp;repeat,&nbsp;replicate,&nbsp;cycle,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;take,&nbsp;drop,&nbsp;splitAt,&nbsp;takeWhile,&nbsp;dropWhile,&nbsp;span,&nbsp;break,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;lines,&nbsp;words,&nbsp;unlines,&nbsp;unwords,&nbsp;reverse,&nbsp;and,&nbsp;or,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;any,&nbsp;all,&nbsp;elem,&nbsp;notElem,&nbsp;lookup,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sum,&nbsp;product,&nbsp;maximum,&nbsp;minimum,&nbsp;concatMap,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;zip,&nbsp;zip3,&nbsp;zipWith,&nbsp;zipWith3,&nbsp;unzip,&nbsp;unzip3<br>
+&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;where<br>
+<br>
+import&nbsp;Maybe(&nbsp;listToMaybe&nbsp;)<br>
+<br>
+infix&nbsp;5&nbsp;\\<br>
+<br>
+elemIndex&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;Maybe&nbsp;Int<br>
+elemIndex&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;findIndex&nbsp;(x&nbsp;==)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+elemIndices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[Int]<br>
+elemIndices&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;findIndices&nbsp;(x&nbsp;==)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+find&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;Maybe&nbsp;a<br>
+find&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;listToMaybe&nbsp;.&nbsp;filter&nbsp;p<br>
+<br>
+findIndex&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;Maybe&nbsp;Int<br>
+findIndex&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;listToMaybe&nbsp;.&nbsp;findIndices&nbsp;p<br>
+<br>
+findIndices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[Int]<br>
+findIndices&nbsp;p&nbsp;xs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[&nbsp;i&nbsp;|&nbsp;(x,i)&nbsp;&lt;-&nbsp;zip&nbsp;xs&nbsp;[0..],&nbsp;p&nbsp;x&nbsp;]<br>
+<br>
+nub&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+nub&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;nubBy&nbsp;(==)<br>
+<br>
+nubBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+nubBy&nbsp;eq&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+nubBy&nbsp;eq&nbsp;(x:xs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;:&nbsp;nubBy&nbsp;eq&nbsp;(filter&nbsp;(\y&nbsp;-&gt;&nbsp;not&nbsp;(eq&nbsp;x&nbsp;y))&nbsp;xs)<br>
+<br>
+delete&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+delete&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;deleteBy&nbsp;(==)<br>
+<br>
+deleteBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+deleteBy&nbsp;eq&nbsp;x&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;[]<br>
+deleteBy&nbsp;eq&nbsp;x&nbsp;(y:ys)&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;if&nbsp;x&nbsp;`eq`&nbsp;y&nbsp;then&nbsp;ys&nbsp;else&nbsp;y&nbsp;:&nbsp;deleteBy&nbsp;eq&nbsp;x&nbsp;ys<br>
+<br>
+(\\)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+(\\)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldl&nbsp;(flip&nbsp;delete)<br>
+<br>
+deleteFirstsBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+deleteFirstsBy&nbsp;eq&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldl&nbsp;(flip&nbsp;(deleteBy&nbsp;eq))<br>
+<br>
+union&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+union&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;unionBy&nbsp;(==)&nbsp;&nbsp;&nbsp;&nbsp;<br>
+<br>
+unionBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+unionBy&nbsp;eq&nbsp;xs&nbsp;ys&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;xs&nbsp;++&nbsp;foldl&nbsp;(flip&nbsp;(deleteBy&nbsp;eq))&nbsp;(nubBy&nbsp;eq&nbsp;ys)&nbsp;xs<br>
+<br>
+intersect&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+intersect&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;intersectBy&nbsp;(==)<br>
+<br>
+intersectBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+intersectBy&nbsp;eq&nbsp;xs&nbsp;ys&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[x&nbsp;|&nbsp;x&nbsp;&lt;-&nbsp;xs,&nbsp;any&nbsp;(eq&nbsp;x)&nbsp;ys]<br>
+<br>
+intersperse&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+intersperse&nbsp;sep&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+intersperse&nbsp;sep&nbsp;[x]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[x]<br>
+intersperse&nbsp;sep&nbsp;(x:xs)&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;:&nbsp;sep&nbsp;:&nbsp;intersperse&nbsp;sep&nbsp;xs<br>
+<br>
+--&nbsp;transpose&nbsp;is&nbsp;lazy&nbsp;in&nbsp;both&nbsp;rows&nbsp;and&nbsp;columns,<br>
+--&nbsp;	&nbsp;and&nbsp;works&nbsp;for&nbsp;non-rectangular&nbsp;'matrices'<br>
+--&nbsp;For&nbsp;example,&nbsp;transpose&nbsp;[[1,2],[3,4,5],[]]&nbsp;&nbsp;=&nbsp;&nbsp;[[1,3],[2,4],[5]]<br>
+--&nbsp;Note&nbsp;that&nbsp;[h&nbsp;|&nbsp;(h:t)&nbsp;&lt;-&nbsp;xss]&nbsp;is&nbsp;not&nbsp;the&nbsp;same&nbsp;as&nbsp;(map&nbsp;head&nbsp;xss)<br>
+--	because&nbsp;the&nbsp;former&nbsp;discards&nbsp;empty&nbsp;sublists&nbsp;inside&nbsp;xss<br>
+transpose&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[[a]]&nbsp;-&gt;&nbsp;[[a]]<br>
+transpose&nbsp;[]		&nbsp;=&nbsp;[]<br>
+transpose&nbsp;([]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:&nbsp;xss)&nbsp;=&nbsp;transpose&nbsp;xss<br>
+transpose&nbsp;((x:xs)&nbsp;:&nbsp;xss)&nbsp;=&nbsp;(x&nbsp;:&nbsp;[h&nbsp;|&nbsp;(h:t)&nbsp;&lt;-&nbsp;xss])&nbsp;:&nbsp;<br>
+			&nbsp;&nbsp;&nbsp;transpose&nbsp;(xs&nbsp;:&nbsp;[t&nbsp;|&nbsp;(h:t)&nbsp;&lt;-&nbsp;xss])<br>
+<br>
+partition&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;([a],[a])<br>
+partition&nbsp;p&nbsp;xs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldr&nbsp;select&nbsp;([],[])&nbsp;xs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;select&nbsp;x&nbsp;(ts,fs)&nbsp;|&nbsp;p&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;(x:ts,fs)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;=&nbsp;(ts,&nbsp;x:fs)<br>
+<br>
+--&nbsp;group&nbsp;splits&nbsp;its&nbsp;list&nbsp;argument&nbsp;into&nbsp;a&nbsp;list&nbsp;of&nbsp;lists&nbsp;of&nbsp;equal,&nbsp;adjacent<br>
+--&nbsp;elements.&nbsp;&nbsp;e.g.,<br>
+--&nbsp;group&nbsp;"Mississippi"&nbsp;==&nbsp;["M","i","ss","i","ss","i","pp","i"]<br>
+group&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[[a]]<br>
+group&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;groupBy&nbsp;(==)<br>
+<br>
+groupBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[[a]]<br>
+groupBy&nbsp;eq&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+groupBy&nbsp;eq&nbsp;(x:xs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;(x:ys)&nbsp;:&nbsp;groupBy&nbsp;eq&nbsp;zs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;(ys,zs)&nbsp;=&nbsp;span&nbsp;(eq&nbsp;x)&nbsp;xs<br>
+<br>
+--&nbsp;inits&nbsp;xs&nbsp;returns&nbsp;the&nbsp;list&nbsp;of&nbsp;initial&nbsp;segments&nbsp;of&nbsp;xs,&nbsp;shortest&nbsp;first.<br>
+--&nbsp;e.g.,&nbsp;inits&nbsp;"abc"&nbsp;==&nbsp;["","a","ab","abc"]<br>
+inits&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[[a]]<br>
+inits&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[[]]<br>
+inits&nbsp;(x:xs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[[]]&nbsp;++&nbsp;map&nbsp;(x:)&nbsp;(inits&nbsp;xs)<br>
+<br>
+--&nbsp;tails&nbsp;xs&nbsp;returns&nbsp;the&nbsp;list&nbsp;of&nbsp;all&nbsp;final&nbsp;segments&nbsp;of&nbsp;xs,&nbsp;longest&nbsp;first.<br>
+--&nbsp;e.g.,&nbsp;tails&nbsp;"abc"&nbsp;==&nbsp;["abc",&nbsp;"bc",&nbsp;"c",""]<br>
+tails&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[[a]]<br>
+tails&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[[]]<br>
+tails&nbsp;xxs@(_:xs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;xxs&nbsp;:&nbsp;tails&nbsp;xs<br>
+<br>
+isPrefixOf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;Bool<br>
+isPrefixOf&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;True<br>
+isPrefixOf&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;False<br>
+isPrefixOf&nbsp;(x:xs)&nbsp;(y:ys)&nbsp;=&nbsp;&nbsp;x&nbsp;==&nbsp;y&nbsp;&amp;&amp;&nbsp;isPrefixOf&nbsp;xs&nbsp;ys<br>
+<br>
+isSuffixOf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;Bool<br>
+isSuffixOf&nbsp;x&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;reverse&nbsp;x&nbsp;`isPrefixOf`&nbsp;reverse&nbsp;y<br>
+<br>
+mapAccumL&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;(a,&nbsp;c))&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;(a,&nbsp;[c])<br>
+mapAccumL&nbsp;f&nbsp;s&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;(s,&nbsp;[])<br>
+mapAccumL&nbsp;f&nbsp;s&nbsp;(x:xs)&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;(s'',y:ys)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;(s',&nbsp;y&nbsp;)&nbsp;=&nbsp;f&nbsp;s&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(s'',ys)&nbsp;=&nbsp;mapAccumL&nbsp;f&nbsp;s'&nbsp;xs<br>
+<br>
+mapAccumR&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;(a,&nbsp;c))&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;(a,&nbsp;[c])<br>
+mapAccumR&nbsp;f&nbsp;s&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;(s,&nbsp;[])<br>
+mapAccumR&nbsp;f&nbsp;s&nbsp;(x:xs)&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;(s'',&nbsp;y:ys)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;(s'',y&nbsp;)&nbsp;=&nbsp;f&nbsp;s'&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(s',&nbsp;ys)&nbsp;=&nbsp;mapAccumR&nbsp;f&nbsp;s&nbsp;xs<br>
+<br>
+unfoldr			::&nbsp;(b&nbsp;-&gt;&nbsp;Maybe&nbsp;(a,b))&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;[a]<br>
+unfoldr&nbsp;f&nbsp;b		=&nbsp;case&nbsp;f&nbsp;b&nbsp;of<br>
+				Nothing&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;[]<br>
+				Just&nbsp;(a,b)&nbsp;-&gt;&nbsp;a&nbsp;:&nbsp;unfoldr&nbsp;f&nbsp;b<br>
+<br>
+sort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ord&nbsp;a)&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+sort&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;sortBy&nbsp;compare<br>
+<br>
+sortBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Ordering)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+sortBy&nbsp;cmp&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldr&nbsp;(insertBy&nbsp;cmp)&nbsp;[]<br>
+<br>
+insert			::&nbsp;(Ord&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+insert			=&nbsp;insertBy&nbsp;compare<br>
+<br>
+insertBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Ordering)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+insertBy&nbsp;cmp&nbsp;x&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[x]<br>
+insertBy&nbsp;cmp&nbsp;x&nbsp;ys@(y:ys')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;case&nbsp;cmp&nbsp;x&nbsp;y&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GT&nbsp;-&gt;&nbsp;y&nbsp;:&nbsp;insertBy&nbsp;cmp&nbsp;x&nbsp;ys'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;-&gt;&nbsp;x&nbsp;:&nbsp;ys<br>
+<br>
+maximumBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;a<br>
+maximumBy&nbsp;max&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"List.maximumBy:&nbsp;empty&nbsp;list"<br>
+maximumBy&nbsp;max&nbsp;xs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldl1&nbsp;max&nbsp;xs<br>
+<br>
+minimumBy&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;a<br>
+minimumBy&nbsp;min&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"List.minimumBy:&nbsp;empty&nbsp;list"<br>
+minimumBy&nbsp;min&nbsp;xs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldl1&nbsp;min&nbsp;xs<br>
+<br>
+genericLength&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Integral&nbsp;a)&nbsp;=&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;a<br>
+genericLength&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;0<br>
+genericLength&nbsp;(x:xs)&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;1&nbsp;+&nbsp;genericLength&nbsp;xs<br>
+<br>
+genericTake&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Integral&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;[b]<br>
+genericTake&nbsp;_&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+genericTake&nbsp;0&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+genericTake&nbsp;n&nbsp;(x:xs)&nbsp;<br>
+&nbsp;&nbsp;&nbsp;|&nbsp;n&nbsp;&gt;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;:&nbsp;genericTake&nbsp;(n-1)&nbsp;xs<br>
+&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"List.genericTake:&nbsp;negative&nbsp;argument"<br>
+<br>
+genericDrop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Integral&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;[b]<br>
+genericDrop&nbsp;0&nbsp;xs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;xs<br>
+genericDrop&nbsp;_&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+genericDrop&nbsp;n&nbsp;(_:xs)&nbsp;<br>
+&nbsp;&nbsp;&nbsp;|&nbsp;n&nbsp;&gt;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;genericDrop&nbsp;(n-1)&nbsp;xs<br>
+&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"List.genericDrop:&nbsp;negative&nbsp;argument"<br>
+<br>
+genericSplitAt&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Integral&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;([b],[b])<br>
+genericSplitAt&nbsp;0&nbsp;xs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;([],xs)<br>
+genericSplitAt&nbsp;_&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;([],[])<br>
+genericSplitAt&nbsp;n&nbsp;(x:xs)&nbsp;<br>
+&nbsp;&nbsp;&nbsp;|&nbsp;n&nbsp;&gt;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;(x:xs',xs'')<br>
+&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"List.genericSplitAt:&nbsp;negative&nbsp;argument"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;(xs',xs'')&nbsp;=&nbsp;&nbsp;genericSplitAt&nbsp;(n-1)&nbsp;xs<br>
+<br>
+genericIndex&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Integral&nbsp;a)&nbsp;=&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+genericIndex&nbsp;(x:_)&nbsp;&nbsp;0&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x<br>
+genericIndex&nbsp;(_:xs)&nbsp;n&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;n&nbsp;&gt;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;genericIndex&nbsp;xs&nbsp;(n-1)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"List.genericIndex:&nbsp;negative&nbsp;argument"<br>
+genericIndex&nbsp;_&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"List.genericIndex:&nbsp;index&nbsp;too&nbsp;large"<br>
+<br>
+genericReplicate&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Integral&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;[b]<br>
+genericReplicate&nbsp;n&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;genericTake&nbsp;n&nbsp;(repeat&nbsp;x)<br>
+&nbsp;<br>
+zip4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;[c]&nbsp;-&gt;&nbsp;[d]&nbsp;-&gt;&nbsp;[(a,b,c,d)]<br>
+zip4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;zipWith4&nbsp;(,,,)<br>
+<br>
+zip5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;[c]&nbsp;-&gt;&nbsp;[d]&nbsp;-&gt;&nbsp;[e]&nbsp;-&gt;&nbsp;[(a,b,c,d,e)]<br>
+zip5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;zipWith5&nbsp;(,,,,)<br>
+<br>
+zip6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;[c]&nbsp;-&gt;&nbsp;[d]&nbsp;-&gt;&nbsp;[e]&nbsp;-&gt;&nbsp;[f]&nbsp;-&gt;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[(a,b,c,d,e,f)]<br>
+zip6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;zipWith6&nbsp;(,,,,,)<br>
+<br>
+zip7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;[c]&nbsp;-&gt;&nbsp;[d]&nbsp;-&gt;&nbsp;[e]&nbsp;-&gt;&nbsp;[f]&nbsp;-&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[g]&nbsp;-&gt;&nbsp;[(a,b,c,d,e,f,g)]<br>
+zip7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;zipWith7&nbsp;(,,,,,,)<br>
+<br>
+zipWith4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a-&gt;b-&gt;c-&gt;d-&gt;e)&nbsp;-&gt;&nbsp;[a]-&gt;[b]-&gt;[c]-&gt;[d]-&gt;[e]<br>
+zipWith4&nbsp;z&nbsp;(a:as)&nbsp;(b:bs)&nbsp;(c:cs)&nbsp;(d:ds)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;z&nbsp;a&nbsp;b&nbsp;c&nbsp;d&nbsp;:&nbsp;zipWith4&nbsp;z&nbsp;as&nbsp;bs&nbsp;cs&nbsp;ds<br>
+zipWith4&nbsp;_&nbsp;_&nbsp;_&nbsp;_&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+<br>
+zipWith5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a-&gt;b-&gt;c-&gt;d-&gt;e-&gt;f)&nbsp;-&gt;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[a]-&gt;[b]-&gt;[c]-&gt;[d]-&gt;[e]-&gt;[f]<br>
+zipWith5&nbsp;z&nbsp;(a:as)&nbsp;(b:bs)&nbsp;(c:cs)&nbsp;(d:ds)&nbsp;(e:es)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;z&nbsp;a&nbsp;b&nbsp;c&nbsp;d&nbsp;e&nbsp;:&nbsp;zipWith5&nbsp;z&nbsp;as&nbsp;bs&nbsp;cs&nbsp;ds&nbsp;es<br>
+zipWith5&nbsp;_&nbsp;_&nbsp;_&nbsp;_&nbsp;_&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+<br>
+zipWith6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a-&gt;b-&gt;c-&gt;d-&gt;e-&gt;f-&gt;g)&nbsp;-&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[a]-&gt;[b]-&gt;[c]-&gt;[d]-&gt;[e]-&gt;[f]-&gt;[g]<br>
+zipWith6&nbsp;z&nbsp;(a:as)&nbsp;(b:bs)&nbsp;(c:cs)&nbsp;(d:ds)&nbsp;(e:es)&nbsp;(f:fs)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;z&nbsp;a&nbsp;b&nbsp;c&nbsp;d&nbsp;e&nbsp;f&nbsp;:&nbsp;zipWith6&nbsp;z&nbsp;as&nbsp;bs&nbsp;cs&nbsp;ds&nbsp;es&nbsp;fs<br>
+zipWith6&nbsp;_&nbsp;_&nbsp;_&nbsp;_&nbsp;_&nbsp;_&nbsp;_&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+<br>
+zipWith7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a-&gt;b-&gt;c-&gt;d-&gt;e-&gt;f-&gt;g-&gt;h)&nbsp;-&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[a]-&gt;[b]-&gt;[c]-&gt;[d]-&gt;[e]-&gt;[f]-&gt;[g]-&gt;[h]<br>
+zipWith7&nbsp;z&nbsp;(a:as)&nbsp;(b:bs)&nbsp;(c:cs)&nbsp;(d:ds)&nbsp;(e:es)&nbsp;(f:fs)&nbsp;(g:gs)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;z&nbsp;a&nbsp;b&nbsp;c&nbsp;d&nbsp;e&nbsp;f&nbsp;g&nbsp;:&nbsp;zipWith7&nbsp;z&nbsp;as&nbsp;bs&nbsp;cs&nbsp;ds&nbsp;es&nbsp;fs&nbsp;gs<br>
+zipWith7&nbsp;_&nbsp;_&nbsp;_&nbsp;_&nbsp;_&nbsp;_&nbsp;_&nbsp;_&nbsp;=&nbsp;[]<br>
+<br>
+unzip4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[(a,b,c,d)]&nbsp;-&gt;&nbsp;([a],[b],[c],[d])<br>
+unzip4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldr&nbsp;(\(a,b,c,d)&nbsp;~(as,bs,cs,ds)&nbsp;-&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(a:as,b:bs,c:cs,d:ds))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([],[],[],[])<br>
+<br>
+unzip5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[(a,b,c,d,e)]&nbsp;-&gt;&nbsp;([a],[b],[c],[d],[e])<br>
+unzip5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldr&nbsp;(\(a,b,c,d,e)&nbsp;~(as,bs,cs,ds,es)&nbsp;-&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(a:as,b:bs,c:cs,d:ds,e:es))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([],[],[],[],[])<br>
+<br>
+unzip6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[(a,b,c,d,e,f)]&nbsp;-&gt;&nbsp;([a],[b],[c],[d],[e],[f])<br>
+unzip6&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldr&nbsp;(\(a,b,c,d,e,f)&nbsp;~(as,bs,cs,ds,es,fs)&nbsp;-&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(a:as,b:bs,c:cs,d:ds,e:es,f:fs))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([],[],[],[],[],[])<br>
+<br>
+unzip7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[(a,b,c,d,e,f,g)]&nbsp;-&gt;&nbsp;([a],[b],[c],[d],[e],[f],[g])<br>
+unzip7&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldr&nbsp;(\(a,b,c,d,e,f,g)&nbsp;~(as,bs,cs,ds,es,fs,gs)&nbsp;-&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(a:as,b:bs,c:cs,d:ds,e:es,f:fs,g:gs))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([],[],[],[],[],[],[])<br>
+<p>
+<hr><i>The Haskell 98 Library Report</i><br><a href="index.html">top</a> | <a href="array.html">back</a> | <a href="maybe.html">next</a> | <a href="libindex.html">contents</a> <br><font size=2>1 February, 1999</font>
+</tt>

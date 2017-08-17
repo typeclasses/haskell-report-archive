@@ -1,0 +1,172 @@
+
+<title>The Haskell 98 Library Report: Indexing Operations</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Library Report</i><br> <a href="index.html">top</a> | <a href="numeric.html">back</a> | <a href="array.html">next</a> | <a href="libindex.html">contents</a> <br><hr>
+<a name="sect5"></a>
+<h2>5<tt>&nbsp;&nbsp;</tt>Indexing Operations</h2><p>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module&nbsp;Ix&nbsp;(&nbsp;Ix(range,&nbsp;index,&nbsp;inRange),&nbsp;rangeSize&nbsp;)&nbsp;where<br>
+<br>
+class&nbsp;&nbsp;(Ord&nbsp;a)&nbsp;=&gt;&nbsp;Ix&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;range&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a,a)&nbsp;-&gt;&nbsp;[a]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;index&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a,a)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;inRange&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a,a)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool<br>
+<br>
+rangeSize&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;(a,a)&nbsp;-&gt;&nbsp;Int<br>
+<br>
+instance&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ix&nbsp;Char&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ix&nbsp;Int&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ix&nbsp;Integer&nbsp;&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(Ix&nbsp;a,&nbsp;Ix&nbsp;b)&nbsp;&nbsp;=&gt;&nbsp;Ix&nbsp;(a,b)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;...<br>
+--&nbsp;et&nbsp;cetera<br>
+instance&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ix&nbsp;Bool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ix&nbsp;Ordering&nbsp;&nbsp;where&nbsp;...<br>
+
+</tt></td></tr></table>
+
+The <tt>Ix</tt> class is used to map a continuous subrange of values in a
+type onto integers.  It is used primarily for array indexing (see
+Section <a href="array.html#arrays">6</a>).  
+The <tt>Ix</tt> class contains the methods <tt>range</tt>,
+<tt>index</tt>, and <tt>inRange</tt>. 
+The <tt>index</tt> operation maps a bounding pair, which defines the lower
+and upper bounds of the range, and a 
+subscript, to an integer.  The <tt>range</tt> operation enumerates all
+subscripts; the <tt>inRange</tt> operation tells whether a particular subscript
+lies in the range defined by a bounding pair.<p>
+An implementation is entitled to assume the following laws about these
+operations:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;range&nbsp;(l,u)&nbsp;!!&nbsp;index&nbsp;(l,u)&nbsp;i&nbsp;==&nbsp;i&nbsp;&nbsp;&nbsp;--&nbsp;when&nbsp;i&nbsp;is&nbsp;in&nbsp;range<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inRange&nbsp;(l,u)&nbsp;i&nbsp;==&nbsp;i&nbsp;`elem`&nbsp;range&nbsp;(l,u)<br>
+
+<br>
+<p>
+</tt><a name="sect5.1"></a>
+<h3>5.1<tt>&nbsp;&nbsp;</tt>Deriving Instances of <tt>Ix</tt></h3><p>
+Derived instance declarations for the class <tt>Ix</tt> are only possible
+for enumerations (i.e. datatypes having
+only nullary constructors) and single-constructor datatypes,
+including arbitrarily large tuples, whose constituent types are
+instances of <tt>Ix</tt>.   
+<UL><LI>
+For an <I>enumeration</I>, the nullary constructors are assumed to be
+numbered left-to-right with the indices being 0 to n-1 inclusive.
+This is the same numbering defined by the <tt>Enum</tt> class.  For example,
+given the datatype:
+<tt><br>
+
+<br>
+data&nbsp;Colour&nbsp;=&nbsp;Red&nbsp;|&nbsp;Orange&nbsp;|&nbsp;Yellow&nbsp;|&nbsp;Green&nbsp;|&nbsp;Blue&nbsp;|&nbsp;Indigo&nbsp;|&nbsp;Violet<br>
+
+<br>
+
+</tt>we would have:
+<tt><br>
+
+<br>
+range&nbsp;&nbsp;&nbsp;(Yellow,Blue)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;==&nbsp;&nbsp;[Yellow,Green,Blue]<br>
+index&nbsp;&nbsp;&nbsp;(Yellow,Blue)&nbsp;Green&nbsp;&nbsp;==&nbsp;&nbsp;1<br>
+inRange&nbsp;(Yellow,Blue)&nbsp;Red&nbsp;&nbsp;&nbsp;&nbsp;==&nbsp;&nbsp;False<br>
+
+<br>
+
+</tt><LI>
+For <I>single-constructor datatypes</I>, the derived instance declarations
+are as shown for tuples in
+Figure <a href="ix.html#prelude-index">1</a>.
+</UL><p>
+<table border=2 cellpadding=3>
+<tr><td>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+instance&nbsp;&nbsp;(Ix&nbsp;a,&nbsp;Ix&nbsp;b)&nbsp;&nbsp;=&gt;&nbsp;Ix&nbsp;(a,b)&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;range&nbsp;((l,l'),(u,u'))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;[(i,i')&nbsp;|&nbsp;i&nbsp;&lt;-&nbsp;range&nbsp;(l,u),&nbsp;i'&nbsp;&lt;-&nbsp;range&nbsp;(l',u')]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index&nbsp;((l,l'),(u,u'))&nbsp;(i,i')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;index&nbsp;(l,u)&nbsp;i&nbsp;*&nbsp;rangeSize&nbsp;(l',u')&nbsp;+&nbsp;index&nbsp;(l',u')&nbsp;i'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inRange&nbsp;((l,l'),(u,u'))&nbsp;(i,i')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;inRange&nbsp;(l,u)&nbsp;i&nbsp;&amp;&amp;&nbsp;inRange&nbsp;(l',u')&nbsp;i'<br>
+<br>
+--&nbsp;Instances&nbsp;for&nbsp;other&nbsp;tuples&nbsp;are&nbsp;obtained&nbsp;from&nbsp;this&nbsp;scheme:<br>
+--<br>
+--&nbsp;&nbsp;instance&nbsp;&nbsp;(Ix&nbsp;a1,&nbsp;Ix&nbsp;a2,&nbsp;...&nbsp;,&nbsp;Ix&nbsp;ak)&nbsp;=&gt;&nbsp;Ix&nbsp;(a1,a2,...,ak)&nbsp;&nbsp;where<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;range&nbsp;((l1,l2,...,lk),(u1,u2,...,uk))&nbsp;=<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[(i1,i2,...,ik)&nbsp;|&nbsp;i1&nbsp;&lt;-&nbsp;range&nbsp;(l1,u1),<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;i2&nbsp;&lt;-&nbsp;range&nbsp;(l2,u2),<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ik&nbsp;&lt;-&nbsp;range&nbsp;(lk,uk)]<br>
+--<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index&nbsp;((l1,l2,...,lk),(u1,u2,...,uk))&nbsp;(i1,i2,...,ik)&nbsp;=<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index&nbsp;(lk,uk)&nbsp;ik&nbsp;+&nbsp;rangeSize&nbsp;(lk,uk)&nbsp;*&nbsp;(<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index&nbsp;(lk-1,uk-1)&nbsp;ik-1&nbsp;+&nbsp;rangeSize&nbsp;(lk-1,uk-1)&nbsp;*&nbsp;(<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;index&nbsp;(l1,u1)))<br>
+--<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inRange&nbsp;((l1,l2,...lk),(u1,u2,...,uk))&nbsp;(i1,i2,...,ik)&nbsp;=<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;inRange&nbsp;(l1,u1)&nbsp;i1&nbsp;&amp;&amp;&nbsp;inRange&nbsp;(l2,u2)&nbsp;i2&nbsp;&amp;&amp;<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...&nbsp;&amp;&amp;&nbsp;inRange&nbsp;(lk,uk)&nbsp;ik<br>
+
+</tt></td></tr></table>
+
+<div align=center><h3>Derivation of Ix instances</h3></div><a name="prelude-index"></a>
+
+                                                
+   
+                                         
+</td></tr></table>
+<p>
+
+<a name="sect5.2"></a>
+<h3>5.2<tt>&nbsp;&nbsp;</tt>Library <tt>Ix</tt></h3>
+<tt><br>
+module&nbsp;Ix&nbsp;(&nbsp;Ix(range,&nbsp;index,&nbsp;inRange),&nbsp;rangeSize&nbsp;)&nbsp;where<br>
+<br>
+class&nbsp;&nbsp;(Ord&nbsp;a)&nbsp;=&gt;&nbsp;Ix&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;range&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a,a)&nbsp;-&gt;&nbsp;[a]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;index&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a,a)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;inRange&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a,a)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool<br>
+<br>
+rangeSize&nbsp;::&nbsp;Ix&nbsp;a&nbsp;=&gt;&nbsp;(a,a)&nbsp;-&gt;&nbsp;Int<br>
+rangeSize&nbsp;b@(l,h)&nbsp;|&nbsp;null&nbsp;(range&nbsp;b)&nbsp;=&nbsp;0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;index&nbsp;b&nbsp;h&nbsp;+&nbsp;1&nbsp;<br>
+	--&nbsp;NB:&nbsp;replacing&nbsp;"null&nbsp;(range&nbsp;b)"&nbsp;by&nbsp;&nbsp;"l&nbsp;&gt;&nbsp;h"&nbsp;fails&nbsp;if<br>
+	--&nbsp;the&nbsp;bounds&nbsp;are&nbsp;tuples.&nbsp;&nbsp;For&nbsp;example,<br>
+	--&nbsp;	(2,1)&nbsp;&gt;&nbsp;(1,2),&nbsp;<br>
+	--&nbsp;but&nbsp;<br>
+	--	range&nbsp;((2,1),(1,2))&nbsp;=&nbsp;[]<br>
+<br>
+<br>
+instance&nbsp;&nbsp;Ix&nbsp;Char&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;range&nbsp;(m,n)		=&nbsp;[m..n]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;index&nbsp;b@(c,c')&nbsp;ci<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;inRange&nbsp;b&nbsp;ci&nbsp;&nbsp;=&nbsp;&nbsp;fromEnum&nbsp;ci&nbsp;-&nbsp;fromEnum&nbsp;c<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"Ix.index:&nbsp;Index&nbsp;out&nbsp;of&nbsp;range."<br>
+&nbsp;&nbsp;&nbsp;&nbsp;inRange&nbsp;(c,c')&nbsp;i&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;c&nbsp;&lt;=&nbsp;i&nbsp;&amp;&amp;&nbsp;i&nbsp;&lt;=&nbsp;c'<br>
+<br>
+instance&nbsp;&nbsp;Ix&nbsp;Int&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;range&nbsp;(m,n)		=&nbsp;[m..n]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;index&nbsp;b@(m,n)&nbsp;i<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;inRange&nbsp;b&nbsp;i&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;i&nbsp;-&nbsp;m<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"Ix.index:&nbsp;Index&nbsp;out&nbsp;of&nbsp;range."<br>
+&nbsp;&nbsp;&nbsp;&nbsp;inRange&nbsp;(m,n)&nbsp;i&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;m&nbsp;&lt;=&nbsp;i&nbsp;&amp;&amp;&nbsp;i&nbsp;&lt;=&nbsp;n<br>
+<br>
+instance&nbsp;&nbsp;Ix&nbsp;Integer&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;range&nbsp;(m,n)		=&nbsp;[m..n]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;index&nbsp;b@(m,n)&nbsp;i<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;inRange&nbsp;b&nbsp;i&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;fromInteger&nbsp;(i&nbsp;-&nbsp;m)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"Ix.index:&nbsp;Index&nbsp;out&nbsp;of&nbsp;range."<br>
+&nbsp;&nbsp;&nbsp;&nbsp;inRange&nbsp;(m,n)&nbsp;i&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;m&nbsp;&lt;=&nbsp;i&nbsp;&amp;&amp;&nbsp;i&nbsp;&lt;=&nbsp;n<br>
+<br>
+instance&nbsp;(Ix&nbsp;a,Ix&nbsp;b)&nbsp;=&gt;&nbsp;Ix&nbsp;(a,&nbsp;b)&nbsp;--&nbsp;as&nbsp;derived,&nbsp;for&nbsp;all&nbsp;tuples<br>
+instance&nbsp;Ix&nbsp;Bool&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;as&nbsp;derived<br>
+instance&nbsp;Ix&nbsp;Ordering&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;as&nbsp;derived<br>
+instance&nbsp;Ix&nbsp;()&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;as&nbsp;derived<br>
+<p>
+<hr><i>The Haskell 98 Library Report</i><br><a href="index.html">top</a> | <a href="numeric.html">back</a> | <a href="array.html">next</a> | <a href="libindex.html">contents</a> <br><font size=2>1 February, 1999</font>
+</tt>

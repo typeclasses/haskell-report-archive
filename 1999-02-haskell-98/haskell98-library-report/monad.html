@@ -1,0 +1,304 @@
+
+<title>The Haskell 98 Library Report: Monad Utilities</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Library Report</i><br> <a href="index.html">top</a> | <a href="char.html">back</a> | <a href="io.html">next</a> | <a href="libindex.html">contents</a> <br><hr>
+<a name="Monad"></a><a name="sect10"></a>
+<h2>10<tt>&nbsp;&nbsp;</tt>Monad Utilities</h2>
+<p>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module&nbsp;Monad&nbsp;(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;MonadPlus(mzero,&nbsp;mplus),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;join,&nbsp;guard,&nbsp;when,&nbsp;unless,&nbsp;ap,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;msum,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filterM,&nbsp;mapAndUnzipM,&nbsp;zipWithM,&nbsp;zipWithM_,&nbsp;foldM,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;liftM,&nbsp;liftM2,&nbsp;liftM3,&nbsp;liftM4,&nbsp;liftM5,<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;...and&nbsp;what&nbsp;the&nbsp;Prelude&nbsp;exports<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Monad((&gt;&gt;=),&nbsp;(&gt;&gt;),&nbsp;return,&nbsp;fail),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Functor(fmap),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mapM,&nbsp;mapM_,&nbsp;sequence,&nbsp;sequence_,&nbsp;(=&lt;&lt;),&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;where<br>
+<br>
+class&nbsp;&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;MonadPlus&nbsp;m&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mzero&nbsp;&nbsp;::&nbsp;m&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mplus&nbsp;&nbsp;::&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;a<br>
+<br>
+join&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;m&nbsp;(m&nbsp;a)&nbsp;-&gt;&nbsp;m&nbsp;a<br>
+guard&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;MonadPlus&nbsp;m&nbsp;=&gt;&nbsp;Bool&nbsp;-&gt;&nbsp;m&nbsp;()<br>
+when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;Bool&nbsp;-&gt;&nbsp;m&nbsp;()&nbsp;-&gt;&nbsp;m&nbsp;()<br>
+unless&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;Bool&nbsp;-&gt;&nbsp;m&nbsp;()&nbsp;-&gt;&nbsp;m&nbsp;()<br>
+ap		&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;m&nbsp;(a&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;b<br>
+<br>
+mapAndUnzipM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;m&nbsp;(b,c))&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;m&nbsp;([b],&nbsp;[c])<br>
+zipWithM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;m&nbsp;c)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;m&nbsp;[c]<br>
+zipWithM_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;m&nbsp;c)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;m&nbsp;()<br>
+foldM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;m&nbsp;a)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;m&nbsp;a<br>
+filterM		&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;m&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;m&nbsp;[a]<br>
+<br>
+msum&nbsp;		&nbsp;::&nbsp;MonadPlus&nbsp;m&nbsp;=&gt;&nbsp;[m&nbsp;a]&nbsp;-&gt;&nbsp;m&nbsp;a<br>
+<br>
+liftM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;(m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;b)<br>
+liftM2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;c)&nbsp;-&gt;&nbsp;(m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;b&nbsp;-&gt;&nbsp;m&nbsp;c)<br>
+liftM3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;c&nbsp;-&gt;&nbsp;d)&nbsp;-&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;b&nbsp;-&gt;&nbsp;m&nbsp;c&nbsp;-&gt;&nbsp;m&nbsp;d)<br>
+liftM4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;c&nbsp;-&gt;&nbsp;d&nbsp;-&gt;&nbsp;e)&nbsp;-&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;b&nbsp;-&gt;&nbsp;m&nbsp;c&nbsp;-&gt;&nbsp;m&nbsp;d&nbsp;-&gt;&nbsp;m&nbsp;e)<br>
+liftM5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;c&nbsp;-&gt;&nbsp;d&nbsp;-&gt;&nbsp;e&nbsp;-&gt;&nbsp;f)&nbsp;-&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;b&nbsp;-&gt;&nbsp;m&nbsp;c&nbsp;-&gt;&nbsp;m&nbsp;d&nbsp;-&gt;&nbsp;m&nbsp;e&nbsp;-&gt;&nbsp;m&nbsp;f)<br>
+<br>
+
+</tt></td></tr></table>
+<p>
+The <tt>Monad</tt> library defines the <tt>MonadPlus</tt> class, and 
+provides some useful operations on monads.<p>
+<a name="sect10.1"></a>
+<h3>10.1<tt>&nbsp;&nbsp;</tt>Naming conventions</h3><p>
+The functions in this library use the following naming conventions:
+<UL><LI>
+A postfix "<tt>M</tt>" always stands for a function in the Kleisli category:
+<tt>m</tt> is added to function results (modulo currying) and nowhere else.
+So, for example,
+<tt><br>
+
+<br>
+&nbsp;&nbsp;filter&nbsp;&nbsp;::&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(a&nbsp;-&gt;&nbsp;&nbsp;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;&nbsp;&nbsp;[a]<br>
+&nbsp;&nbsp;filterM&nbsp;::&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;m&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;m&nbsp;[a]<br>
+
+<br>
+<p>
+</tt><LI>A postfix "<tt>_</tt>" changes the result type from <tt>(m&nbsp;a)</tt> to <tt>(m&nbsp;())</tt>.
+Thus (in the <tt>Prelude</tt>):
+<tt><br>
+
+<br>
+sequence&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;[m&nbsp;a]&nbsp;-&gt;&nbsp;m&nbsp;[a]&nbsp;<br>
+sequence_&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;[m&nbsp;a]&nbsp;-&gt;&nbsp;m&nbsp;()&nbsp;<br>
+
+<br>
+<p>
+</tt><LI>A prefix "<tt>m</tt>" generalises an existing function to a monadic form.
+Thus, for example:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;sum&nbsp;&nbsp;::&nbsp;Num&nbsp;a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;[a]&nbsp;&nbsp;&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;msum&nbsp;::&nbsp;MonadPlus&nbsp;m&nbsp;=&gt;&nbsp;[m&nbsp;a]&nbsp;-&gt;&nbsp;m&nbsp;a<br>
+
+<br>
+
+</tt></UL><p>
+<a name="sect10.2"></a>
+<h3>10.2<tt>&nbsp;&nbsp;</tt>Class <tt>MonadPlus</tt></h3><p>
+The <tt>MonadPlus</tt> class is defined as follows:
+<tt><br>
+
+<br>
+class&nbsp;&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;MonadPlus&nbsp;m&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mzero&nbsp;&nbsp;::&nbsp;m&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mplus&nbsp;&nbsp;::&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;a<br>
+
+<br>
+
+</tt>The class methods <tt>mzero</tt> and <tt>mplus</tt> are the zero and plus
+of the monad.<p>
+Lists and the <tt>Maybe</tt> type are instances of <tt>MonadPlus</tt>, thus:
+<tt><br>
+
+<br>
+instance&nbsp;&nbsp;MonadPlus&nbsp;Maybe&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mzero&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Nothing<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Nothing&nbsp;`mplus`&nbsp;ys&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;ys<br>
+&nbsp;&nbsp;&nbsp;&nbsp;xs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`mplus`&nbsp;ys&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;xs<br>
+<br>
+instance&nbsp;&nbsp;MonadPlus&nbsp;[]&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mzero&nbsp;=&nbsp;[]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mplus&nbsp;=&nbsp;(++)<br>
+
+<br>
+<p>
+</tt><a name="sect10.3"></a>
+<h3>10.3<tt>&nbsp;&nbsp;</tt>Functions</h3><p>
+The <tt>join</tt> function is the conventional monad join operator.  It is
+used to remove one level of monadic structure, projecting its bound
+argument into the outer level.<p>
+The <tt>mapAndUnzipM</tt> function maps its first argument over a list,
+returning the result as a pair of lists.  This function is mainly used
+with complicated data structures or a state-transforming monad.<p>
+The <tt>zipWithM</tt> function generalises <tt>zipWith</tt> to arbitrary monads.
+For instance the following function displays a file, prefixing
+each line with its line number,
+<tt><br>
+
+<br>
+listFile&nbsp;::&nbsp;String&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+listFile&nbsp;nm&nbsp;=<br>
+&nbsp;&nbsp;do&nbsp;cts&nbsp;&lt;-&nbsp;openFile&nbsp;nm<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;zipWithM_&nbsp;(\i&nbsp;line&nbsp;-&gt;&nbsp;do&nbsp;putStr&nbsp;(show&nbsp;i);&nbsp;putStr&nbsp;":&nbsp;";&nbsp;putStrLn&nbsp;line)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[1..]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(lines&nbsp;cts)<br>
+
+<br>
+<p>
+</tt>The <tt>foldM</tt> function is analogous to <tt>foldl</tt>, except that its result
+is encapsulated in a monad.  Note that <tt>foldM</tt> works from
+left-to-right over the list arguments.  This could be an issue where
+<tt>(&gt;&gt;)</tt> and the "folded function" are not commutative. 
+<tt><br>
+
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;foldM&nbsp;f&nbsp;a1&nbsp;[x1,&nbsp;x2,&nbsp;...,&nbsp;xm&nbsp;]<br>
+==&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;do<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a2&nbsp;&lt;-&nbsp;f&nbsp;a1&nbsp;x1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a3&nbsp;&lt;-&nbsp;f&nbsp;a2&nbsp;x2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f&nbsp;am&nbsp;xm<br>
+
+<br>
+
+</tt>If right-to-left
+evaluation is required, the input list should be reversed.<p>
+The <tt>when</tt> and <tt>unless</tt> functions provide conditional execution of
+monadic expressions.  For example,
+<tt><br>
+
+<br>
+when&nbsp;debug&nbsp;(putStr&nbsp;"Debugging\n")<br>
+
+<br>
+
+</tt>will output the string <tt>"Debugging\n"</tt> if the Boolean value <tt>debug</tt> is
+<tt>True</tt>, and otherwise do nothing.<p>
+The monadic lifting operators promote a function to a monad.  The
+function arguments are scanned left to right.  For example,
+<tt><br>
+
+<br>
+liftM2&nbsp;(+)&nbsp;[0,1]&nbsp;[0,2]&nbsp;=&nbsp;[0,2,1,3]<br>
+liftM2&nbsp;(+)&nbsp;(Just&nbsp;1)&nbsp;Nothing&nbsp;=&nbsp;Nothing<br>
+
+<br>
+<p>
+</tt>In many situations, the <tt>liftM</tt> operations can be replaced by uses
+of <tt>ap</tt>, which promotes function application.
+<tt><br>
+
+<br>
+return&nbsp;f&nbsp;`ap`&nbsp;x1&nbsp;`ap`&nbsp;...&nbsp;`ap`&nbsp;xn<br>
+
+<br>
+
+</tt>is equivalent to
+<tt><br>
+
+<br>
+liftMn&nbsp;f&nbsp;x1&nbsp;x2&nbsp;...&nbsp;xn<br>
+
+<br>
+
+
+</tt><a name="sect10.4"></a>
+<h3>10.4<tt>&nbsp;&nbsp;</tt>Library <tt>Monad</tt></h3>
+<tt><br>
+module&nbsp;Monad&nbsp;(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;MonadPlus(mzero,&nbsp;mplus),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;join,&nbsp;guard,&nbsp;when,&nbsp;unless,&nbsp;ap,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;msum,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;filterM,&nbsp;mapAndUnzipM,&nbsp;zipWithM,&nbsp;zipWithM_,&nbsp;foldM,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;liftM,&nbsp;liftM2,&nbsp;liftM3,&nbsp;liftM4,&nbsp;liftM5,<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;...and&nbsp;what&nbsp;the&nbsp;Prelude&nbsp;exports<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Monad((&gt;&gt;=),&nbsp;(&gt;&gt;),&nbsp;return,&nbsp;fail),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Functor(fmap),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mapM,&nbsp;mapM_,&nbsp;sequence,&nbsp;sequence_,&nbsp;(=&lt;&lt;),&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;where<br>
+<br>
+<br>
+--&nbsp;The&nbsp;MonadPlus&nbsp;class&nbsp;definition<br>
+<br>
+class&nbsp;&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;MonadPlus&nbsp;m&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mzero&nbsp;&nbsp;::&nbsp;m&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mplus&nbsp;&nbsp;::&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;a<br>
+<br>
+<br>
+--&nbsp;Instances&nbsp;of&nbsp;MonadPlus<br>
+<br>
+instance&nbsp;&nbsp;MonadPlus&nbsp;Maybe&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mzero&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Nothing<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Nothing&nbsp;`mplus`&nbsp;ys&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;ys<br>
+&nbsp;&nbsp;&nbsp;&nbsp;xs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`mplus`&nbsp;ys&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;xs<br>
+<br>
+instance&nbsp;&nbsp;MonadPlus&nbsp;[]&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mzero&nbsp;=&nbsp;&nbsp;[]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mplus&nbsp;=&nbsp;(++)<br>
+<br>
+<br>
+--&nbsp;Functions&nbsp;&nbsp;&nbsp;&nbsp;<br>
+<br>
+<br>
+msum		&nbsp;::&nbsp;MonadPlus&nbsp;m&nbsp;=&gt;&nbsp;[m&nbsp;a]&nbsp;-&gt;&nbsp;m&nbsp;a<br>
+msum&nbsp;xs		&nbsp;=&nbsp;&nbsp;foldr&nbsp;mplus&nbsp;mzero&nbsp;xs<br>
+<br>
+join&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;m&nbsp;(m&nbsp;a)&nbsp;-&gt;&nbsp;m&nbsp;a<br>
+join&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;&gt;&gt;=&nbsp;id<br>
+<br>
+when&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;Bool&nbsp;-&gt;&nbsp;m&nbsp;()&nbsp;-&gt;&nbsp;m&nbsp;()<br>
+when&nbsp;p&nbsp;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;if&nbsp;p&nbsp;then&nbsp;s&nbsp;else&nbsp;return&nbsp;()<br>
+<br>
+unless&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;Bool&nbsp;-&gt;&nbsp;m&nbsp;()&nbsp;-&gt;&nbsp;m&nbsp;()<br>
+unless&nbsp;p&nbsp;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;when&nbsp;(not&nbsp;p)&nbsp;s<br>
+<br>
+ap&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;m&nbsp;(a&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;b<br>
+ap&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;liftM2&nbsp;($)<br>
+<br>
+guard&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;MonadPlus&nbsp;m&nbsp;=&gt;&nbsp;Bool&nbsp;-&gt;&nbsp;m&nbsp;()<br>
+guard&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;if&nbsp;p&nbsp;then&nbsp;return&nbsp;()&nbsp;else&nbsp;mzero<br>
+<br>
+mapAndUnzipM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;m&nbsp;(b,c))&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;m&nbsp;([b],&nbsp;[c])<br>
+mapAndUnzipM&nbsp;f&nbsp;xs&nbsp;=&nbsp;sequence&nbsp;(map&nbsp;f&nbsp;xs)&nbsp;&gt;&gt;=&nbsp;return&nbsp;.&nbsp;unzip<br>
+<br>
+zipWithM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;m&nbsp;c)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;m&nbsp;[c]<br>
+zipWithM&nbsp;f&nbsp;xs&nbsp;ys&nbsp;=&nbsp;&nbsp;sequence&nbsp;(zipWith&nbsp;f&nbsp;xs&nbsp;ys)<br>
+<br>
+zipWithM_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;m&nbsp;c)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;m&nbsp;()<br>
+zipWithM_&nbsp;f&nbsp;xs&nbsp;ys&nbsp;=&nbsp;&nbsp;sequence_&nbsp;(zipWith&nbsp;f&nbsp;xs&nbsp;ys)<br>
+<br>
+foldM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;m&nbsp;a)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;m&nbsp;a<br>
+foldM&nbsp;f&nbsp;a&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;return&nbsp;a<br>
+foldM&nbsp;f&nbsp;a&nbsp;(x:xs)&nbsp;=&nbsp;&nbsp;f&nbsp;a&nbsp;x&nbsp;&gt;&gt;=&nbsp;\&nbsp;y&nbsp;-&gt;&nbsp;foldM&nbsp;f&nbsp;y&nbsp;xs<br>
+<br>
+filterM&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;m&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;m&nbsp;[a]<br>
+filterM&nbsp;p&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;return&nbsp;[]<br>
+filterM&nbsp;p&nbsp;(x:xs)&nbsp;=&nbsp;do&nbsp;{&nbsp;b&nbsp;&nbsp;&lt;-&nbsp;p&nbsp;x;<br>
+			ys&nbsp;&lt;-&nbsp;filterM&nbsp;p&nbsp;xs;&nbsp;<br>
+			return&nbsp;(if&nbsp;b&nbsp;then&nbsp;(x:ys)&nbsp;else&nbsp;ys)<br>
+		&nbsp;&nbsp;&nbsp;}<br>
+<br>
+liftM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;(m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;b)<br>
+liftM&nbsp;f&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;\a&nbsp;-&gt;&nbsp;do&nbsp;{&nbsp;a'&nbsp;&lt;-&nbsp;a;&nbsp;return&nbsp;(f&nbsp;a')&nbsp;}<br>
+<br>
+liftM2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;c)&nbsp;-&gt;&nbsp;(m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;b&nbsp;-&gt;&nbsp;m&nbsp;c)<br>
+liftM2&nbsp;f&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;\a&nbsp;b&nbsp;-&gt;&nbsp;do&nbsp;{&nbsp;a'&nbsp;&lt;-&nbsp;a;&nbsp;b'&nbsp;&lt;-&nbsp;b;&nbsp;return&nbsp;(f&nbsp;a'&nbsp;b')&nbsp;}<br>
+<br>
+liftM3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;c&nbsp;-&gt;&nbsp;d)&nbsp;-&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;b&nbsp;-&gt;&nbsp;m&nbsp;c&nbsp;-&gt;&nbsp;m&nbsp;d)<br>
+liftM3&nbsp;f&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;\a&nbsp;b&nbsp;c&nbsp;-&gt;&nbsp;do&nbsp;{&nbsp;a'&nbsp;&lt;-&nbsp;a;&nbsp;b'&nbsp;&lt;-&nbsp;b;&nbsp;c'&nbsp;&lt;-&nbsp;c;<br>
+				&nbsp;&nbsp;&nbsp;return&nbsp;(f&nbsp;a'&nbsp;b'&nbsp;c')&nbsp;}<br>
+<br>
+liftM4&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;c&nbsp;-&gt;&nbsp;d&nbsp;-&gt;&nbsp;e)&nbsp;-&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;b&nbsp;-&gt;&nbsp;m&nbsp;c&nbsp;-&gt;&nbsp;m&nbsp;d&nbsp;-&gt;&nbsp;m&nbsp;e)<br>
+liftM4&nbsp;f&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;\a&nbsp;b&nbsp;c&nbsp;d&nbsp;-&gt;&nbsp;do&nbsp;{&nbsp;a'&nbsp;&lt;-&nbsp;a;&nbsp;b'&nbsp;&lt;-&nbsp;b;&nbsp;c'&nbsp;&lt;-&nbsp;c;&nbsp;d'&nbsp;&lt;-&nbsp;d;<br>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;(f&nbsp;a'&nbsp;b'&nbsp;c'&nbsp;d')&nbsp;}<br>
+<br>
+liftM5&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;c&nbsp;-&gt;&nbsp;d&nbsp;-&gt;&nbsp;e&nbsp;-&gt;&nbsp;f)&nbsp;-&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;b&nbsp;-&gt;&nbsp;m&nbsp;c&nbsp;-&gt;&nbsp;m&nbsp;d&nbsp;-&gt;&nbsp;m&nbsp;e&nbsp;-&gt;&nbsp;m&nbsp;f)<br>
+liftM5&nbsp;f&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;\a&nbsp;b&nbsp;c&nbsp;d&nbsp;e&nbsp;-&gt;&nbsp;do&nbsp;{&nbsp;a'&nbsp;&lt;-&nbsp;a;&nbsp;b'&nbsp;&lt;-&nbsp;b;&nbsp;c'&nbsp;&lt;-&nbsp;c;&nbsp;d'&nbsp;&lt;-&nbsp;d;<br>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;e'&nbsp;&lt;-&nbsp;e;&nbsp;return&nbsp;(f&nbsp;a'&nbsp;b'&nbsp;c'&nbsp;d'&nbsp;e')&nbsp;}<br>
+<br>
+<br>
+<p>
+<hr><i>The Haskell 98 Library Report</i><br><a href="index.html">top</a> | <a href="char.html">back</a> | <a href="io.html">next</a> | <a href="libindex.html">contents</a> <br><font size=2>1 February, 1999</font>
+<p>
+</tt>

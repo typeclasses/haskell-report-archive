@@ -1,0 +1,63 @@
+
+<title>The Haskell 98 Library Report: Locale</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Library Report</i><br> <a href="index.html">top</a> | <a href="time.html">back</a> | <a href="cputime.html">next</a> | <a href="libindex.html">contents</a> <br><hr>
+<a name="locale"></a><a name="sect15"></a>
+<h2>15<tt>&nbsp;&nbsp;</tt>Locale</h2>
+<p>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module&nbsp;Locale(TimeLocale(..),&nbsp;defaultTimeLocale)&nbsp;where<br>
+<br>
+data&nbsp;TimeLocale&nbsp;=&nbsp;TimeLocale&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;wDays&nbsp;&nbsp;::&nbsp;[(String,&nbsp;String)],&nbsp;&nbsp;&nbsp;--&nbsp;full&nbsp;and&nbsp;abbreviated&nbsp;week&nbsp;days<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;months&nbsp;::&nbsp;[(String,&nbsp;String)],&nbsp;&nbsp;&nbsp;--&nbsp;full&nbsp;and&nbsp;abbreviated&nbsp;months<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amPm&nbsp;&nbsp;&nbsp;::&nbsp;(String,&nbsp;String),&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;AM/PM&nbsp;symbols<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dateTimeFmt,&nbsp;dateFmt,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;formatting&nbsp;strings<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timeFmt,&nbsp;time12Fmt&nbsp;::&nbsp;String&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Show)<br>
+<br>
+defaultTimeLocale&nbsp;::&nbsp;TimeLocale&nbsp;<br>
+
+</tt></td></tr></table>
+<p>
+The <tt>Locale</tt> library provides the ability to adapt to local
+conventions.  At present, it supports only time and date information
+as used by <tt>calendarTimeToString</tt> from the <tt>Time</tt> library.<p>
+
+<a name="sect15.1"></a>
+<h3>15.1<tt>&nbsp;&nbsp;</tt>Library <tt>Locale</tt></h3>
+<tt><br>
+module&nbsp;Locale(TimeLocale(..),&nbsp;defaultTimeLocale)&nbsp;where<br>
+<br>
+data&nbsp;TimeLocale&nbsp;=&nbsp;TimeLocale&nbsp;{<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;wDays&nbsp;&nbsp;::&nbsp;[(String,&nbsp;String)],&nbsp;&nbsp;&nbsp;--&nbsp;full&nbsp;and&nbsp;abbreviated&nbsp;week&nbsp;days<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;months&nbsp;::&nbsp;[(String,&nbsp;String)],&nbsp;&nbsp;&nbsp;--&nbsp;full&nbsp;and&nbsp;abbreviated&nbsp;months<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amPm&nbsp;&nbsp;&nbsp;::&nbsp;(String,&nbsp;String),&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;AM/PM&nbsp;symbols<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dateTimeFmt,&nbsp;dateFmt,&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;formatting&nbsp;strings<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timeFmt,&nbsp;time12Fmt&nbsp;::&nbsp;String&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Show)<br>
+<br>
+defaultTimeLocale&nbsp;::&nbsp;TimeLocale&nbsp;<br>
+defaultTimeLocale&nbsp;=&nbsp;&nbsp;TimeLocale&nbsp;{&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;wDays&nbsp;&nbsp;=&nbsp;[("Sunday",&nbsp;&nbsp;&nbsp;"Sun"),&nbsp;&nbsp;("Monday",&nbsp;&nbsp;&nbsp;&nbsp;"Mon"),&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;("Tuesday",&nbsp;&nbsp;"Tue"),&nbsp;&nbsp;("Wednesday",&nbsp;"Wed"),&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;("Thursday",&nbsp;"Thu"),&nbsp;&nbsp;("Friday",&nbsp;&nbsp;&nbsp;&nbsp;"Fri"),&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;("Saturday",&nbsp;"Sat")],<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;months&nbsp;=&nbsp;[("January",&nbsp;&nbsp;&nbsp;"Jan"),&nbsp;("February",&nbsp;&nbsp;"Feb"),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;("March",&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Mar"),&nbsp;("April",&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Apr"),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;("May",&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"May"),&nbsp;("June",&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Jun"),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;("July",&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"Jul"),&nbsp;("August",&nbsp;&nbsp;&nbsp;&nbsp;"Aug"),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;("September",&nbsp;"Sep"),&nbsp;("October",&nbsp;&nbsp;&nbsp;"Oct"),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;("November",&nbsp;&nbsp;"Nov"),&nbsp;("December",&nbsp;&nbsp;"Dec")],<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;amPm&nbsp;=&nbsp;("AM",&nbsp;"PM"),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dateTimeFmt&nbsp;=&nbsp;"%a&nbsp;%b&nbsp;%e&nbsp;%H:%M:%S&nbsp;%Z&nbsp;%Y",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;dateFmt&nbsp;=&nbsp;"%m/%d/%y",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;timeFmt&nbsp;=&nbsp;"%H:%M:%S",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;time12Fmt&nbsp;=&nbsp;"%I:%M:%S&nbsp;%p"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}<br>
+<p>
+<hr><i>The Haskell 98 Library Report</i><br><a href="index.html">top</a> | <a href="time.html">back</a> | <a href="cputime.html">next</a> | <a href="libindex.html">contents</a> <br><font size=2>1 February, 1999</font>
+</tt>

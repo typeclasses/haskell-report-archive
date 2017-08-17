@@ -1,0 +1,936 @@
+
+<title>The Haskell 98 Report: Basic Types and Classes</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Report</i><br> <a href="index.html">top</a> | <a href="modules.html">back</a> | <a href="io-13.html">next</a> | <a href="index98.html">contents</a> | <a href="prelude-index.html">function index</a> <br><hr>
+<a name="basic-types-and-classes"></a><a name="sect6"></a>
+<h2>6<tt>&nbsp;&nbsp;</tt>Predefined Types and Classes</h2>
+
+The Haskell  Prelude contains predefined classes, types,
+and functions that are implicitly imported into every Haskell
+program.  In this section, we describe the types and classes found in
+the Prelude.
+Most functions are not described in detail here as they
+can easily be understood from their definitions as given in Appendix
+<a href="standard-prelude.html#stdprelude">A</a>.
+Other predefined types such as arrays, complex numbers, and rationals
+are defined in the Haskell  Library Report.<a name="basic-types"></a><p>
+<a name="sect6.1"></a>
+<h3>6.1<tt>&nbsp;&nbsp;</tt>Standard Haskell Types</h3>
+
+These types are defined by the Haskell  Prelude.  Numeric types are
+described in Section <a href="basic.html#numbers">6.4</a>.  When appropriate, the Haskell 
+definition of the type is given.  Some definitions may not be
+completely valid on syntactic grounds but they faithfully convey the
+meaning of the underlying type.<a name="booleans"></a><p>
+<a name="sect6.1.1"></a>
+<h4>6.1.1<tt>&nbsp;&nbsp;</tt>Booleans</h4>
+
+
+<tt><br>
+
+<br>
+data&nbsp;&nbsp;Bool&nbsp;&nbsp;=&nbsp;&nbsp;False&nbsp;|&nbsp;True&nbsp;deriving&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Read,&nbsp;Show,&nbsp;Eq,&nbsp;Ord,&nbsp;Enum,&nbsp;Bounded)<br>
+
+<br>
+
+</tt>The boolean type <tt>Bool</tt> is an enumeration. The basic boolean functions are <tt>&amp;&amp;</tt> (and), <tt>||</tt> (or), and <tt>not</tt>.
+The name <tt>otherwise</tt> is defined as <tt>True</tt> to make guarded expressions
+more readable.<a name="prelude-bool"></a><p>
+<a name="characters"></a><p>
+<a name="sect6.1.2"></a>
+<h4>6.1.2<tt>&nbsp;&nbsp;</tt>Characters and Strings</h4>
+<p>
+The character type <tt>Char
+</tt>is an enumeration and consists of 16 bit values, conforming to
+the Unicode standard [<a href="haskell.html#$unicode">10</a>].
+The lexical syntax for
+characters is defined in Section <a href="lexemes.html#lexemes-char">2.6</a>; character
+literals are nullary constructors in the datatype <tt>Char</tt>.  Type <tt>Char
+</tt>is an instance of the classes <tt>Read</tt>, <tt>Show</tt>, <tt>Eq</tt>, <tt>Ord</tt>, 
+<tt>Enum</tt>, and <tt>Bounded</tt>.  The <tt>toEnum</tt> and <tt>fromEnum</tt> functions,
+standard functions over bounded enumerations, map characters onto
+<tt>Int</tt> values in the range <I>[ 0 , 2</I><sup><I>16</I></sup><I>-1 ]</I>.<p>
+Note that ASCII control characters each have several representations
+in character literals: numeric escapes, ASCII mnemonic escapes,
+and the <tt>\^</tt><I>X</I> notation.
+In addition, there are the following equivalences:
+<tt>\a</tt> and <tt>\BEL</tt>, <tt>\b</tt> and <tt>\BS</tt>, <tt>\f</tt> and <tt>\FF</tt>, <tt>\r</tt> and <tt>\CR</tt>,
+<tt>\t</tt> and <tt>\HT</tt>, <tt>\v</tt> and <tt>\VT</tt>, and <tt>\n</tt> and <tt>\LF</tt>.<p>
+A <I>string</I> is a list of characters:
+<tt><br>
+
+<br>
+type&nbsp;&nbsp;String&nbsp;&nbsp;=&nbsp;&nbsp;[Char]<br>
+
+<br>
+
+
+</tt>Strings may be abbreviated using the lexical syntax described in
+Section <a href="lexemes.html#lexemes-char">2.6</a>.  For example, <tt>"A&nbsp;string"</tt> abbreviates
+<p>
+
+<tt>[&nbsp;'A','&nbsp;','s','t','r',&nbsp;'i','n','g']
+<p>
+<a name="basic-lists"></a><p>
+</tt><a name="sect6.1.3"></a>
+<h4>6.1.3<tt>&nbsp;&nbsp;</tt>Lists</h4>
+
+
+<tt><br>
+
+<br>
+data&nbsp;&nbsp;[a]&nbsp;&nbsp;=&nbsp;&nbsp;[]&nbsp;|&nbsp;a&nbsp;:&nbsp;[a]&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord)<br>
+
+<br>
+
+</tt>Lists are an algebraic datatype of two constructors, although
+with special syntax, as described in Section <a href="exps.html#lists">3.7</a>.
+The first constructor is the null list, written `<tt>[]</tt>' ("nil"),
+and the second is `<tt>:</tt>' ("cons").
+
+The module <tt>PreludeList</tt> (see Appendix <a href="standard-prelude.html#preludelist">A.1</a>) 
+defines many standard list functions.  
+Arithmetic sequences
+
+and list comprehensions,
+
+two convenient
+syntaxes for special kinds of lists, are described in
+Sections <a href="exps.html#arithmetic-sequences">3.10</a> and <a href="exps.html#list-comprehensions">3.11</a>,
+respectively.  Lists are an instance of classes <tt>Read</tt>, <tt>Show</tt>, <tt>Eq</tt>, <tt>Ord</tt>, 
+<tt>Monad</tt>, and <tt>MonadPlus</tt>.<a name="basic-tuples"></a><p>
+<a name="sect6.1.4"></a>
+<h4>6.1.4<tt>&nbsp;&nbsp;</tt>Tuples</h4>
+<p>
+Tuples are algebraic datatypes with special syntax, as defined
+in Section <a href="exps.html#tuples">3.8</a>.  Each tuple type has a single constructor.
+There is no upper bound on the size of a tuple.  However, some
+Haskell  implementations may restrict the size of tuples and limit
+the instances associated with larger tuples.
+The Prelude and libraries define tuple functions such as <tt>zip</tt> for
+tuples up to a
+size of 7.  All tuples are instances of <tt>Eq</tt>, <tt>Ord</tt>, <tt>Bounded</tt>, <tt>Read</tt>,
+and <tt>Show</tt>.  Classes defined in the libraries may also supply
+instances for tuple types.<p>
+The constructor for a tuple is written by omitting the expressions
+surrounding the commas; thus <tt>(x,y)</tt> and <tt>(,)&nbsp;x&nbsp;y</tt> produce the same
+value. The same holds for tuple type constructors; thus, <tt>(Int,Bool,Int)
+</tt>and <tt>(,,)&nbsp;Int&nbsp;Bool&nbsp;Int</tt> denote the same type.<p>
+The following functions are defined for pairs (2-tuples):
+<tt>fst</tt>, <tt>snd</tt>, <tt>curry</tt>, and <tt>uncurry</tt>.  Similar functions are not
+predefined for larger tuples.<a name="basic-trivial"></a><p>
+<a name="sect6.1.5"></a>
+<h4>6.1.5<tt>&nbsp;&nbsp;</tt>The Unit Datatype</h4>
+
+<tt><br>
+
+<br>
+data&nbsp;&nbsp;()&nbsp;=&nbsp;()&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Bounded,&nbsp;Enum,&nbsp;Read,&nbsp;Show)<br>
+
+<br>
+
+</tt>The unit datatype <tt>()</tt> has one non-<I>_|_
+</I>member, the nullary constructor <tt>()</tt>.  See also Section <a href="exps.html#unit-expression">3.9</a>.<p>
+<a name="sect6.1.6"></a>
+<h4>6.1.6<tt>&nbsp;&nbsp;</tt>Function Types</h4>
+
+Functions are an abstract type: no constructors directly create
+functional values.  Functions are an instance of the <tt>Show</tt> class but
+not <tt>Read</tt>.  The following simple functions are found in the Prelude:
+<tt>id</tt>, <tt>const</tt>, <tt>(.)</tt>, <tt>flip</tt>, <tt>($)</tt>, and <tt>until</tt>.<p>
+<a name="sect6.1.7"></a>
+<h4>6.1.7<tt>&nbsp;&nbsp;</tt>The IO and IOError Types</h4>
+The <tt>IO</tt> type serves as a tag for operations (actions) that interact
+with the outside world.  The <tt>IO</tt> type is abstract: no constructors are
+visible to the user.  <tt>IO</tt> is an instance of the <tt>Monad</tt> and 
+<tt>Show</tt> classes.  Section <a href="io-13.html#io">7</a> describes I/O operations.<p>
+<tt>IOError</tt> is an abstract type representing errors raised by I/O
+operations.  It is an instance of <tt>Show</tt> and <tt>Eq</tt>.  Values of this type
+are constructed by the various I/O functions and are not presented in
+any further detail in this report.  The Prelude contains a few
+I/O functions (defined in Section <a href="standard-prelude.html#preludeio">A.3</a>), and the Library
+Report contains many more.<p>
+<a name="sect6.1.8"></a>
+<h4>6.1.8<tt>&nbsp;&nbsp;</tt>Other Types</h4>
+<tt><br>
+
+<br>
+data&nbsp;&nbsp;Maybe&nbsp;a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;Nothing&nbsp;|&nbsp;Just&nbsp;a	deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Read,&nbsp;Show)<br>
+data&nbsp;&nbsp;Either&nbsp;a&nbsp;b&nbsp;&nbsp;=&nbsp;&nbsp;Left&nbsp;a&nbsp;|&nbsp;Right&nbsp;b	deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Read,&nbsp;Show)<br>
+data&nbsp;&nbsp;Ordering&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;LT&nbsp;|&nbsp;EQ&nbsp;|&nbsp;GT&nbsp;deriving<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Eq,&nbsp;Ord,&nbsp;Bounded,&nbsp;Enum,&nbsp;Read,&nbsp;Show)<br>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<br>
+
+</tt>The <tt>Maybe</tt> type is an instance of classes <tt>Functor</tt>, <tt>Monad</tt>,
+and <tt>MonadPlus</tt>.  The <tt>Ordering</tt> type is used by <tt>compare
+</tt>in the class <tt>Ord</tt>. The functions <tt>maybe</tt> and <tt>either</tt> are found in
+the Prelude.<a name="strict-eval"></a><p>
+<a name="sect6.2"></a>
+<h3>6.2<tt>&nbsp;&nbsp;</tt>Strict Evaluation</h3>
+
+
+
+Function application in Haskell is non-strict; that is, a function
+argument is evaluated only when required.  Sometimes it is desirable to
+force the evaluation of a value, using the <tt>seq</tt> function:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;seq&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;b<br>
+
+<br>
+
+</tt>The function <tt>seq</tt> is defined by the equations:
+<p>
+<table >
+<tr><td>
+<tt>seq</tt><I> _|_b = _|_</I> </td></tr><tr><td><tt>seq</tt><I>  a b =  b,  if a /=_|_</I> </td></tr></table>
+<p>
+
+<tt>seq</tt> is usually introduced to improve performance by
+avoiding unneeded laziness.  Strict datatypes (see
+
+Section <a href="decls.html#strictness-flags">4.2.1</a>) are defined in terms of the <tt>$!
+</tt>function. 
+However, it has important semantic consequences, because it is available
+<I>at every type</I>.
+As a consequence, <I>_|_</I> is
+not the same as <tt>\x&nbsp;-&gt;&nbsp;</tt> <I>_|_</I>, since <tt>seq</tt> can be used to distinguish them.
+For the same reason, the existence of <tt>seq</tt> weakens Haskell's parametricity properties.<p>
+The operator <tt>$!</tt> is strict (call-by-value) application, and is defined
+in terms of <tt>seq</tt>.  The Prelude also defines lazy application, <tt>$</tt>.
+<tt><br>
+
+<br>
+&nbsp;&nbsp;infixr&nbsp;0&nbsp;$,&nbsp;$!<br>
+&nbsp;&nbsp;($),&nbsp;($!)&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+&nbsp;&nbsp;&nbsp;f&nbsp;$&nbsp;&nbsp;x&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;f&nbsp;$!&nbsp;x&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;`seq`&nbsp;f&nbsp;x<br>
+
+<br>
+
+</tt>The lazy application operator <tt>$</tt> may appear redundant, since 
+ordinary application <tt>(f&nbsp;x)</tt> means the same as <tt>(f&nbsp;$&nbsp;x)</tt>.
+However, <tt>$</tt> has low, right-associative binding precedence,
+so it sometimes allows parentheses to be omitted; for example:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;f&nbsp;$&nbsp;g&nbsp;$&nbsp;h&nbsp;x&nbsp;&nbsp;=&nbsp;&nbsp;f&nbsp;(g&nbsp;(h&nbsp;x))<br>
+
+<br>
+
+</tt>It is also useful in higher-order situations, such as <tt>map&nbsp;($&nbsp;0)&nbsp;xs</tt>,
+or <tt>zipWith&nbsp;($)&nbsp;fs&nbsp;xs</tt>.<p>
+<a name="sect6.3"></a>
+<h3>6.3<tt>&nbsp;&nbsp;</tt>Standard Haskell Classes</h3>
+Figure <a href="basic.html#standard-classes">5</a> shows the hierarchy of 
+Haskell  classes defined in the Prelude and the Prelude types that
+are instances of these classes.
+<table border=2 cellpadding=3>
+<tr><td><div align=center><img src="classes.gif" alt="Diagram of standard Haskell classes"> 
+<h4>Figure 5</h4> </div>
+<div align=center><h3>Standard Haskell Classes</h3></div><a name="standard-classes"></a>
+
+</td></tr></table>
+<p>
+Default class method declarations (Section <a href="decls.html#classes">4.3</a>) are provided
+for many of the methods in standard classes.  For example, the declaration
+of class <tt>Eq</tt> is:
+<tt><br>
+&nbsp;&nbsp;class&nbsp;&nbsp;Eq&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(==),&nbsp;(/=)&nbsp;&nbsp;::&nbsp;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;/=&nbsp;y&nbsp;&nbsp;=&nbsp;not&nbsp;(x&nbsp;==&nbsp;y)<br>
+	x&nbsp;==&nbsp;y&nbsp;&nbsp;=&nbsp;not&nbsp;(x&nbsp;/=&nbsp;y)<br>
+
+</tt>This declaration gives default method declarations for both <tt>/=</tt> and <tt>==</tt>,
+each being defined in terms of the other.  If an instance declaration
+for <tt>Eq</tt> defines neither <tt>==</tt> nor <tt>/=</tt>, then both will loop.
+If one is defined, the default method for the other will make use of
+the one that is defined.  If both are defined, neither default method is used.<p>
+A comment with each <tt>class</tt> declaration in Appendix <a href="standard-prelude.html#stdprelude">A</a> specifies
+the smallest collection of method definitions that, 
+together with the default declarations,
+provide a definition for all the class methods.
+If there is no such comment, then all class methods must
+be given to fully specify an instance.<p>
+<a name="sect6.3.1"></a>
+<h4>6.3.1<tt>&nbsp;&nbsp;</tt>The Eq Class</h4>
+
+
+
+<tt><br>
+
+<br>
+&nbsp;&nbsp;class&nbsp;&nbsp;Eq&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(==),&nbsp;(/=)&nbsp;&nbsp;::&nbsp;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;/=&nbsp;y&nbsp;&nbsp;=&nbsp;not&nbsp;(x&nbsp;==&nbsp;y)<br>
+	x&nbsp;==&nbsp;y&nbsp;&nbsp;=&nbsp;not&nbsp;(x&nbsp;/=&nbsp;y)<br>
+
+<br>
+
+</tt>The <tt>Eq</tt> class provides equality (<tt>==</tt>) and inequality (<tt>/=</tt>) methods.
+All basic datatypes except for functions and <tt>IO</tt> are instances of this class.
+Instances of <tt>Eq</tt> can be derived for any user-defined datatype whose
+constituents are also instances of <tt>Eq</tt>.<p>
+<a name="sect6.3.2"></a>
+<h4>6.3.2<tt>&nbsp;&nbsp;</tt>The Ord Class</h4>
+
+
+
+
+
+
+
+
+<tt><br>
+
+<br>
+&nbsp;&nbsp;class&nbsp;&nbsp;(Eq&nbsp;a)&nbsp;=&gt;&nbsp;Ord&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;compare&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Ordering<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(&lt;),&nbsp;(&lt;=),&nbsp;(&gt;=),&nbsp;(&gt;)&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;max,&nbsp;min		&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;compare&nbsp;x&nbsp;y<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;x&nbsp;==&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;EQ<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;x&nbsp;&lt;=&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;LT<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;=&nbsp;GT<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;&lt;=&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;compare&nbsp;x&nbsp;y&nbsp;/=&nbsp;GT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;&lt;	&nbsp;y		=&nbsp;compare&nbsp;x&nbsp;y&nbsp;==&nbsp;LT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;&gt;=&nbsp;y		=&nbsp;compare&nbsp;x&nbsp;y&nbsp;/=&nbsp;LT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;&gt;	&nbsp;y		=&nbsp;compare&nbsp;x&nbsp;y&nbsp;==&nbsp;GT<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;note&nbsp;that&nbsp;(min&nbsp;x&nbsp;y,&nbsp;max&nbsp;x&nbsp;y)&nbsp;=&nbsp;(x,y)&nbsp;or&nbsp;(y,x)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;max&nbsp;x&nbsp;y&nbsp;|&nbsp;x&nbsp;&gt;=&nbsp;y	=&nbsp;&nbsp;x<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;=&nbsp;&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;min&nbsp;x&nbsp;y&nbsp;|&nbsp;x&nbsp;&lt;&nbsp;&nbsp;y	=&nbsp;&nbsp;x<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;=&nbsp;&nbsp;y<br>
+
+<br>
+
+</tt>The <tt>Ord</tt> class is used for totally ordered datatypes.  All basic
+datatypes
+except for functions, <tt>IO</tt>, and <tt>IOError</tt>, are instances of this class.  Instances
+of <tt>Ord</tt> 
+can be derived for any user-defined datatype whose constituent types
+are in <tt>Ord</tt>.  The declared order
+of the constructors in the data declaration determines the ordering in
+derived <tt>Ord</tt> instances.
+The <tt>Ordering</tt> datatype
+allows a single comparison to determine the precise ordering of two
+objects.<p>
+<a name="sect6.3.3"></a>
+<h4>6.3.3<tt>&nbsp;&nbsp;</tt>The Read and Show Classes</h4>
+
+
+
+
+
+
+
+
+
+<tt><br>
+
+<br>
+type&nbsp;&nbsp;ReadS&nbsp;a&nbsp;=&nbsp;String&nbsp;-&gt;&nbsp;[(a,String)]<br>
+type&nbsp;&nbsp;ShowS&nbsp;&nbsp;&nbsp;=&nbsp;String&nbsp;-&gt;&nbsp;String<br>
+<br>
+class&nbsp;&nbsp;Read&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readsPrec&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;ReadS&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readList&nbsp;&nbsp;::&nbsp;ReadS&nbsp;[a]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;...&nbsp;default&nbsp;decl&nbsp;for&nbsp;readList&nbsp;given&nbsp;in&nbsp;Prelude<br>
+<br>
+class&nbsp;&nbsp;Show&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;ShowS<br>
+&nbsp;&nbsp;&nbsp;&nbsp;show&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;String&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showList&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;ShowS<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;_&nbsp;x&nbsp;s&nbsp;&nbsp;&nbsp;=&nbsp;show&nbsp;x&nbsp;++&nbsp;s<br>
+&nbsp;&nbsp;&nbsp;&nbsp;show&nbsp;x&nbsp;	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;showsPrec&nbsp;0&nbsp;x&nbsp;""<br>
+&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;...&nbsp;default&nbsp;decl&nbsp;for&nbsp;showList&nbsp;given&nbsp;in&nbsp;Prelude<br>
+
+<br>
+
+</tt>The <tt>Read</tt> and <tt>Show</tt> classes are used to convert values to
+or from strings. <tt>showsPrec</tt> and <tt>showList</tt> return a <tt>String</tt>-to-<tt>String
+</tt>function, to allow constant-time concatenation of its results using function
+composition.
+A specialised variant, <tt>show</tt>, is also provided, which
+uses precedence context zero, and returns an ordinary <tt>String</tt>.
+The method <tt>showList</tt> is provided to allow the programmer to
+give a specialised way of showing lists of values.  This is particularly
+useful for the <tt>Char</tt> type, where values of type <tt>String</tt> should be
+shown in double quotes, rather than between square brackets.<p>
+Derived instances of <tt>Read</tt> and <tt>Show</tt> replicate the style in which a
+constructor is declared: infix constructors and field names are used
+on input and output.  Strings produced by <tt>showsPrec</tt> are usually
+readable by <tt>readsPrec</tt>.  <p>
+All <tt>Prelude</tt> types, except function types and <tt>IO</tt> types,
+are instances of <tt>Show</tt> and <tt>Read</tt>.
+(If desired, a programmer can easily make functions and <tt>IO</tt> types 
+into (vacuous) instances of <tt>Show</tt>, by providing an instance declaration.)<p>
+
+
+
+For convenience, the Prelude provides the following auxiliary
+functions: 
+<tt><br>
+
+<br>
+reads&nbsp;	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Read&nbsp;a)&nbsp;=&gt;&nbsp;ReadS&nbsp;a<br>
+reads		=&nbsp;&nbsp;readsPrec&nbsp;0<br>
+<br>
+shows&nbsp;	&nbsp;&nbsp;&nbsp;&nbsp;	::&nbsp;(Show&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;ShowS<br>
+shows		=&nbsp;&nbsp;showsPrec&nbsp;0<br>
+<br>
+read&nbsp;	&nbsp;&nbsp;&nbsp;&nbsp;	::&nbsp;(Read&nbsp;a)&nbsp;=&gt;&nbsp;String&nbsp;-&gt;&nbsp;a<br>
+read&nbsp;s&nbsp;	&nbsp;&nbsp;&nbsp;&nbsp;	=&nbsp;&nbsp;case&nbsp;[x&nbsp;|&nbsp;(x,t)&nbsp;&lt;-&nbsp;reads&nbsp;s,&nbsp;("","")&nbsp;&lt;-&nbsp;lex&nbsp;t]&nbsp;of<br>
+			[x]&nbsp;-&gt;&nbsp;x<br>
+			[]&nbsp;&nbsp;-&gt;&nbsp;error&nbsp;"PreludeText.read:&nbsp;no&nbsp;parse"<br>
+			_&nbsp;&nbsp;&nbsp;-&gt;&nbsp;error&nbsp;"PreludeText.read:&nbsp;ambiguous&nbsp;parse"<br>
+
+<br>
+
+
+shows</tt> and <tt>reads</tt> use a default precedence of 0.  The <tt>read</tt> function reads
+input from a string, which must be completely consumed by the input
+process.  The <tt>lex</tt> function used by <tt>read</tt> is also part of the Prelude.<p>
+<a name="sect6.3.4"></a>
+<h4>6.3.4<tt>&nbsp;&nbsp;</tt>The Enum Class</h4>
+
+
+
+
+
+
+
+<tt><br>
+
+<br>
+class&nbsp;&nbsp;Enum&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;succ,&nbsp;pred		::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;toEnum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromEnum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;Int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFrom		::&nbsp;a&nbsp;-&gt;&nbsp;[a]		--&nbsp;[n..]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromThen	::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]	--&nbsp;[n,n'..]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromTo		::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]	--&nbsp;[n..m]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromThenTo	::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]	--&nbsp;[n,n'..m]<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Default&nbsp;declarations&nbsp;given&nbsp;in&nbsp;Prelude<br>
+
+<br>
+
+</tt>Class <tt>Enum</tt> defines operations on sequentially ordered types.
+The functions <tt>succ</tt> and <tt>pred</tt> return the successor and predecessor,
+respectively, of a value.
+The <tt>toEnum</tt> and <tt>fromEnum</tt> functions map values from a type in
+<tt>Enum</tt> onto <tt>Int</tt>.  These functions are not meaningful for all
+instances of <tt>Enum</tt>: floating
+point values or <tt>Integer</tt> may not be mapped onto an <tt>Int</tt>.  A
+runtime error occurs if either <tt>toEnum</tt> or <tt>fromEnum</tt> is given a value
+not mappable to the result type.  <p>
+The <tt>enumFrom</tt>... methods are used when translating arithmetic
+sequences (Section <a href="exps.html#arithmetic-sequences">3.10</a>), and should
+obey the specification given in there.<p>
+Instances of <tt>Enum</tt> may be derived
+for any enumeration type (types whose constructors have no fields).
+There are also <tt>Enum</tt> instances for floats.  <p>
+<a name="sect6.3.5"></a>
+<h4>6.3.5<tt>&nbsp;&nbsp;</tt>Class <tt>Functor</tt></h4><p>
+<tt><br>
+
+<br>
+class&nbsp;&nbsp;Functor&nbsp;f&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fmap&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;(f&nbsp;a&nbsp;-&gt;&nbsp;f&nbsp;b)<br>
+
+<br>
+
+</tt>The <tt>Functor
+</tt>class is used for types that can be mapped over.  Lists, <tt>IO</tt>, and
+<tt>Maybe</tt> are in this class. <p>
+Instances of <tt>Functor</tt> should satisfy the following laws:
+<p>
+<table >
+<tr><td>
+<tt>fmap&nbsp;id</tt></td><td align=center>=</td><td><tt>id</tt></td></tr><tr><td><tt>fmap&nbsp;(f&nbsp;.&nbsp;g)</tt></td><td align=center>=</td><td><tt>fmap&nbsp;f&nbsp;.&nbsp;fmap&nbsp;g</tt></td></tr></table>
+<p>
+
+All instances defined in the Prelude satisfy these laws.<a name="monad-class"></a><p>
+<a name="sect6.3.6"></a>
+<h4>6.3.6<tt>&nbsp;&nbsp;</tt>Class <tt>Monad</tt></h4>
+
+
+
+
+
+
+
+<tt><br>
+
+<br>
+class&nbsp;&nbsp;Monad&nbsp;m&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(&gt;&gt;=)&nbsp;&nbsp;&nbsp;::&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;(a&nbsp;-&gt;&nbsp;m&nbsp;b)&nbsp;-&gt;&nbsp;m&nbsp;b<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(&gt;&gt;)&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;b&nbsp;-&gt;&nbsp;m&nbsp;b<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fail&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;String&nbsp;-&gt;&nbsp;m&nbsp;a<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;m&nbsp;&gt;&gt;&nbsp;k&nbsp;&nbsp;=&nbsp;&nbsp;m&nbsp;&gt;&gt;=&nbsp;\_&nbsp;-&gt;&nbsp;k<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fail&nbsp;s&nbsp;&nbsp;=&nbsp;error&nbsp;s<br>
+
+<br>
+
+</tt>The <tt>Monad</tt> class defines the basic operations over a <I>monad</I>.
+See Section <a href="io-13.html#io">7</a> for more information about monads.<p>
+"<tt>do</tt>" expressions provide a convenient syntax for writing
+monadic expressions (see Section <a href="exps.html#do-expressions">3.14</a>).
+The <tt>fail</tt> method is invoked on pattern-match failure in a <tt>do
+</tt>expression.<p>
+In the Prelude, lists, 
+<tt>Maybe</tt>, and <tt>IO</tt> are all instances of <tt>Monad</tt>.
+The <tt>fail</tt> method for lists returns the empty list <tt>[]</tt>,
+and for <tt>Maybe</tt> returns <tt>Nothing</tt>.  However, for <tt>IO</tt>, the <tt>fail</tt> 
+method invokes <tt>error</tt>.<p>
+Instances of <tt>Monad</tt> should satisfy the following laws:
+<p>
+<table >
+<tr><td>
+<tt>return&nbsp;a&nbsp;&gt;&gt;=&nbsp;k</tt></td><td align=center>=</td><td><tt>k&nbsp;a</tt> </td></tr><tr><td><tt>m&nbsp;&gt;&gt;=&nbsp;return</tt></td><td align=center>=</td><td><tt>m</tt> </td></tr><tr><td><tt>m&nbsp;&gt;&gt;=&nbsp;(\x&nbsp;-&gt;&nbsp;k&nbsp;x&nbsp;&gt;&gt;=&nbsp;h)</tt></td><td align=center>=</td><td><tt>(m&nbsp;&gt;&gt;=&nbsp;k)&nbsp;&gt;&gt;=&nbsp;h</tt></td></tr><tr><td><tt>fmap&nbsp;f&nbsp;xs</tt></td><td align=center>=</td><td><tt>xs&nbsp;&gt;&gt;=&nbsp;return&nbsp;.&nbsp;f</tt></td></tr></table>
+<p>
+
+All instances defined in the Prelude satisfy these laws.<p>
+The Prelude provides the following auxiliary
+functions: 
+<tt><br>
+
+<br>
+sequence&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;[m&nbsp;a]&nbsp;-&gt;&nbsp;m&nbsp;[a]&nbsp;<br>
+sequence_&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;[m&nbsp;a]&nbsp;-&gt;&nbsp;m&nbsp;()&nbsp;<br>
+mapM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;m&nbsp;b)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;m&nbsp;[b]<br>
+mapM_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;m&nbsp;b)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;m&nbsp;()<br>
+(=&lt;&lt;)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;m&nbsp;b)&nbsp;-&gt;&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;b<br>
+
+<br>
+<p>
+</tt><a name="sect6.3.7"></a>
+<h4>6.3.7<tt>&nbsp;&nbsp;</tt>The Bounded Class</h4>
+
+
+
+<tt><br>
+class&nbsp;&nbsp;Bounded&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;minBound,&nbsp;maxBound&nbsp;::&nbsp;a<br>
+<p>
+</tt>The <tt>Bounded</tt> class is used to name the upper and lower limits of a
+type.  <tt>Ord</tt> is not a superclass of <tt>Bounded</tt> since types that are not
+totally ordered may also have upper and lower bounds.
+The types <tt>Int</tt>, <tt>Char</tt>, <tt>Bool</tt>,
+<tt>()</tt>, <tt>Ordering</tt>, and all tuples are instances of <tt>Bounded</tt>.  
+The <tt>Bounded</tt> class may be derived
+for any enumeration type; <tt>minBound</tt> is the first constructor listed
+in the <tt>data</tt> declaration and <tt>maxBound</tt> is the last.  <tt>Bounded</tt> may
+also be derived for single-constructor datatypes whose constituent
+types are in <tt>Bounded</tt>.<a name="numbers"></a><p>
+<a name="sect6.4"></a>
+<h3>6.4<tt>&nbsp;&nbsp;</tt>Numbers</h3>
+<p>
+Haskell  provides several kinds of numbers; the numeric
+types and the operations upon them have been heavily influenced by
+Common Lisp and Scheme.
+Numeric function names and operators are usually overloaded, using
+several type classes with an inclusion relation shown in
+Figure <a href="basic.html#standard-classes">5</a>.
+The class <tt>Num</tt> of numeric
+types is a subclass of <tt>Eq</tt>, since all numbers may be
+compared for equality; its subclass <tt>Real</tt> is also a
+subclass of <tt>Ord</tt>, since the other comparison operations
+apply to all but complex numbers (defined in the <tt>Complex</tt> library).
+The class <tt>Integral</tt> contains integers of both 
+limited and unlimited range; the class
+<tt>Fractional</tt> contains all non-integral types; and
+the class <tt>Floating</tt> contains all floating-point
+types, both real and complex.<p>
+The Prelude defines only the most basic numeric types: fixed sized
+integers (<tt>Int</tt>), arbitrary precision integers (<tt>Integer</tt>), single
+precision floating (<tt>Float</tt>), and double precision floating
+(<tt>Double</tt>).  Other numeric types such as rationals and complex numbers
+are defined in libraries.  In particular, the type <tt>Rational</tt> is a
+ratio of two <tt>Integer</tt> values, as defined in the <tt>Rational
+</tt>library.  <p>
+The default floating point operations defined by the Haskell 
+Prelude do not 
+conform to current language independent arithmetic (LIA) standards.  These
+standards require considerably more complexity in the numeric
+structure and have thus been relegated to a library.  Some, but not
+all, aspects of the IEEE standard floating point standard have been
+accounted for in class <tt>RealFloat</tt>.<p>
+The standard numeric types are listed in Table <a href="basic.html#standard-numeric-types">3</a>.
+The finite-precision integer type <tt>Int</tt> covers at
+least the range 
+<I>[ - 2</I><sup><I>29</I></sup><I>, 2</I><sup><I>29</I></sup><I> - 1]</I>.  As <tt>Int</tt> is an instance of the <tt>Bounded
+</tt>class, <tt>maxBound</tt> and <tt>minBound</tt> can be used to determine the exact
+<tt>Int</tt> range defined by an implementation.
+<tt>Float</tt> is implementation-defined; it is desirable that
+this type be at least equal in range and precision to the IEEE
+single-precision type.  Similarly, <tt>Double</tt> should
+cover IEEE double-precision.  The results of exceptional
+conditions (such as overflow or underflow) on the fixed-precision
+numeric types are undefined; an implementation may choose error
+(<I>_|_</I>, semantically), a truncated value, or a special value such as
+infinity, indefinite, etc.<p>
+<div align=center>
+<p>
+
+<table border=2>
+<tr><td>
+
+Type </td><td> 
+	Class </td><td>
+	Description </td></tr><tr><td>
+<tt>Integer</tt> </td><td> <tt>Integral</tt> </td><td> Arbitrary-precision integers </td></tr><tr><td><tt>Int</tt> </td><td> <tt>Integral</tt> </td><td> Fixed-precision integers </td></tr><tr><td><tt>(Integral&nbsp;a)&nbsp;=&gt;&nbsp;Ratio&nbsp;a</tt> </td><td> <tt>RealFrac</tt> </td><td> Rational numbers </td></tr><tr><td><tt>Float</tt> </td><td> <tt>RealFloat</tt> </td><td> Real floating-point, single precision </td></tr><tr><td><tt>Double</tt> </td><td> <tt>RealFloat</tt> </td><td> Real floating-point, double precision </td></tr><tr><td><tt>(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Complex&nbsp;a</tt> </td><td> <tt>Floating</tt> </td><td> Complex floating-point </td></tr><tr><td>
+</td></tr></table>
+
+<p>
+
+<div align=center> <h4>Table 2</h4> </div>
+<div align=center><h3>Standard Numeric Types</h3></div><a name="standard-numeric-types"></a>
+
+
+</div><p>
+The standard numeric classes and other numeric functions defined in
+the Prelude are shown
+in Figures <a href="basic.html#basic-numeric-1">6</a>--<a href="basic.html#basic-numeric-2">7</a>.
+Figure <a href="basic.html#standard-classes">5</a> shows the class dependencies and
+built-in types that are instances of the numeric classes.<p>
+<table border=2 cellpadding=3>
+<tr><td>
+<div align=center><table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+class&nbsp;&nbsp;(Eq&nbsp;a,&nbsp;Show&nbsp;a)&nbsp;=&gt;&nbsp;Num&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(+),&nbsp;(-),&nbsp;(*)	::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;negate		::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;abs,&nbsp;signum		::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromInteger		::&nbsp;Integer&nbsp;-&gt;&nbsp;a<br>
+<br>
+class&nbsp;&nbsp;(Num&nbsp;a,&nbsp;Ord&nbsp;a)&nbsp;=&gt;&nbsp;Real&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;toRational		::&nbsp;&nbsp;a&nbsp;-&gt;&nbsp;Rational<br>
+<br>
+class&nbsp;&nbsp;(Real&nbsp;a,&nbsp;Enum&nbsp;a)&nbsp;=&gt;&nbsp;Integral&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;quot,&nbsp;rem,&nbsp;div,&nbsp;mod	::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;quotRem,&nbsp;divMod	::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;(a,a)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;toInteger		::&nbsp;a&nbsp;-&gt;&nbsp;Integer<br>
+<br>
+class&nbsp;&nbsp;(Num&nbsp;a)&nbsp;=&gt;&nbsp;Fractional&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(/)			::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;recip		::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromRational	::&nbsp;Rational&nbsp;-&gt;&nbsp;a<br>
+<br>
+class&nbsp;&nbsp;(Fractional&nbsp;a)&nbsp;=&gt;&nbsp;Floating&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pi			::&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;exp,&nbsp;log,&nbsp;sqrt	::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(**),&nbsp;logBase	::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sin,&nbsp;cos,&nbsp;tan	::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;asin,&nbsp;acos,&nbsp;atan	::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sinh,&nbsp;cosh,&nbsp;tanh	::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;asinh,&nbsp;acosh,&nbsp;atanh&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+
+</tt></td></tr></table>
+</div>
+<div align=center> <h4>Figure 6</h4> </div>
+<div align=center><h3>Standard Numeric Classes and Related Operations, Part 1</h3></div><a name="basic-numeric-1"></a>
+
+
+
+
+
+         
+
+
+
+
+
+
+
+
+       
+ 
+
+
+                        
+               
+               
+      
+</td></tr></table>
+<p>
+<table border=2 cellpadding=3>
+<tr><td>
+<div align=center><table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+class&nbsp;&nbsp;(Real&nbsp;a,&nbsp;Fractional&nbsp;a)&nbsp;=&gt;&nbsp;RealFrac&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;properFraction	::&nbsp;(Integral&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;(b,a)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;truncate,&nbsp;round	::&nbsp;(Integral&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ceiling,&nbsp;floor	::&nbsp;(Integral&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+<br>
+class&nbsp;&nbsp;(RealFrac&nbsp;a,&nbsp;Floating&nbsp;a)&nbsp;=&gt;&nbsp;RealFloat&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;floatRadix		::&nbsp;a&nbsp;-&gt;&nbsp;Integer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;floatDigits		::&nbsp;a&nbsp;-&gt;&nbsp;Int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;floatRange		::&nbsp;a&nbsp;-&gt;&nbsp;(Int,Int)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;decodeFloat		::&nbsp;a&nbsp;-&gt;&nbsp;(Integer,Int)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;encodeFloat		::&nbsp;Integer&nbsp;-&gt;&nbsp;Int&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;exponent		::&nbsp;a&nbsp;-&gt;&nbsp;Int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;significand		::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;scaleFloat		::&nbsp;Int&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;isNaN,&nbsp;isInfinite,&nbsp;isDenormalized,&nbsp;isNegativeZero,&nbsp;isIEEE&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;Bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;atan2		::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+<br>
+fromIntegral		::&nbsp;(Integral&nbsp;a,&nbsp;Num&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+gcd,&nbsp;lcm		::&nbsp;(Integral&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;a-&gt;&nbsp;a<br>
+(^)			::&nbsp;(Num&nbsp;a,&nbsp;Integral&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;a<br>
+(^^)			::&nbsp;(Fractional&nbsp;a,&nbsp;Integral&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;a<br>
+<br>
+fromRealFrac	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(RealFrac&nbsp;a,&nbsp;Fractional&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+
+</tt></td></tr></table>
+</div>
+<div align=center> <h4>Figure 7</h4> </div>
+<div align=center><h3>Standard Numeric Classes and Related Operations, Part 2</h3></div><a name="basic-numeric-2"></a>
+
+
+
+    
+
+ 
+
+
+
+                
+
+ 
+  
+
+
+
+</td></tr></table>
+<a name="numeric-literals"></a><p>
+<a name="sect6.4.1"></a>
+<h4>6.4.1<tt>&nbsp;&nbsp;</tt>Numeric Literals</h4>
+<p>
+The syntax of numeric literals is given in
+Section <a href="lexemes.html#lexemes-numeric">2.5</a>.  An integer literal represents the
+application
+of the function <tt>fromInteger</tt> to the appropriate
+value of type 
+<tt>Integer</tt>.  Similarly, a floating literal stands for an application of
+<tt>fromRational</tt> to a value of type <tt>Rational</tt> (that is, 
+<tt>Ratio&nbsp;Integer</tt>).  Given the typings:
+<tt><br>
+
+<br>
+fromInteger&nbsp;&nbsp;::&nbsp;(Num&nbsp;a)&nbsp;=&gt;&nbsp;Integer&nbsp;-&gt;&nbsp;a<br>
+fromRational&nbsp;::&nbsp;(Fractional&nbsp;a)&nbsp;=&gt;&nbsp;Rational&nbsp;-&gt;&nbsp;a<br>
+
+<br>
+</tt>integer and floating literals have the
+typings <tt>(Num&nbsp;a)&nbsp;=&gt;&nbsp;a</tt> and <tt>(Fractional&nbsp;a)&nbsp;=&gt;&nbsp;a</tt>, respectively.
+Numeric literals are defined in this indirect way so that they may be
+interpreted as values of any appropriate numeric type.
+See Section <a href="decls.html#default-decls">4.3.4</a> for a discussion of overloading ambiguity.<a name="arithmetic-operators"></a><p>
+<a name="sect6.4.2"></a>
+<h4>6.4.2<tt>&nbsp;&nbsp;</tt>Arithmetic and Number-Theoretic Operations</h4>
+<p>
+The infix class methods 
+<tt>(+)</tt>,
+
+<tt>(*)</tt>,
+
+<tt>(-)</tt>,
+
+and the unary function
+<tt>negate</tt> (which can also be written as a prefix minus sign; see
+section <a href="exps.html#operators">3.4</a>) apply to all numbers.  The class methods
+<tt>quot</tt>, <tt>rem</tt>, <tt>div</tt>, and
+<tt>mod</tt> apply only to integral numbers, while the class method
+<tt>(/)
+
+</tt>applies only to fractional ones.  The <tt>quot</tt>, <tt>rem</tt>,
+<tt>div</tt>, and <tt>mod</tt> class methods satisfy these laws:
+<p>
+<table >
+<tr><td align=center>
+<tt>(x&nbsp;</tt>`<tt>quot</tt>`<tt>&nbsp;y)*y&nbsp;+&nbsp;(x&nbsp;</tt>`<tt>rem</tt>`<tt>&nbsp;y)&nbsp;==&nbsp;x</tt></td></tr><tr><td align=center><tt>(x&nbsp;</tt>`<tt>div</tt>`<tt>&nbsp;&nbsp;y)*y&nbsp;+&nbsp;(x&nbsp;</tt>`<tt>mod</tt>`<tt>&nbsp;y)&nbsp;==&nbsp;x
+</tt></td></tr></table>
+<p>
+
+<tt>`quot`</tt> is integer division truncated toward zero,
+while the result of <tt>`div`</tt> is truncated toward
+negative infinity. 
+The <tt>quotRem</tt> class method takes a dividend and a divisor as arguments
+and returns a (quotient, remainder) pair; <tt>divMod</tt> is defined
+similarly:
+<tt><br>
+
+<br>
+quotRem&nbsp;x&nbsp;y&nbsp;&nbsp;=&nbsp;&nbsp;(x&nbsp;</tt>`<tt>quot</tt>`<tt>&nbsp;y,&nbsp;x&nbsp;</tt>`<tt>rem</tt>`<tt>&nbsp;y)<br>
+divMod&nbsp;&nbsp;x&nbsp;y&nbsp;&nbsp;=&nbsp;&nbsp;(x&nbsp;</tt>`<tt>div</tt>`<tt>&nbsp;y,&nbsp;x&nbsp;</tt>`<tt>mod</tt>`<tt>&nbsp;y)<br>
+
+<br>
+
+</tt>Also available on integral numbers are the even and odd predicates:
+<tt><br>
+
+<br>
+even&nbsp;x	&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;</tt>`<tt>rem</tt>`<tt>&nbsp;2&nbsp;==&nbsp;0<br>
+odd	&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;not&nbsp;.&nbsp;even<br>
+
+<br>
+
+</tt>Finally, there are the greatest common divisor and least common
+multiple functions: <tt>gcd</tt> <I>x</I> <I>y</I> is the greatest
+integer that divides both <I>x</I> and <I>y</I>.  <tt>lcm</tt> <I>x</I> <I>y
+</I>is the smallest positive integer that both <I>x</I> and <I>y</I> divide.<p>
+<a name="sect6.4.3"></a>
+<h4>6.4.3<tt>&nbsp;&nbsp;</tt>Exponentiation and Logarithms</h4><p>
+The one-argument exponential function <tt>exp</tt> and the
+logarithm function <tt>log</tt> act on floating-point numbers and
+use base <I>e</I>.  <tt>logBase</tt> <I>a</I> <I>x</I> returns the
+logarithm of <I>x</I> in base <I>a</I>.  <tt>sqrt</tt> returns the
+principal square root of a floating-point number.
+There are three two-argument exponentiation operations:
+<tt>(^)</tt> raises any  number to a nonnegative integer power,
+<tt>(^^)</tt> raises a
+fractional number to any integer power, and <tt>(**)
+
+</tt>takes two floating-point arguments.  The value of <I>x</I><tt>^0</tt> or <I>x</I><tt>^^0
+</tt>is <tt>1</tt> for any <I>x</I>, including zero; <tt>0**</tt><I>y</I> is undefined.
+  <a name="magnitude-sign"></a>
+<a name="sect6.4.4"></a>
+<h4>6.4.4<tt>&nbsp;&nbsp;</tt>Magnitude and Sign</h4>
+<p>
+A number has a <I>magnitude
+</I>and a <I>sign</I>.  The functions <tt>abs</tt> and
+<tt>signum</tt> apply to any number and satisfy the law:
+<tt><br>
+
+<br>
+abs&nbsp;x&nbsp;*&nbsp;signum&nbsp;x&nbsp;==&nbsp;x<br>
+
+<br>
+
+</tt>For real numbers, these functions are defined by:
+<tt><br>
+
+<br>
+abs&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;x&nbsp;&gt;=&nbsp;0&nbsp;&nbsp;=&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;x&nbsp;&lt;&nbsp;&nbsp;0&nbsp;&nbsp;=&nbsp;-x<br>
+<br>
+signum&nbsp;x&nbsp;|&nbsp;x&nbsp;&gt;&nbsp;&nbsp;0&nbsp;&nbsp;=&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;x&nbsp;==&nbsp;0&nbsp;&nbsp;=&nbsp;0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;x&nbsp;&lt;&nbsp;&nbsp;0&nbsp;&nbsp;=&nbsp;-1<br>
+
+<br>
+<p>
+</tt><a name="sect6.4.5"></a>
+<h4>6.4.5<tt>&nbsp;&nbsp;</tt>Trigonometric Functions</h4><p>
+Class <tt>Floating</tt> provides the 
+circular and hyperbolic sine, cosine,
+and tangent functions and their inverses.
+Default implementations of <tt>tan</tt>, <tt>tanh</tt>, <tt>logBase</tt>, <tt>**</tt>, and <tt>sqrt</tt> are
+provided, but implementors are free to provide more accurate implementations.<p>
+Class <tt>RealFloat</tt> provides a version of arctangent
+taking two real floating-point arguments.
+For real floating <I>x</I> and <I>y</I>, <tt>atan2</tt> <I>y</I> <I>x
+</I>computes the angle (from the positive x-axis) of the vector from the origin
+to the point <I>(x,y)</I>.  <tt>atan2</tt> <I>y</I> <I>x
+</I>returns a value in the range <tt>[-pi,&nbsp;pi]</tt>.  It
+follows the Common Lisp semantics for the origin when signed zeroes are
+supported.  <tt>atan2</tt> <I>y</I> <tt>1</tt>, with <I>y</I> in a type that is <tt>RealFloat</tt>, should return the
+same value as <tt>atan</tt> <I>y</I>.  A default definition of <tt>atan2</tt> is provided, but
+implementors can provide a more accurate implementation. <p>
+The precise definition of the above functions is as in Common Lisp,
+which in turn follows Penfield's proposal for
+APL [<a href="haskell.html#$penfield:complex-apl">7</a>].  See these references for discussions
+of branch cuts, discontinuities, and implementation.<a name="coercion"></a><p>
+<a name="sect6.4.6"></a>
+<h4>6.4.6<tt>&nbsp;&nbsp;</tt>Coercions and Component Extraction</h4>
+<p>
+The <tt>ceiling</tt>, <tt>floor</tt>,
+<tt>truncate</tt>, and <tt>round
+</tt>functions each take a real fractional argument and return an integral
+result.  <tt>ceiling</tt> <I>x</I> returns the least integer not less than <I>x</I>, and
+<tt>floor</tt> <I>x</I>, the greatest integer not greater than <I>x</I>.  <tt>truncate</tt> <I>x
+</I>yields the integer nearest <I>x</I> between <I>0</I> and <I>x</I>, inclusive.
+<tt>round</tt> <I>x</I> returns the nearest integer to <I>x</I>, the even integer if
+<I>x</I> is equidistant between two integers.<p>
+The function <tt>properFraction</tt> takes a real
+fractional number <I>x</I> and returns a pair <I>(n,f)</I> such that <I>x = n+f</I>, and:
+<I>n</I> is an integral number with the same sign as <I>x</I>; and <I>f</I> is a
+fraction <I>f</I> with the same type and sign as <I>x</I>, and with absolute
+value less than 1.
+The <tt>ceiling</tt>, <tt>floor</tt>, <tt>truncate</tt>, and <tt>round
+</tt>functions can be defined in terms of <tt>properFraction</tt>.<p>
+Two functions convert numbers to type <tt>Rational</tt>:
+<tt>toRational</tt> returns the rational equivalent of
+its real argument with full precision;
+<tt>approxRational</tt> takes two real fractional arguments
+<I>x</I> and <font face="symbol">e</font> and returns the simplest rational number within
+<font face="symbol">e</font> of <I>x</I>, where a rational  p/q  in reduced form is
+<I>simpler</I> than another  p<sup>'</sup> / q<sup>'</sup>  if 
+ |p| &lt;=|p<sup>'</sup>|  and  q &lt;=q<sup>'</sup> .
+Every real interval contains a unique simplest rational;
+in particular, note that  0/1  is the simplest rational of all.<p>
+The class methods of class <tt>RealFloat</tt> allow
+efficient, machine-independent
+access to the components of a floating-point number.
+The functions <tt>floatRadix</tt>,
+<tt>floatDigits</tt>, and
+<tt>floatRange</tt> give the parameters of a
+floating-point type:  the radix of the representation, the number of
+digits of this radix in the significand, and the lowest and highest
+values the exponent may assume, respectively.
+The function <tt>decodeFloat
+</tt>applied to a real floating-point number returns the significand
+expressed as an <tt>Integer</tt> and an appropriately scaled exponent (an
+<tt>Int</tt>).  If <tt>decodeFloat&nbsp;x</tt> yields <tt>(</tt><I>m</I><tt>,</tt><I>n</I><tt>)</tt>, then <tt>x</tt> is
+equal in value to <I>mb</I><sup><I>n</I></sup>, where <I>b</I> is the floating-point radix, and
+furthermore, either <I>m</I> and <I>n</I> are both zero or else
+<I>b</I><sup><I>d-1</I></sup><I>&lt;=m&lt;b</I><sup><I>d</I></sup>, where <I>d</I> is the value of <tt>floatDigits&nbsp;x</tt>.
+<tt>encodeFloat</tt> performs the inverse of this
+transformation.  The functions <tt>significand
+</tt>and <tt>exponent</tt> together provide the same
+information as <tt>decodeFloat</tt>,  but rather than an <tt>Integer</tt>,
+<tt>significand&nbsp;x</tt> yields a value of the same type as <tt>x</tt>, scaled to lie
+in the open interval <I>(-1,1)</I>.  <tt>exponent&nbsp;0</tt> is zero.  <tt>scaleFloat
+</tt>multiplies a floating-point number by an integer power of the radix.<p>
+The functions <tt>isNaN</tt>, <tt>isInfinite</tt>, <tt>isDenormalized</tt>,
+<tt>isNegativeZero</tt>, and <tt>isIEEE</tt> all support numbers represented using
+the IEEE standard.  For non-IEEE floating point numbers, these may all
+return false.<p>
+Also available are the following coercion functions:
+<tt><br>
+
+<br>
+fromIntegral&nbsp;::&nbsp;(Integral&nbsp;a,&nbsp;Num&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+fromRealFrac&nbsp;::&nbsp;(RealFrac&nbsp;a,&nbsp;Fractional&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+<p>
+<hr><i>The Haskell 98 Report</i><br><a href="index.html">top</a> | <a href="modules.html">back</a> | <a href="io-13.html">next</a> | <a href="index98.html">contents</a> | <a href="prelude-index.html">function index</a> <br><font size=2>1 February, 1999</font>
+<p>
+</tt>

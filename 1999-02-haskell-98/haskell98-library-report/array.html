@@ -1,0 +1,294 @@
+
+<title>The Haskell 98 Library Report: Arrays</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Library Report</i><br> <a href="index.html">top</a> | <a href="ix.html">back</a> | <a href="list.html">next</a> | <a href="libindex.html">contents</a> <br><hr>
+<a name="arrays"></a><a name="sect6"></a>
+<h2>6<tt>&nbsp;&nbsp;</tt>Arrays</h2>
+<p>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module&nbsp;&nbsp;Array&nbsp;(&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;module&nbsp;Ix,&nbsp;&nbsp;--&nbsp;export&nbsp;all&nbsp;of&nbsp;Ix&nbsp;for&nbsp;convenience<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Array,&nbsp;array,&nbsp;listArray,&nbsp;(!),&nbsp;bounds,&nbsp;indices,&nbsp;elems,&nbsp;assocs,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;accumArray,&nbsp;(//),&nbsp;accum,&nbsp;ixmap&nbsp;)&nbsp;where<br>
+<br>
+import&nbsp;Ix<br>
+<br>
+infixl&nbsp;9&nbsp;&nbsp;!,&nbsp;//<br>
+<br>
+data&nbsp;&nbsp;(Ix&nbsp;a)&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;=&nbsp;...	--&nbsp;Abstract<br>
+<br>
+array&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;(a,a)&nbsp;-&gt;&nbsp;[(a,b)]&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b<br>
+listArray&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;(a,a)&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b<br>
+(!)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+bounds&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;(a,a)<br>
+indices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;[a]<br>
+elems&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;[b]<br>
+assocs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;[(a,b)]<br>
+accumArray&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;(b&nbsp;-&gt;&nbsp;c&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;(a,a)&nbsp;-&gt;&nbsp;[(a,c)]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b<br>
+(//)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;[(a,b)]&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b<br>
+accum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;(b&nbsp;-&gt;&nbsp;c&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;[(a,c)]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b<br>
+ixmap&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a,&nbsp;Ix&nbsp;b)&nbsp;=&gt;&nbsp;(a,a)&nbsp;-&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;Array&nbsp;b&nbsp;c<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;c<br>
+<br>
+instance&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Functor&nbsp;(Array&nbsp;a)&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(Ix&nbsp;a,&nbsp;Eq&nbsp;b)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;Eq&nbsp;&nbsp;&nbsp;(Array&nbsp;a&nbsp;b)&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(Ix&nbsp;a,&nbsp;Ord&nbsp;b)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;Ord&nbsp;&nbsp;(Array&nbsp;a&nbsp;b)&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(Ix&nbsp;a,&nbsp;Show&nbsp;a,&nbsp;Show&nbsp;b)&nbsp;=&gt;&nbsp;Show&nbsp;(Array&nbsp;a&nbsp;b)&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(Ix&nbsp;a,&nbsp;Read&nbsp;a,&nbsp;Read&nbsp;b)&nbsp;=&gt;&nbsp;Read&nbsp;(Array&nbsp;a&nbsp;b)&nbsp;&nbsp;where&nbsp;...<br>
+<br>
+
+</tt></td></tr></table>
+<p>
+Haskell  provides indexable <I>arrays</I>, which may be thought of as
+functions whose domains are isomorphic to contiguous subsets of the
+integers.
+Functions restricted in this way can be
+implemented efficiently; in particular, a programmer may
+reasonably expect rapid access to the components.  To ensure
+the possibility of such an implementation, arrays are treated as data, not as
+general functions.<p>
+Since most array functions involve the class <tt>Ix</tt>, this module is
+exported from <tt>Array</tt> so that modules need not import both <tt>Array</tt> and
+<tt>Ix</tt>. <p>
+<a name="sect6.1"></a>
+<h3>6.1<tt>&nbsp;&nbsp;</tt>Array Construction</h3>
+If <tt>a</tt> is an index type and <tt>b</tt> is any type, the type of arrays with
+indices in <tt>a</tt> and elements in <tt>b</tt> is written <tt>Array&nbsp;a&nbsp;b</tt>.
+An array may be created by the function <tt>array</tt>.
+The first argument of <tt>array</tt> is a pair of <I>bounds</I>, each of the
+index type of the array.  These bounds are the lowest and
+highest indices in the array, in that order.  For example, a
+one-origin vector of length <tt>10</tt> has bounds <tt>(1,10)</tt>, and a one-origin <tt>10
+</tt>by <tt>10</tt> matrix has bounds <tt>((1,1),(10,10))</tt>.<p>
+The second argument of <tt>array</tt> is a list of <I>associations
+</I>of the form (index, value).  Typically, this list will
+be expressed as a comprehension.  An association <tt>(i,&nbsp;x)</tt> defines the
+value of the array at index <tt>i</tt> to be <tt>x</tt>.  The array is undefined (i.e. _|_) if
+any index in the list is out of bounds.  If any two associations in the
+list have the same index, the value at that index is undefined (i.e. _|_).
+Because the indices must be checked for these errors, <tt>array</tt> is
+strict in the bounds argument and in the indices of the association list,
+but nonstrict in the values.  Thus, recurrences such as the following are
+possible:
+<tt><br>
+
+<br>
+a&nbsp;=&nbsp;array&nbsp;(1,100)&nbsp;((1,1)&nbsp;:&nbsp;[(i,&nbsp;i&nbsp;*&nbsp;a!(i-1))&nbsp;|&nbsp;i&nbsp;&lt;-&nbsp;[2..100]])<br>
+
+<br>
+
+</tt>Not every index within the bounds of the array need
+appear in the association list, but the values associated with indices
+that do not appear will be undefined.
+Figure <a href="array.html#array-examples">2</a> shows some examples that use the
+<tt>array</tt> constructor.<p>
+<table border=2 cellpadding=3>
+<tr><td>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+--&nbsp;Scaling&nbsp;an&nbsp;array&nbsp;of&nbsp;numbers&nbsp;by&nbsp;a&nbsp;given&nbsp;number:<br>
+scale&nbsp;::&nbsp;(Num&nbsp;a,&nbsp;Ix&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;Array&nbsp;b&nbsp;a&nbsp;-&gt;&nbsp;Array&nbsp;b&nbsp;a<br>
+scale&nbsp;x&nbsp;a&nbsp;=&nbsp;array&nbsp;b&nbsp;[(i,&nbsp;a!i&nbsp;*&nbsp;x)&nbsp;|&nbsp;i&nbsp;&lt;-&nbsp;range&nbsp;b]<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;b&nbsp;=&nbsp;bounds&nbsp;a<br>
+<br>
+--&nbsp;Inverting&nbsp;an&nbsp;array&nbsp;that&nbsp;holds&nbsp;a&nbsp;permutation&nbsp;of&nbsp;its&nbsp;indices<br>
+invPerm&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;a&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;a<br>
+invPerm&nbsp;a&nbsp;=&nbsp;array&nbsp;b&nbsp;[(a!i,&nbsp;i)&nbsp;|&nbsp;i&nbsp;&lt;-&nbsp;range&nbsp;b]<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;b&nbsp;=&nbsp;bounds&nbsp;a<br>
+<br>
+--&nbsp;The&nbsp;inner&nbsp;product&nbsp;of&nbsp;two&nbsp;vectors<br>
+inner&nbsp;::&nbsp;(Ix&nbsp;a,&nbsp;Num&nbsp;b)&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;b<br>
+inner&nbsp;v&nbsp;w&nbsp;=&nbsp;if&nbsp;b&nbsp;==&nbsp;bounds&nbsp;w<br>
+		then&nbsp;sum&nbsp;[v!i&nbsp;*&nbsp;w!i&nbsp;|&nbsp;i&nbsp;&lt;-&nbsp;range&nbsp;b]<br>
+		else&nbsp;error&nbsp;"inconformable&nbsp;arrays&nbsp;for&nbsp;inner&nbsp;product"<br>
+	&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;b&nbsp;=&nbsp;bounds&nbsp;v<br>
+
+</tt></td></tr></table>
+
+<div align=center><h3>Array examples</h3></div><a name="array-examples"></a>
+
+</td></tr></table>
+<p>
+The <tt>(!)</tt> operator denotes array subscripting.
+The <tt>bounds</tt> function
+applied to an array returns its bounds.
+The functions <tt>indices</tt>, <tt>elems</tt>, and
+<tt>assocs</tt>, when applied to an array, return lists of
+the indices, elements, or associations, respectively, in index order.
+An array may be constructed from a pair of bounds and a list
+of values in index order using the function <tt>listArray</tt>.<p>
+If, in any dimension, the lower bound is greater than the upper bound,
+then the array is legal, but empty.  Indexing an empty array always
+gives an array-bounds error, but <tt>bounds</tt> still yields the bounds
+with which the array was constructed.<p>
+<a name="sect6.1.1"></a>
+<h4>6.1.1<tt>&nbsp;&nbsp;</tt>Accumulated Arrays</h4><p>
+Another array creation function, <tt>accumArray</tt>,
+relaxes the restriction that a given index may appear at most once in
+the association list, using an <I>accumulating function</I> which
+combines the values of associations with the same index.
+The first argument of <tt>accumArray</tt> is the accumulating function; the
+second is an initial value; the remaining two arguments are a bounds
+pair and an association list, as for the <tt>array</tt> function.
+For example, given a list of values of some index type, <tt>hist
+</tt>produces a histogram of the number of occurrences of each index within
+a specified range:
+<tt><br>
+
+<br>
+hist&nbsp;::&nbsp;(Ix&nbsp;a,&nbsp;Num&nbsp;b)&nbsp;=&gt;&nbsp;(a,a)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b<br>
+hist&nbsp;bnds&nbsp;is&nbsp;=&nbsp;accumArray&nbsp;(+)&nbsp;0&nbsp;bnds&nbsp;[(i,&nbsp;1)&nbsp;|&nbsp;i&lt;-is,&nbsp;inRange&nbsp;bnds&nbsp;i]<br>
+
+<br>
+
+</tt>If the accumulating function is strict, then <tt>accumArray</tt> is
+strict in the values, as well as the indices, in the
+association list.  Thus, unlike ordinary arrays,
+accumulated arrays should not in general be recursive.<a name="array-update"></a><p>
+<a name="sect6.2"></a>
+<h3>6.2<tt>&nbsp;&nbsp;</tt>Incremental Array Updates</h3>
+<p>
+The operator <tt>(//)</tt> takes an array and a list of pairs and returns
+an array identical to the left argument except that it has
+been updated by the associations in the right argument.  (As with
+the <tt>array</tt> function, the indices in the association list must
+be unique for the updated elements to be defined.)  For example,
+if <tt>m</tt> is a 1-origin, <tt>n</tt> by <tt>n</tt> matrix, then
+<tt>m//[((i,i),&nbsp;0)&nbsp;|&nbsp;i&nbsp;&lt;-&nbsp;[1..n]]</tt> is the same matrix, except with
+the diagonal zeroed.<p>
+<tt>accum</tt> <I>f</I> takes an array
+and an association list and accumulates pairs from the list into
+the array with the accumulating function <I>f</I>.  Thus <tt>accumArray
+</tt>can be defined using <tt>accum</tt>:
+<tt><br>
+
+<br>
+accumArray&nbsp;f&nbsp;z&nbsp;b&nbsp;=&nbsp;accum&nbsp;f&nbsp;(array&nbsp;b&nbsp;[(i,&nbsp;z)&nbsp;|&nbsp;i&nbsp;&lt;-&nbsp;range&nbsp;b])<br>
+<p>
+</tt><a name="sect6.3"></a>
+<h3>6.3<tt>&nbsp;&nbsp;</tt>Derived Arrays</h3><p>
+The two functions <tt>map</tt> and <tt>ixmap
+</tt>derive new arrays from existing ones; they may be
+thought of as providing function composition on the left and right,
+respectively, with the mapping that the original array embodies.
+The <tt>map</tt> function transforms the array values while 
+<tt>ixmap</tt> allows for transformations on array indices.
+Figure <a href="array.html#derived-array-examples">3</a> shows some examples.<p>
+<table border=2 cellpadding=3>
+<tr><td>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+--&nbsp;A&nbsp;rectangular&nbsp;subarray<br>
+subArray&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;(a,a)&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b<br>
+subArray&nbsp;bnds&nbsp;=&nbsp;ixmap&nbsp;bnds&nbsp;(\i-&gt;i)<br>
+<br>
+--&nbsp;A&nbsp;row&nbsp;of&nbsp;a&nbsp;matrix<br>
+row&nbsp;::&nbsp;(Ix&nbsp;a,&nbsp;Ix&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;Array&nbsp;(a,b)&nbsp;c&nbsp;-&gt;&nbsp;Array&nbsp;b&nbsp;c<br>
+row&nbsp;i&nbsp;x&nbsp;=&nbsp;ixmap&nbsp;(l',u')&nbsp;(\j-&gt;(i,j))&nbsp;x&nbsp;where&nbsp;((l,l'),(u,u'))&nbsp;=&nbsp;bounds&nbsp;x<br>
+<br>
+--&nbsp;Diagonal&nbsp;of&nbsp;a&nbsp;square	matrix<br>
+diag&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;Array&nbsp;(a,a)&nbsp;b&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b<br>
+diag&nbsp;x&nbsp;=&nbsp;ixmap&nbsp;(l,u)&nbsp;(\i-&gt;(i,i))&nbsp;x<br>
+	&nbsp;where&nbsp;((l,l'),(u,u'))&nbsp;|&nbsp;l&nbsp;==&nbsp;l'&nbsp;&amp;&amp;&nbsp;u&nbsp;==&nbsp;u'&nbsp;&nbsp;=&nbsp;bounds&nbsp;x<br>
+<br>
+--&nbsp;Projection&nbsp;of&nbsp;first&nbsp;components&nbsp;of&nbsp;an&nbsp;array&nbsp;of&nbsp;pairs<br>
+firstArray&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;(b,c)&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b<br>
+firstArray&nbsp;=&nbsp;map&nbsp;(\(x,y)-&gt;x)<br>
+
+</tt></td></tr></table>
+
+<div align=center><h3>Derived array examples</h3></div><a name="derived-array-examples"></a>
+
+</td></tr></table>
+<a name="Libarray"></a><p>
+<a name="sect6.4"></a>
+<h3>6.4<tt>&nbsp;&nbsp;</tt>Library <tt>Array</tt></h3>
+
+<tt><br>
+module&nbsp;&nbsp;Array&nbsp;(&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;module&nbsp;Ix,&nbsp;&nbsp;--&nbsp;export&nbsp;all&nbsp;of&nbsp;Ix&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Array,&nbsp;array,&nbsp;listArray,&nbsp;(!),&nbsp;bounds,&nbsp;indices,&nbsp;elems,&nbsp;assocs,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;accumArray,&nbsp;(//),&nbsp;accum,&nbsp;ixmap&nbsp;)&nbsp;where<br>
+<br>
+import&nbsp;Ix<br>
+import&nbsp;List(&nbsp;(\\)&nbsp;)<br>
+<br>
+infixl&nbsp;9&nbsp;&nbsp;!,&nbsp;//<br>
+<br>
+data&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;=&nbsp;MkArray&nbsp;(a,a)&nbsp;(a&nbsp;-&gt;&nbsp;b)&nbsp;deriving&nbsp;()<br>
+<br>
+array&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;(a,a)&nbsp;-&gt;&nbsp;[(a,b)]&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b<br>
+array&nbsp;b&nbsp;ivs&nbsp;=<br>
+&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;and&nbsp;[inRange&nbsp;b&nbsp;i&nbsp;|&nbsp;(i,_)&nbsp;&lt;-&nbsp;ivs]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;then&nbsp;MkArray&nbsp;b<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(\j&nbsp;-&gt;&nbsp;case&nbsp;[v&nbsp;|&nbsp;(i,v)&nbsp;&lt;-&nbsp;ivs,&nbsp;i&nbsp;==&nbsp;j]&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[v]&nbsp;&nbsp;&nbsp;-&gt;&nbsp;v<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;error&nbsp;"Array.!:&nbsp;\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\undefined&nbsp;array&nbsp;element"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;error&nbsp;"Array.!:&nbsp;\<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\multiply&nbsp;defined&nbsp;array&nbsp;element")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else&nbsp;error&nbsp;"Array.array:&nbsp;out-of-range&nbsp;array&nbsp;association"<br>
+<br>
+listArray&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;(a,a)&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b<br>
+listArray&nbsp;b&nbsp;vs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;array&nbsp;b&nbsp;(zipWith&nbsp;(\&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;(a,b))&nbsp;(range&nbsp;b)&nbsp;vs)<br>
+<br>
+(!)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+(!)&nbsp;(MkArray&nbsp;_&nbsp;f)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;f<br>
+<br>
+bounds&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;(a,a)<br>
+bounds&nbsp;(MkArray&nbsp;b&nbsp;_)&nbsp;&nbsp;=&nbsp;&nbsp;b<br>
+<br>
+indices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;[a]<br>
+indices&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;range&nbsp;.&nbsp;bounds<br>
+<br>
+elems&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;[b]<br>
+elems&nbsp;a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[a!i&nbsp;|&nbsp;i&nbsp;&lt;-&nbsp;indices&nbsp;a]<br>
+<br>
+assocs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;[(a,b)]<br>
+assocs&nbsp;a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[(i,&nbsp;a!i)&nbsp;|&nbsp;i&nbsp;&lt;-&nbsp;indices&nbsp;a]<br>
+<br>
+(//)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;[(a,b)]&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b<br>
+a&nbsp;//&nbsp;us&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;array&nbsp;(bounds&nbsp;a)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([(i,a!i)&nbsp;|&nbsp;i&nbsp;&lt;-&nbsp;indices&nbsp;a&nbsp;\\&nbsp;[i&nbsp;|&nbsp;(i,_)&nbsp;&lt;-&nbsp;us]]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++&nbsp;us)<br>
+<br>
+accum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;(b&nbsp;-&gt;&nbsp;c&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;[(a,c)]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b<br>
+accum&nbsp;f&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldl&nbsp;(\a&nbsp;(i,v)&nbsp;-&gt;&nbsp;a&nbsp;//&nbsp;[(i,f&nbsp;(a!i)&nbsp;v)])<br>
+<br>
+accumArray&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a)&nbsp;=&gt;&nbsp;(b&nbsp;-&gt;&nbsp;c&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;(a,a)&nbsp;-&gt;&nbsp;[(a,c)]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;b<br>
+accumArray&nbsp;f&nbsp;z&nbsp;b&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;accum&nbsp;f&nbsp;(array&nbsp;b&nbsp;[(i,z)&nbsp;|&nbsp;i&nbsp;&lt;-&nbsp;range&nbsp;b])<br>
+<br>
+ixmap&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Ix&nbsp;a,&nbsp;Ix&nbsp;b)&nbsp;=&gt;&nbsp;(a,a)&nbsp;-&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;Array&nbsp;b&nbsp;c<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;Array&nbsp;a&nbsp;c<br>
+ixmap&nbsp;b&nbsp;f&nbsp;a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;array&nbsp;b&nbsp;[(i,&nbsp;a&nbsp;!&nbsp;f&nbsp;i)&nbsp;|&nbsp;i&nbsp;&lt;-&nbsp;range&nbsp;b]<br>
+<br>
+instance&nbsp;&nbsp;(Ix&nbsp;a)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;Functor&nbsp;(Array&nbsp;a)&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fmap&nbsp;fn&nbsp;(MkArray&nbsp;b&nbsp;f)&nbsp;=&nbsp;&nbsp;MkArray&nbsp;b&nbsp;(fn&nbsp;.&nbsp;f)&nbsp;<br>
+<br>
+instance&nbsp;&nbsp;(Ix&nbsp;a,&nbsp;Eq&nbsp;b)&nbsp;&nbsp;=&gt;&nbsp;Eq&nbsp;(Array&nbsp;a&nbsp;b)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;==&nbsp;a'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;assocs&nbsp;a&nbsp;==&nbsp;assocs&nbsp;a'<br>
+<br>
+instance&nbsp;&nbsp;(Ix&nbsp;a,&nbsp;Ord&nbsp;b)&nbsp;=&gt;&nbsp;Ord&nbsp;(Array&nbsp;a&nbsp;b)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;a&nbsp;&lt;=&nbsp;&nbsp;a'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;assocs&nbsp;a&nbsp;&lt;=&nbsp;&nbsp;assocs&nbsp;a'<br>
+<br>
+instance&nbsp;&nbsp;(Ix&nbsp;a,&nbsp;Show&nbsp;a,&nbsp;Show&nbsp;b)&nbsp;=&gt;&nbsp;Show&nbsp;(Array&nbsp;a&nbsp;b)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;p&nbsp;a&nbsp;=&nbsp;showParen&nbsp;(p&nbsp;&gt;&nbsp;9)&nbsp;(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;showString&nbsp;"array&nbsp;"&nbsp;.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shows&nbsp;(bounds&nbsp;a)&nbsp;.&nbsp;showChar&nbsp;'&nbsp;'&nbsp;.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shows&nbsp;(assocs&nbsp;a)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;)<br>
+<br>
+instance&nbsp;&nbsp;(Ix&nbsp;a,&nbsp;Read&nbsp;a,&nbsp;Read&nbsp;b)&nbsp;=&gt;&nbsp;Read&nbsp;(Array&nbsp;a&nbsp;b)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readsPrec&nbsp;p&nbsp;=&nbsp;readParen&nbsp;(p&nbsp;&gt;&nbsp;9)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(\r&nbsp;-&gt;&nbsp;[(array&nbsp;b&nbsp;as,&nbsp;u)&nbsp;|&nbsp;("array",s)&nbsp;&lt;-&nbsp;lex&nbsp;r,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(b,t)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&nbsp;reads&nbsp;s,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(as,u)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&nbsp;reads&nbsp;t&nbsp;&nbsp;&nbsp;])<br>
+
+<hr><i>The Haskell 98 Library Report</i><br><a href="index.html">top</a> | <a href="ix.html">back</a> | <a href="list.html">next</a> | <a href="libindex.html">contents</a> <br><font size=2>1 February, 1999</font>
+</tt>

@@ -1,0 +1,257 @@
+
+<title>The Haskell 98 Library Report: Random Numbers</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Library Report</i><br> <a href="index.html">top</a> | <a href="cputime.html">back</a> | next | <a href="libindex.html">contents</a> <br><hr>
+<a name="random numbers"></a><a name="sect17"></a>
+<h2>17<tt>&nbsp;&nbsp;</tt>Random Numbers</h2>
+<p>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module&nbsp;Random&nbsp;(<br>
+	RandomGen(next,&nbsp;split),<br>
+	StdGen,&nbsp;mkStdGen,<br>
+	Random(&nbsp;random,&nbsp;&nbsp;&nbsp;randomR,&nbsp;<br>
+		randoms,&nbsp;&nbsp;randomRs,<br>
+		randomIO,&nbsp;randomRIO&nbsp;),<br>
+	getStdRandom,&nbsp;getStdGen,&nbsp;setStdGen,&nbsp;newStdGen<br>
+&nbsp;&nbsp;)&nbsp;where<br>
+	<br>
+----------------&nbsp;The&nbsp;RandomGen&nbsp;class&nbsp;------------------------<br>
+<br>
+class&nbsp;RandomGen&nbsp;g&nbsp;where<br>
+&nbsp;&nbsp;next&nbsp;&nbsp;::&nbsp;g&nbsp;&nbsp;-&gt;&nbsp;(Int,&nbsp;g)<br>
+&nbsp;&nbsp;split&nbsp;::&nbsp;g&nbsp;-&gt;&nbsp;(g,&nbsp;g)<br>
+<br>
+----------------&nbsp;A&nbsp;standard&nbsp;instance&nbsp;of&nbsp;RandomGen&nbsp;-----------<br>
+data&nbsp;StdGen&nbsp;=&nbsp;...	--&nbsp;Abstract<br>
+<br>
+instance&nbsp;RandomGen&nbsp;StdGen&nbsp;where&nbsp;...<br>
+instance&nbsp;Read&nbsp;	&nbsp;&nbsp;&nbsp;StdGen&nbsp;where&nbsp;...<br>
+instance&nbsp;Show&nbsp;	&nbsp;&nbsp;&nbsp;StdGen&nbsp;where&nbsp;...<br>
+<br>
+mkStdGen&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;StdGen<br>
+<br>
+----------------&nbsp;The&nbsp;Random&nbsp;class&nbsp;---------------------------<br>
+class&nbsp;Random&nbsp;a&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;randomR&nbsp;::&nbsp;RandomGen&nbsp;g&nbsp;=&gt;&nbsp;(a,&nbsp;a)&nbsp;-&gt;&nbsp;g&nbsp;-&gt;&nbsp;(a,&nbsp;g)<br>
+&nbsp;&nbsp;&nbsp;random&nbsp;&nbsp;::&nbsp;RandomGen&nbsp;g&nbsp;=&gt;&nbsp;g&nbsp;-&gt;&nbsp;(a,&nbsp;g)<br>
+<br>
+&nbsp;&nbsp;&nbsp;randomRs&nbsp;::&nbsp;RandomGen&nbsp;g&nbsp;=&gt;&nbsp;(a,&nbsp;a)&nbsp;-&gt;&nbsp;g&nbsp;-&gt;&nbsp;[a]<br>
+&nbsp;&nbsp;&nbsp;randoms&nbsp;&nbsp;::&nbsp;RandomGen&nbsp;g&nbsp;=&gt;&nbsp;g&nbsp;-&gt;&nbsp;[a]<br>
+<br>
+&nbsp;&nbsp;&nbsp;randomRIO&nbsp;::&nbsp;(a,a)&nbsp;-&gt;&nbsp;IO&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;randomIO&nbsp;&nbsp;::&nbsp;IO&nbsp;a<br>
+<br>
+instance&nbsp;Random&nbsp;Int&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;Random&nbsp;Integer&nbsp;where&nbsp;...<br>
+instance&nbsp;Random&nbsp;Float&nbsp;&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;Random&nbsp;Double&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;Random&nbsp;Bool&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;Random&nbsp;Char&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;...<br>
+<br>
+----------------&nbsp;The&nbsp;global&nbsp;random&nbsp;generator&nbsp;----------------<br>
+newStdGen&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;StdGen<br>
+setStdGen&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;StdGen&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+getStdGen&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;StdGen	<br>
+getStdRandom&nbsp;::&nbsp;(StdGen&nbsp;-&gt;&nbsp;(a,&nbsp;StdGen))&nbsp;-&gt;&nbsp;IO&nbsp;a<br>
+<br>
+<br>
+
+</tt></td></tr></table>
+<p>
+The <tt>Random</tt> library deals with the common task of 
+pseudo-random number generation.  The library makes it possible to
+generate repeatable results, by starting with a specified initial
+random number generator; or to get different results on each run
+by using the system-initialised generator, or by supplying a seed
+from some other source.<p>
+The library is split into two layers:
+<UL><LI>A core <I>random number generator</I> provides a supply of bits.
+The class <tt>RandomGen</tt> provides a common interface to such generators.<p>
+<LI>The class <tt>Random</tt> provides a way to extract particular values from
+a random number generator.  For example, the <tt>Float</tt> instance of <tt>Random</tt> 
+allows one to generate random values of type <tt>Float</tt>.
+</UL><p>
+<a name="sect17.1"></a>
+<h3>17.1<tt>&nbsp;&nbsp;</tt>The <tt>RandomGen</tt> class, and the <tt>StdGen</tt> generator</h3><p>
+The class <tt>RandomGen</tt> provides a common interface to random number generators.
+<tt><br>
+
+<br>
+&nbsp;&nbsp;class&nbsp;RandomGen&nbsp;g&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;next&nbsp;&nbsp;::&nbsp;g&nbsp;&nbsp;-&gt;&nbsp;(Int,&nbsp;g)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;split&nbsp;::&nbsp;g&nbsp;-&gt;&nbsp;(g,&nbsp;g)<br>
+
+<br>
+
+
+
+
+</tt><UL><LI>The <tt>next</tt> operation allows one to extract at least 30 bits (one <tt>Int</tt>'s worth)
+from the generator, returning a new generator as well.  The integer returned
+may be positive or negative.<p>
+<LI>The <tt>split</tt> operation allows one to obtain two distinct random number
+generators.  This is very useful in functional programs (for example, when
+passing a random number generator down to recursive calls), but very little work
+has been done on statistically robust implementations of <tt>split
+</tt>([1,4] are the only examples we know of).
+</UL><p>
+The <tt>Random</tt> library provides one instance of <tt>RandomGen</tt>, the abstract data
+type <tt>StdGen</tt>:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;data&nbsp;StdGen&nbsp;=&nbsp;...	--&nbsp;Abstract<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;instance&nbsp;RandomGen&nbsp;StdGen&nbsp;where&nbsp;...<br>
+&nbsp;&nbsp;instance&nbsp;Read&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StdGen&nbsp;where&nbsp;...<br>
+&nbsp;&nbsp;instance&nbsp;Show&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;StdGen&nbsp;where&nbsp;...<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;mkStdGen&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;StdGen<br>
+
+<br>
+
+
+
+</tt>The result of repeatedly using <tt>next</tt> should be at least as
+statistically robust as the "Minimal Standard Random Number Generator"
+described by [2,3].  Until more is known about implementations of <tt>split</tt>,
+all we require is that <tt>split</tt> deliver generators that are (a) not identical
+and (b) independently robust in the sense just given.<p>
+The <tt>show</tt>/<tt>Read</tt> instances of <tt>StdGen</tt> provide a primitive way to save
+the state of a random number generator.
+It is required that <tt>read&nbsp;(show&nbsp;g)&nbsp;==&nbsp;g</tt>.<p>
+In addition, <tt>read</tt> may be used to map an arbitrary string (not
+necessarily one produced by <tt>show</tt>) onto a value of type <tt>StdGen</tt>.
+In general, the <tt>read</tt> instance of <tt>StdGen</tt> has the following properties:
+<UL><LI>It guarantees to succeed on any string.
+<LI>It guarantees to consume only a finite portion of the string.
+<LI>Different argument strings are likely to result in different results.
+</UL><p>
+The function <tt>mkStdGen</tt> provides an alternative way of producing an initial generator,
+by mapping an <tt>Int</tt> into a generator.  Again, distinct arguments should be likely
+to produce distinct generators.<p>
+Programmers may, of course, supply their own instances of <tt>RandomGen</tt>.<p>
+<a name="sect17.2"></a>
+<h3>17.2<tt>&nbsp;&nbsp;</tt>The <tt>Random</tt> class</h3><p>
+With a source of random number supply in hand, the <tt>Random</tt> class allows
+the programmer to extract random values of a variety of types:
+<tt><br>
+
+<br>
+class&nbsp;Random&nbsp;a&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;randomR&nbsp;::&nbsp;RandomGen&nbsp;g&nbsp;=&gt;&nbsp;(a,&nbsp;a)&nbsp;-&gt;&nbsp;g&nbsp;-&gt;&nbsp;(a,&nbsp;g)<br>
+&nbsp;&nbsp;&nbsp;random&nbsp;&nbsp;::&nbsp;RandomGen&nbsp;g&nbsp;=&gt;&nbsp;g&nbsp;-&gt;&nbsp;(a,&nbsp;g)<br>
+<br>
+&nbsp;&nbsp;&nbsp;randomRs&nbsp;::&nbsp;RandomGen&nbsp;g&nbsp;=&gt;&nbsp;(a,&nbsp;a)&nbsp;-&gt;&nbsp;g&nbsp;-&gt;&nbsp;[a]<br>
+&nbsp;&nbsp;&nbsp;randoms&nbsp;&nbsp;::&nbsp;RandomGen&nbsp;g&nbsp;=&gt;&nbsp;g&nbsp;-&gt;&nbsp;[a]<br>
+<br>
+&nbsp;&nbsp;&nbsp;randomRIO&nbsp;::&nbsp;(a,a)&nbsp;-&gt;&nbsp;IO&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;randomIO&nbsp;::&nbsp;IO&nbsp;a<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;Default&nbsp;methods<br>
+&nbsp;&nbsp;&nbsp;randoms&nbsp;g&nbsp;=&nbsp;x&nbsp;:&nbsp;randoms&nbsp;g'&nbsp;<br>
+		&nbsp;&nbsp;&nbsp;where&nbsp;<br>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(x,g')&nbsp;=&nbsp;random&nbsp;g<br>
+&nbsp;&nbsp;&nbsp;randomRs&nbsp;=&nbsp;...similar...<br>
+<br>
+&nbsp;&nbsp;&nbsp;randomIO&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;getStdRandom&nbsp;random<br>
+&nbsp;&nbsp;&nbsp;randomRIO&nbsp;range&nbsp;=&nbsp;getStdRandom&nbsp;(randomR&nbsp;range)<br>
+<br>
+<br>
+instance&nbsp;Random&nbsp;Int&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;Random&nbsp;Integer&nbsp;where&nbsp;...<br>
+instance&nbsp;Random&nbsp;Float&nbsp;&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;Random&nbsp;Double&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;Random&nbsp;Bool&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;Random&nbsp;Char&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;...<br>
+
+<br>
+
+
+
+
+
+
+
+
+</tt><UL><LI><tt>randomR</tt> takes a range <I>(lo,hi)</I> and a random number generator <I>g</I>,
+and returns a random value uniformly distributed in the closed interval <I>[lo,hi]</I>, together
+with a new generator.  It is unspecified what happens if <I>lo&gt;hi</I>.
+For continuous types there is no requirement that the values <I>lo</I> and <I>hi</I> are
+ever produced, but they may be, depending on the implementation and the interval.<p>
+<LI><tt>random</tt> does the same as <tt>randomR</tt>, but does not take a range.
+<UL><LI>For bounded types (instances of <tt>Bounded</tt>, such as <tt>Char</tt>), 
+the range is normally the whole type.
+<LI>For fractional types, the range is normally the semi-closed interval <I>[0,1)</I>.
+<LI>For <tt>Integer</tt>, the range is (arbitrarily) the range of <tt>Int</tt>.
+</UL><p>
+<LI>The plural versions, <tt>randomRs</tt> and <tt>randoms</tt>, produce an infinite list of random
+values, and do not return a new generator.<p>
+<LI>The <tt>IO</tt> versions, <tt>randomRIO</tt> and <tt>randomIO</tt>, use the global random number
+generator (see Section <a href="random.html#global-rng">17.3</a>).
+</UL><a name="global-rng"></a><p>
+<a name="sect17.3"></a>
+<h3>17.3<tt>&nbsp;&nbsp;</tt>The global random number generator</h3>
+<p>
+There is a single, implicit, global random number generator
+of type <tt>StdGen</tt>, held in some global variable maintained by the <tt>IO</tt> monad.
+It is initialised automatically in some system-dependent fashion,
+for example, by using the time of day, or Linux's kernal random number generator.
+To get deterministic behaviour, use <tt>setStdGen</tt>.
+<tt><br>
+
+<br>
+&nbsp;&nbsp;setStdGen&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;StdGen&nbsp;-&gt;&nbsp;IO&nbsp;()	<br>
+&nbsp;&nbsp;getStdGen&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;StdGen		<br>
+&nbsp;&nbsp;newStdGen&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;StdGen<br>
+&nbsp;&nbsp;getStdRandom&nbsp;::&nbsp;(StdGen&nbsp;-&gt;&nbsp;(a,&nbsp;StdGen))&nbsp;-&gt;&nbsp;IO&nbsp;a<br>
+
+<br>
+
+
+
+
+
+</tt><UL><LI><tt>getStdGen</tt> and <tt>setStdGen</tt> get and set the global random
+number generator, respectively.<p>
+<LI><tt>newStdGen</tt> applies <tt>split</tt> to the current global random generator,
+updates it with one of the results, and returns the other.<p>
+<LI><tt>getStdRandom</tt> uses the supplied function to get a value from
+the current global random generator, and updates the
+global generator with the new generator returned by the function.
+For example, <tt>rollDice</tt> gets a random integer between 1 and 6:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;rollDice&nbsp;::&nbsp;IO&nbsp;Int<br>
+&nbsp;&nbsp;rollDice&nbsp;=&nbsp;getStdRandom&nbsp;(randomR&nbsp;(1,6))<br>
+
+<br>
+
+</tt></UL>    <p>
+<h3>References</h3>
+<DL><DT>
+[1]
+</DT>
+ FW Burton and RL Page, "Distributed random number generation",
+	Journal of Functional Programming, 2(2):203-212, April 1992.<p>
+<DT>
+[2]
+</DT>
+ SK Park, and KW Miller, "Random number generators - good ones are hard to find",
+	Comm ACM 31(10), Oct 1988, pp1192-1201.<p>
+<DT>
+[3]
+</DT>
+ DG Carta, "Two fast implementations of the minimal standard random number generator",
+	Comm ACM, 33(1), Jan 1990, pp87-88.<p>
+<DT>
+[4]
+</DT>
+ P Hellekalek, "Don't trust parallel Monte Carlo", Department of Mathematics,
+University of Salzburg, <tt>http://random.mat.sbg.ac.at/~peter/pads98.ps</tt>, 1998.
+</DL><p>
+The Web site <tt>http://random.mat.sbg.ac.at/</tt> is a great source of information.<p>
+<hr><i>The Haskell 98 Library Report</i><br><a href="index.html">top</a> | <a href="cputime.html">back</a> | next | <a href="libindex.html">contents</a> <br><font size=2>1 February, 1999</font>
+<p>

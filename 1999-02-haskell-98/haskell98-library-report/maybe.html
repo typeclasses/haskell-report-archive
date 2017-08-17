@@ -1,0 +1,90 @@
+
+<title>The Haskell 98 Library Report: Maybe Utilities</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Library Report</i><br> <a href="index.html">top</a> | <a href="list.html">back</a> | <a href="char.html">next</a> | <a href="libindex.html">contents</a> <br><hr>
+<a name="sect8"></a>
+<h2>8<tt>&nbsp;&nbsp;</tt>Maybe Utilities</h2><p>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module&nbsp;Maybe(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;isJust,&nbsp;isNothing,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromJust,&nbsp;fromMaybe,&nbsp;listToMaybe,&nbsp;maybeToList,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;catMaybes,&nbsp;mapMaybe,<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;...and&nbsp;what&nbsp;the&nbsp;Prelude&nbsp;exports<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Maybe(Nothing,&nbsp;Just),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;maybe<br>
+&nbsp;&nbsp;)&nbsp;where<br>
+<br>
+isJust,&nbsp;isNothing&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Maybe&nbsp;a&nbsp;-&gt;&nbsp;Bool<br>
+fromJust&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Maybe&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+fromMaybe&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;Maybe&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+listToMaybe&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;Maybe&nbsp;a<br>
+maybeToList&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Maybe&nbsp;a&nbsp;-&gt;&nbsp;[a]<br>
+catMaybes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[Maybe&nbsp;a]&nbsp;-&gt;&nbsp;[a]<br>
+mapMaybe&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;Maybe&nbsp;b)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[b]<br>
+
+</tt></td></tr></table>
+<p>
+The type constructor <tt>Maybe</tt> is defined in <tt>Prelude</tt> as
+<tt><br>
+
+<br>
+data&nbsp;Maybe&nbsp;a&nbsp;=&nbsp;Nothing&nbsp;|&nbsp;Just&nbsp;a<br>
+
+<br>
+
+</tt>The purpose of the <tt>Maybe</tt> type is to provide a method of dealing with
+illegal or optional values without terminating the program, as would
+happen if <tt>error</tt> were used, and without using <tt>IOError</tt> from the <tt>IO
+</tt>monad, which would cause the expression to become monadic.  A correct
+result is encapsulated by wrapping it in <tt>Just</tt>; an incorrect result
+is returned as <tt>Nothing</tt>.<p>
+Other operations on <tt>Maybe</tt> are provided as part of the monadic
+classes in the Prelude.<a name="Maybe"></a><p>
+
+<a name="sect8.1"></a>
+<h3>8.1<tt>&nbsp;&nbsp;</tt>Library <tt>Maybe</tt></h3>
+
+<tt><br>
+module&nbsp;Maybe(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;isJust,&nbsp;isNothing,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromJust,&nbsp;fromMaybe,&nbsp;listToMaybe,&nbsp;maybeToList,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;catMaybes,&nbsp;mapMaybe,<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;...and&nbsp;what&nbsp;the&nbsp;Prelude&nbsp;exports<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Maybe(Nothing,&nbsp;Just),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;maybe<br>
+&nbsp;&nbsp;)&nbsp;where<br>
+<br>
+isJust&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Maybe&nbsp;a&nbsp;-&gt;&nbsp;Bool<br>
+isJust&nbsp;(Just&nbsp;a)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;True<br>
+isJust&nbsp;Nothing&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;False<br>
+<br>
+isNothing	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Maybe&nbsp;a&nbsp;-&gt;&nbsp;Bool<br>
+isNothing	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;not&nbsp;.&nbsp;isJust<br>
+<br>
+fromJust&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Maybe&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+fromJust&nbsp;(Just&nbsp;a)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;a<br>
+fromJust&nbsp;Nothing&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"Maybe.fromJust:&nbsp;Nothing"<br>
+<br>
+fromMaybe&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;Maybe&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+fromMaybe&nbsp;d&nbsp;Nothing&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;d<br>
+fromMaybe&nbsp;d&nbsp;(Just&nbsp;a)&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;a<br>
+<br>
+maybeToList&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Maybe&nbsp;a&nbsp;-&gt;&nbsp;[a]<br>
+maybeToList&nbsp;Nothing&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+maybeToList&nbsp;(Just&nbsp;a)&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[a]<br>
+<br>
+listToMaybe&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;Maybe&nbsp;a<br>
+listToMaybe&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;Nothing<br>
+listToMaybe&nbsp;(a:_)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;Just&nbsp;a<br>
+&nbsp;<br>
+catMaybes&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[Maybe&nbsp;a]&nbsp;-&gt;&nbsp;[a]<br>
+catMaybes&nbsp;ms&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[&nbsp;m&nbsp;|&nbsp;Just&nbsp;m&nbsp;&lt;-&nbsp;ms&nbsp;]<br>
+<br>
+mapMaybe&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;Maybe&nbsp;b)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[b]<br>
+mapMaybe&nbsp;f&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;catMaybes&nbsp;.&nbsp;map&nbsp;f<br>
+<p>
+<hr><i>The Haskell 98 Library Report</i><br><a href="index.html">top</a> | <a href="list.html">back</a> | <a href="char.html">next</a> | <a href="libindex.html">contents</a> <br><font size=2>1 February, 1999</font>
+</tt>

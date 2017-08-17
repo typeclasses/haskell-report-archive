@@ -1,0 +1,167 @@
+
+<title>The Haskell 98 Library Report: Complex Numbers</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Library Report</i><br> <a href="index.html">top</a> | <a href="ratio.html">back</a> | <a href="numeric.html">next</a> | <a href="libindex.html">contents</a> <br><hr>
+<a name="lib-num"></a><a name="sect3"></a>
+<h2>3<tt>&nbsp;&nbsp;</tt>Complex Numbers</h2>
+<p>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module&nbsp;&nbsp;Complex&nbsp;(&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Complex((:+)),&nbsp;realPart,&nbsp;imagPart,&nbsp;conjugate,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mkPolar,&nbsp;cis,&nbsp;polar,&nbsp;magnitude,&nbsp;phase&nbsp;)&nbsp;where<br>
+<br>
+infix&nbsp;&nbsp;6&nbsp;&nbsp;:+<br>
+<br>
+data&nbsp;&nbsp;(RealFloat&nbsp;a)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;Complex&nbsp;a&nbsp;=&nbsp;!a&nbsp;:+&nbsp;!a<br>
+<br>
+realPart,&nbsp;imagPart&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Complex&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+conjugate	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Complex&nbsp;a&nbsp;-&gt;&nbsp;Complex&nbsp;a<br>
+mkPolar		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Complex&nbsp;a<br>
+cis		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;Complex&nbsp;a<br>
+polar		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Complex&nbsp;a&nbsp;-&gt;&nbsp;(a,a)<br>
+magnitude,&nbsp;phase&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Complex&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+<br>
+instance&nbsp;&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Eq&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Complex&nbsp;a)&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Read&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Complex&nbsp;a)&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Show&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Complex&nbsp;a)&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Num&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Complex&nbsp;a)&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Fractional&nbsp;(Complex&nbsp;a)&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Floating&nbsp;&nbsp;&nbsp;(Complex&nbsp;a)&nbsp;&nbsp;where&nbsp;...<br>
+
+</tt></td></tr></table>
+<p>
+Complex numbers are an algebraic type.
+The constructor <tt>(:+)</tt> forms a complex number from its
+real and imaginary rectangular components.  This constructor is
+strict: if either the real part or the imaginary part of the number is
+_|_, the entire number is _|_.  A complex number may also
+be formed from polar components of magnitude and phase by the function
+<tt>mkPolar</tt>.  The function <tt>cis
+</tt>produces a complex number from an angle <I>t</I>.
+Put another way, <tt>cis</tt> <I>t</I> is a complex value with magnitude <I>1
+</I>and phase <I>t</I> (modulo <I>2</I><font face="symbol">p</font>).<p>
+The function <tt>polar</tt> takes a complex number and
+returns a (magnitude, phase) pair in canonical form: The magnitude is
+nonnegative, and the phase, in the range (- <font face="symbol">p</font>, <font face="symbol">p</font>]; if the
+magnitude is zero, then so is the phase.  <p>
+The functions <tt>realPart</tt> and
+<tt>imagPart</tt> extract the rectangular components of a
+complex number and the functions <tt>magnitude</tt> and
+<tt>phase</tt> extract the polar components of a complex
+number.  The function <tt>conjugate</tt> computes the
+conjugate of a complex number in the usual way.<p>
+The magnitude and sign of a complex number are defined as follows:
+<tt><br>
+
+<br>
+abs&nbsp;z		&nbsp;&nbsp;=&nbsp;&nbsp;magnitude&nbsp;z&nbsp;:+&nbsp;0<br>
+signum&nbsp;0	&nbsp;&nbsp;=&nbsp;&nbsp;0<br>
+signum&nbsp;z@(x:+y)&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x/r&nbsp;:+&nbsp;y/r&nbsp;&nbsp;where&nbsp;r&nbsp;=&nbsp;magnitude&nbsp;z<br>
+
+<br>
+
+</tt>That is, <tt>abs</tt> z is a number with the magnitude of z, but oriented
+in the positive real direction, whereas <tt>signum</tt> z has the phase of
+z, but unit magnitude.<p>
+<a name="sect3.1"></a>
+<h3>3.1<tt>&nbsp;&nbsp;</tt>Library <tt>Complex</tt></h3>
+<tt><br>
+<br>
+module&nbsp;Complex(Complex((:+)),&nbsp;realPart,&nbsp;imagPart,&nbsp;conjugate,&nbsp;mkPolar,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cis,&nbsp;polar,&nbsp;magnitude,&nbsp;phase)&nbsp;&nbsp;where<br>
+<br>
+infix&nbsp;&nbsp;6&nbsp;&nbsp;:+<br>
+<br>
+data&nbsp;&nbsp;(RealFloat&nbsp;a)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;Complex&nbsp;a&nbsp;=&nbsp;!a&nbsp;:+&nbsp;!a&nbsp;&nbsp;deriving&nbsp;(Eq,Read,Show)<br>
+<br>
+<br>
+realPart,&nbsp;imagPart&nbsp;::&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Complex&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+realPart&nbsp;(x:+y)	&nbsp;=&nbsp;&nbsp;x<br>
+imagPart&nbsp;(x:+y)	&nbsp;=&nbsp;&nbsp;y<br>
+<br>
+conjugate	&nbsp;::&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Complex&nbsp;a&nbsp;-&gt;&nbsp;Complex&nbsp;a<br>
+conjugate&nbsp;(x:+y)&nbsp;=&nbsp;&nbsp;x&nbsp;:+&nbsp;(-y)<br>
+<br>
+mkPolar		&nbsp;::&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Complex&nbsp;a<br>
+mkPolar&nbsp;r&nbsp;theta	&nbsp;=&nbsp;&nbsp;r&nbsp;*&nbsp;cos&nbsp;theta&nbsp;:+&nbsp;r&nbsp;*&nbsp;sin&nbsp;theta<br>
+<br>
+cis		&nbsp;::&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;Complex&nbsp;a<br>
+cis&nbsp;theta	&nbsp;=&nbsp;&nbsp;cos&nbsp;theta&nbsp;:+&nbsp;sin&nbsp;theta<br>
+<br>
+polar		&nbsp;::&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Complex&nbsp;a&nbsp;-&gt;&nbsp;(a,a)<br>
+polar&nbsp;z		&nbsp;=&nbsp;&nbsp;(magnitude&nbsp;z,&nbsp;phase&nbsp;z)<br>
+<br>
+magnitude&nbsp;::&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Complex&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+magnitude&nbsp;(x:+y)&nbsp;=&nbsp;&nbsp;scaleFloat&nbsp;k<br>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(sqrt&nbsp;((scaleFloat&nbsp;mk&nbsp;x)^2&nbsp;+&nbsp;(scaleFloat&nbsp;mk&nbsp;y)^2))<br>
+		&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;k&nbsp;&nbsp;=&nbsp;max&nbsp;(exponent&nbsp;x)&nbsp;(exponent&nbsp;y)<br>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mk&nbsp;=&nbsp;-&nbsp;k<br>
+<br>
+phase&nbsp;::&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Complex&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+phase&nbsp;(0&nbsp;:+&nbsp;0)&nbsp;=&nbsp;0<br>
+phase&nbsp;(x&nbsp;:+&nbsp;y)&nbsp;=&nbsp;atan2&nbsp;y&nbsp;x<br>
+<br>
+<br>
+instance&nbsp;&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Num&nbsp;(Complex&nbsp;a)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(x:+y)&nbsp;+&nbsp;(x':+y')	=&nbsp;&nbsp;(x+x')&nbsp;:+&nbsp;(y+y')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(x:+y)&nbsp;-&nbsp;(x':+y')	=&nbsp;&nbsp;(x-x')&nbsp;:+&nbsp;(y-y')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(x:+y)&nbsp;*&nbsp;(x':+y')	=&nbsp;&nbsp;(x*x'-y*y')&nbsp;:+&nbsp;(x*y'+y*x')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;negate&nbsp;(x:+y)	=&nbsp;&nbsp;negate&nbsp;x&nbsp;:+&nbsp;negate&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;abs&nbsp;z		=&nbsp;&nbsp;magnitude&nbsp;z&nbsp;:+&nbsp;0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;signum&nbsp;0		=&nbsp;&nbsp;0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;signum&nbsp;z@(x:+y)	=&nbsp;&nbsp;x/r&nbsp;:+&nbsp;y/r&nbsp;&nbsp;where&nbsp;r&nbsp;=&nbsp;magnitude&nbsp;z<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromInteger&nbsp;n	=&nbsp;&nbsp;fromInteger&nbsp;n&nbsp;:+&nbsp;0<br>
+<br>
+instance&nbsp;&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Fractional&nbsp;(Complex&nbsp;a)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(x:+y)&nbsp;/&nbsp;(x':+y')	=&nbsp;&nbsp;(x*x''+y*y'')&nbsp;/&nbsp;d&nbsp;:+&nbsp;(y*x''-x*y'')&nbsp;/&nbsp;d<br>
+			&nbsp;&nbsp;&nbsp;where&nbsp;x''&nbsp;=&nbsp;scaleFloat&nbsp;k&nbsp;x'<br>
+				&nbsp;y''&nbsp;=&nbsp;scaleFloat&nbsp;k&nbsp;y'<br>
+				&nbsp;k&nbsp;&nbsp;&nbsp;=&nbsp;-&nbsp;max&nbsp;(exponent&nbsp;x')&nbsp;(exponent&nbsp;y')<br>
+				&nbsp;d&nbsp;&nbsp;&nbsp;=&nbsp;x'*x''&nbsp;+&nbsp;y'*y''<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromRational&nbsp;a	=&nbsp;&nbsp;fromRational&nbsp;a&nbsp;:+&nbsp;0<br>
+<br>
+instance&nbsp;&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;Floating&nbsp;(Complex&nbsp;a)	where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pi&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;pi&nbsp;:+&nbsp;0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;exp&nbsp;(x:+y)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;expx&nbsp;*&nbsp;cos&nbsp;y&nbsp;:+&nbsp;expx&nbsp;*&nbsp;sin&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;expx&nbsp;=&nbsp;exp&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;log&nbsp;z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;log&nbsp;(magnitude&nbsp;z)&nbsp;:+&nbsp;phase&nbsp;z<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sqrt&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sqrt&nbsp;z@(x:+y)&nbsp;&nbsp;=&nbsp;&nbsp;u&nbsp;:+&nbsp;(if&nbsp;y&nbsp;&lt;&nbsp;0&nbsp;then&nbsp;-v&nbsp;else&nbsp;v)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;(u,v)&nbsp;=&nbsp;if&nbsp;x&nbsp;&lt;&nbsp;0&nbsp;then&nbsp;(v',u')&nbsp;else&nbsp;(u',v')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;v'&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;abs&nbsp;y&nbsp;/&nbsp;(u'*2)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;u'&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;sqrt&nbsp;((magnitude&nbsp;z&nbsp;+&nbsp;abs&nbsp;x)&nbsp;/&nbsp;2)<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sin&nbsp;(x:+y)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;sin&nbsp;x&nbsp;*&nbsp;cosh&nbsp;y&nbsp;:+&nbsp;cos&nbsp;x&nbsp;*&nbsp;sinh&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cos&nbsp;(x:+y)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;cos&nbsp;x&nbsp;*&nbsp;cosh&nbsp;y&nbsp;:+&nbsp;(-&nbsp;sin&nbsp;x&nbsp;*&nbsp;sinh&nbsp;y)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tan&nbsp;(x:+y)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;(sinx*coshy:+cosx*sinhy)/(cosx*coshy:+(-sinx*sinhy))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;sinx&nbsp;&nbsp;=&nbsp;sin&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cosx&nbsp;&nbsp;=&nbsp;cos&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sinhy&nbsp;=&nbsp;sinh&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;coshy&nbsp;=&nbsp;cosh&nbsp;y<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sinh&nbsp;(x:+y)&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;cos&nbsp;y&nbsp;*&nbsp;sinh&nbsp;x&nbsp;:+&nbsp;sin&nbsp;&nbsp;y&nbsp;*&nbsp;cosh&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;cosh&nbsp;(x:+y)&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;cos&nbsp;y&nbsp;*&nbsp;cosh&nbsp;x&nbsp;:+&nbsp;sin&nbsp;y&nbsp;*&nbsp;sinh&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tanh&nbsp;(x:+y)&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;(cosy*sinhx:+siny*coshx)/(cosy*coshx:+siny*sinhx)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;siny&nbsp;&nbsp;=&nbsp;sin&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cosy&nbsp;&nbsp;=&nbsp;cos&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;sinhx&nbsp;=&nbsp;sinh&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;coshx&nbsp;=&nbsp;cosh&nbsp;x<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;asin&nbsp;z@(x:+y)&nbsp;&nbsp;=&nbsp;&nbsp;y':+(-x')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;&nbsp;(x':+y')&nbsp;=&nbsp;log&nbsp;(((-y):+x)&nbsp;+&nbsp;sqrt&nbsp;(1&nbsp;-&nbsp;z*z))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;acos&nbsp;z@(x:+y)&nbsp;&nbsp;=&nbsp;&nbsp;y'':+(-x'')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;(x'':+y'')&nbsp;=&nbsp;log&nbsp;(z&nbsp;+&nbsp;((-y'):+x'))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(x':+y')&nbsp;&nbsp;&nbsp;=&nbsp;sqrt&nbsp;(1&nbsp;-&nbsp;z*z)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;atan&nbsp;z@(x:+y)&nbsp;&nbsp;=&nbsp;&nbsp;y':+(-x')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;(x':+y')&nbsp;=&nbsp;log&nbsp;(((1-y):+x)&nbsp;/&nbsp;sqrt&nbsp;(1+z*z))<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;asinh&nbsp;z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;log&nbsp;(z&nbsp;+&nbsp;sqrt&nbsp;(1+z*z))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;acosh&nbsp;z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;log&nbsp;(z&nbsp;+&nbsp;(z+1)&nbsp;*&nbsp;sqrt&nbsp;((z-1)/(z+1)))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;atanh&nbsp;z&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;log&nbsp;((1+z)&nbsp;/&nbsp;sqrt&nbsp;(1-z*z))<br>
+<p>
+<hr><i>The Haskell 98 Library Report</i><br><a href="index.html">top</a> | <a href="ratio.html">back</a> | <a href="numeric.html">next</a> | <a href="libindex.html">contents</a> <br><font size=2>1 February, 1999</font>
+<p>
+</tt>

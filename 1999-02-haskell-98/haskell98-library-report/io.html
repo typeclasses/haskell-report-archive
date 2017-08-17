@@ -1,0 +1,591 @@
+
+<title>The Haskell 98 Library Report: IO</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Library Report</i><br> <a href="index.html">top</a> | <a href="monad.html">back</a> | <a href="directory.html">next</a> | <a href="libindex.html">contents</a> <br><hr>
+<a name="IO"></a><a name="sect11"></a>
+<h2>11<tt>&nbsp;&nbsp;</tt>Input/Output</h2>
+<p>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module&nbsp;IO&nbsp;(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Handle,&nbsp;HandlePosn,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;IOMode(ReadMode,WriteMode,AppendMode,ReadWriteMode),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;BufferMode(NoBuffering,LineBuffering,BlockBuffering),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;SeekMode(AbsoluteSeek,RelativeSeek,SeekFromEnd),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;stdin,&nbsp;stdout,&nbsp;stderr,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;openFile,&nbsp;hClose,&nbsp;hFileSize,&nbsp;hIsEOF,&nbsp;isEOF,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hSetBuffering,&nbsp;hGetBuffering,&nbsp;hFlush,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hGetPosn,&nbsp;hSetPosn,&nbsp;hSeek,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hWaitForInput,&nbsp;hReady,&nbsp;hGetChar,&nbsp;hGetLine,&nbsp;hLookAhead,&nbsp;hGetContents,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hPutChar,&nbsp;hPutStr,&nbsp;hPutStrLn,&nbsp;hPrint,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;hIsOpen,&nbsp;hIsClosed,&nbsp;hIsReadable,&nbsp;hIsWritable,&nbsp;hIsSeekable,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;isAlreadyExistsError,&nbsp;isDoesNotExistError,&nbsp;isAlreadyInUseError,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;isFullError,&nbsp;isEOFError,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;isIllegalOperation,&nbsp;isPermissionError,&nbsp;isUserError,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ioeGetErrorString,&nbsp;ioeGetHandle,&nbsp;ioeGetFileName,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;try,&nbsp;bracket,&nbsp;bracket_<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;...and&nbsp;what&nbsp;the&nbsp;Prelude&nbsp;exports<br>
+&nbsp;&nbsp;&nbsp;&nbsp;IO,&nbsp;FilePath,&nbsp;IOError,&nbsp;ioError,&nbsp;userError,&nbsp;catch,&nbsp;interact,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;putChar,&nbsp;putStr,&nbsp;putStrLn,&nbsp;print,&nbsp;getChar,&nbsp;getLine,&nbsp;getContents,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readFile,&nbsp;writeFile,&nbsp;appendFile,&nbsp;readIO,&nbsp;readLn<br>
+&nbsp;&nbsp;&nbsp;&nbsp;)&nbsp;where<br>
+<br>
+import&nbsp;Ix(Ix)<br>
+<br>
+data&nbsp;Handle&nbsp;=&nbsp;...			--&nbsp;implementation-dependent<br>
+instance&nbsp;Eq&nbsp;Handle&nbsp;where&nbsp;...<br>
+instance&nbsp;Show&nbsp;Handle&nbsp;where&nbsp;..&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;implementation-dependent<br>
+<br>
+data&nbsp;HandlePosn&nbsp;=&nbsp;...			--&nbsp;implementation-dependent<br>
+instance&nbsp;Eq&nbsp;HandlePosn&nbsp;where&nbsp;...<br>
+instance&nbsp;Show&nbsp;HandlePosn&nbsp;where&nbsp;---&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;implementation-dependent<br>
+<br>
+<br>
+data&nbsp;IOMode&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;ReadMode&nbsp;|&nbsp;WriteMode&nbsp;|&nbsp;AppendMode&nbsp;|&nbsp;ReadWriteMode<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Ix,&nbsp;Bounded,&nbsp;Enum,&nbsp;Read,&nbsp;Show)<br>
+data&nbsp;BufferMode&nbsp;&nbsp;=&nbsp;&nbsp;NoBuffering&nbsp;|&nbsp;LineBuffering&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;BlockBuffering&nbsp;(Maybe&nbsp;Int)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Read,&nbsp;Show)<br>
+data&nbsp;SeekMode&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;AbsoluteSeek&nbsp;|&nbsp;RelativeSeek&nbsp;|&nbsp;SeekFromEnd<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Ix,&nbsp;Bounded,&nbsp;Enum,&nbsp;Read,&nbsp;Show)<br>
+<br>
+stdin,&nbsp;stdout,&nbsp;stderr&nbsp;::&nbsp;Handle<br>
+<br>
+openFile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;FilePath&nbsp;-&gt;&nbsp;IOMode&nbsp;-&gt;&nbsp;IO&nbsp;Handle<br>
+hClose&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+
+</tt></td></tr></table>
+
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+hFileSize&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;IO&nbsp;Integer<br>
+hIsEOF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;IO&nbsp;Bool<br>
+isEOF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;Bool<br>
+isEOF&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;hIsEOF&nbsp;stdin<br>
+<br>
+hSetBuffering&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;&nbsp;-&gt;&nbsp;BufferMode&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+hGetBuffering&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;&nbsp;-&gt;&nbsp;IO&nbsp;BufferMode<br>
+hFlush&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;IO&nbsp;()&nbsp;<br>
+hGetPosn&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;IO&nbsp;HandlePosn<br>
+hSetPosn&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;HandlePosn&nbsp;-&gt;&nbsp;IO&nbsp;()&nbsp;<br>
+hSeek&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;SeekMode&nbsp;-&gt;&nbsp;Integer&nbsp;-&gt;&nbsp;IO&nbsp;()&nbsp;<br>
+<br>
+hWaitForInput	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;Int&nbsp;-&gt;&nbsp;IO&nbsp;Bool<br>
+hReady&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;IO&nbsp;Bool&nbsp;<br>
+hReady&nbsp;h	&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;hWaitForInput&nbsp;h&nbsp;0<br>
+hGetChar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;IO&nbsp;Char<br>
+hGetLine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;IO&nbsp;String<br>
+hLookAhead&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;IO&nbsp;Char<br>
+hGetContents&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;IO&nbsp;String<br>
+hPutChar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;Char&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+hPutStr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;String&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+hPutStrLn&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;String&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+hPrint&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Show&nbsp;a&nbsp;=&gt;&nbsp;Handle&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+<br>
+hIsOpen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;IO&nbsp;Bool<br>
+hIsClosed&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;IO&nbsp;Bool<br>
+hIsReadable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;IO&nbsp;Bool<br>
+hIsWritable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;IO&nbsp;Bool<br>
+hIsSeekable&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Handle&nbsp;-&gt;&nbsp;IO&nbsp;Bool<br>
+<br>
+isAlreadyExistsError&nbsp;&nbsp;::&nbsp;IOError&nbsp;-&gt;&nbsp;Bool<br>
+isDoesNotExistError&nbsp;&nbsp;&nbsp;::&nbsp;IOError&nbsp;-&gt;&nbsp;Bool<br>
+isAlreadyInUseError&nbsp;&nbsp;&nbsp;::&nbsp;IOError&nbsp;-&gt;&nbsp;Bool<br>
+isFullError&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IOError&nbsp;-&gt;&nbsp;Bool<br>
+isEOFError&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IOError&nbsp;-&gt;&nbsp;Bool<br>
+isIllegalOperation&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IOError&nbsp;-&gt;&nbsp;Bool<br>
+isPermissionError&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IOError&nbsp;-&gt;&nbsp;Bool<br>
+isUserError&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IOError&nbsp;-&gt;&nbsp;Bool<br>
+<br>
+ioeGetErrorString&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IOError&nbsp;-&gt;&nbsp;String<br>
+ioeGetHandle&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IOError&nbsp;-&gt;&nbsp;Maybe&nbsp;Handle<br>
+ioeGetFileName&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IOError&nbsp;-&gt;&nbsp;Maybe&nbsp;FilePath<br>
+<br>
+try&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;a&nbsp;-&gt;&nbsp;Either&nbsp;IOError&nbsp;a<br>
+bracket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;a&nbsp;-&gt;&nbsp;(a&nbsp;-&gt;&nbsp;IO&nbsp;b)&nbsp;-&gt;&nbsp;(a&nbsp;-&gt;&nbsp;IO&nbsp;c)&nbsp;-&gt;&nbsp;IO&nbsp;c<br>
+bracket_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;a&nbsp;-&gt;&nbsp;(a&nbsp;-&gt;&nbsp;IO&nbsp;b)&nbsp;-&gt;&nbsp;IO&nbsp;c&nbsp;-&gt;&nbsp;IO&nbsp;c<br>
+
+</tt></td></tr></table>
+<p>
+The monadic I/O system used in Haskell  is described by the
+Haskell  language report.  Commonly used I/O functions such as
+<tt>print</tt> are part of the standard prelude and need not be explicitly
+imported.  This library contain more advanced I/O features.
+Some related operations on file systems are contained in the
+<tt>Directory</tt> library.<a name="IOError"></a><p>
+<a name="sect11.1"></a>
+<h3>11.1<tt>&nbsp;&nbsp;</tt>I/O Errors</h3>
+
+
+Errors of type <tt>IOError</tt> are used by the I/O monad.  This is an
+abstract type; the library provides functions to interrogate and
+construct values in <tt>IOError</tt>:
+<UL><LI>
+<tt>isAlreadyExistsError
+</tt> -- the operation failed because one of its
+arguments already exists.
+<LI>
+<tt>isDoesNotExistError
+</tt> -- the operation failed because one of its
+arguments does not exist.
+<LI>
+<tt>isAlreadyInUseError
+</tt> -- the operation failed because one of its
+arguments is a single-use resource, which is already being used (for
+example, opening the same file twice for writing might give this
+error).
+<LI>
+<tt>isFullError
+</tt> -- the operation failed because the device is full.
+<LI>
+<tt>isEOFError
+</tt> -- the operation failed because the end of file
+has been reached.
+<LI>
+<tt>isIllegalOperation
+</tt> -- the operation is not possible.
+<LI>
+<tt>isPermissionError
+</tt> -- the operation failed because the user does not
+have sufficient operating system privilege to perform that operation.
+<LI>
+<tt>isUserError
+</tt> -- a programmer-defined error value has been raised using
+<tt>fail</tt>.
+</UL>
+All these functions return return a <tt>Bool</tt>, which is <tt>True</tt> if
+its argument is the corresponding kind of error, and <tt>False
+</tt>otherwise.  <p>
+Any computation which returns an <tt>IO</tt> result may fail with
+<tt>isIllegalOperationError</tt>.  Additional errors which could be raised by
+an implementation are listed after the corresponding operation.  In
+some cases, an implementation will not be able to distinguish between
+the possible error causes.  In this case it should return
+<tt>isIllegalOperationError</tt>.<p>
+Three additional functions are provided to obtain information about an
+error value.  These are <tt>ioeGetHandle</tt> which
+returns <tt>Just</tt> <I>hdl</I> if the error value refers to handle <I>hdl</I> and
+<tt>Nothing</tt> otherwise; <tt>ioeGetFileName</tt> which
+returns <tt>Just</tt> <I>name</I> if the error value refers to file <I>name</I>, and
+<tt>Nothing</tt> otherwise; and <tt>ioeGetErrorString</tt> which returns a
+string.  For "user" errors (those which are raised using <tt>fail</tt>),
+the string returned by <tt>ioeGetErrorString</tt> is the argument that was passed to
+<tt>fail</tt>; for all other errors, the string is implementation-dependent.<p>
+The <tt>try</tt> function returns an error in a computation explicitly using
+the <tt>Either</tt> type.<p>
+The <tt>bracket</tt> function 
+captures a common allocate, compute, deallocate idiom in which the
+deallocation step must occur even in the case of an error during
+computation.  This is similar to try-catch-finally in Java.<p>
+<tt>module&nbsp;IO&nbsp;where<br>
+<br>
+--&nbsp;Just&nbsp;provide&nbsp;an&nbsp;implementation&nbsp;of&nbsp;the&nbsp;system-indendent<br>
+--&nbsp;actions&nbsp;that&nbsp;IO&nbsp;exports.<br>
+<br>
+try&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;a&nbsp;-&gt;&nbsp;IO&nbsp;(Either&nbsp;IOError&nbsp;a)<br>
+try&nbsp;f&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;catch&nbsp;(do&nbsp;r&nbsp;&lt;-&nbsp;f<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;(Right&nbsp;r))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(return&nbsp;.&nbsp;Left)<br>
+<br>
+bracket&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;a&nbsp;-&gt;&nbsp;(a&nbsp;-&gt;&nbsp;IO&nbsp;b)&nbsp;-&gt;&nbsp;(a&nbsp;-&gt;&nbsp;IO&nbsp;c)&nbsp;-&gt;&nbsp;IO&nbsp;c<br>
+bracket&nbsp;before&nbsp;after&nbsp;m&nbsp;=&nbsp;do<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;&nbsp;&lt;-&nbsp;before<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rs&nbsp;&lt;-&nbsp;try&nbsp;(m&nbsp;x)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;after&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;rs&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Right&nbsp;r&nbsp;-&gt;&nbsp;return&nbsp;r<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Left&nbsp;&nbsp;e&nbsp;-&gt;&nbsp;ioError&nbsp;e<br>
+<br>
+--&nbsp;variant&nbsp;of&nbsp;the&nbsp;above&nbsp;where&nbsp;middle&nbsp;computation&nbsp;doesn't&nbsp;want&nbsp;x<br>
+bracket_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;a&nbsp;-&gt;&nbsp;(a&nbsp;-&gt;&nbsp;IO&nbsp;b)&nbsp;-&gt;&nbsp;IO&nbsp;c&nbsp;-&gt;&nbsp;IO&nbsp;c<br>
+bracket_&nbsp;before&nbsp;after&nbsp;m&nbsp;=&nbsp;do<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;&nbsp;&lt;-&nbsp;before<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;rs&nbsp;&lt;-&nbsp;try&nbsp;m<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;after&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;case&nbsp;rs&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Right&nbsp;r&nbsp;-&gt;&nbsp;return&nbsp;r<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Left&nbsp;&nbsp;e&nbsp;-&gt;&nbsp;ioError&nbsp;e<br>
+<p>
+</tt><a name="sect11.2"></a>
+<h3>11.2<tt>&nbsp;&nbsp;</tt>Files and Handles</h3>
+Haskell  interfaces to the external world through an abstract <I>file
+system</I>.  This file system is a collection of named <I>file
+system objects</I>, which may be organised
+in <I>directories</I> (see <tt>Directory</tt>).  
+In some implementations, directories may themselves be file system
+objects and could be entries in other directories.  For simplicity,
+any non-directory file system object is termed a <I>file</I>,
+although it could in fact be a communication channel, or any other
+object recognised by the operating system.  <I>Physical
+files</I> are 
+persistent, ordered files, and normally reside on disk.<p>
+File and directory names are values of type <tt>String</tt>, whose precise
+meaning is operating system dependent.  Files can be opened, yielding
+a handle which can then be used to operate on the contents of that
+file.<a name="Handles"></a><p>
+<p>
+Haskell  defines operations to read and write characters from and to files,
+represented by values of type <tt>Handle</tt>.  Each value of this type is a 
+<I>handle</I>: a record used by the Haskell  run-time system to <I>manage</I> I/O
+with file system objects.  A handle has at least the following properties:<p>
+<UL><LI>
+ whether it manages input or output or both;
+<LI>
+ whether it is <I>open</I>, <I>closed</I> or <I>semi-closed</I>;
+<LI>
+ whether the object is seekable;
+<LI>
+ whether buffering is disabled, or enabled on a line or block basis;
+<LI>
+ a buffer (whose length may be zero).
+</UL><p>
+Most handles will also have a current I/O position indicating where the next
+input or output operation will occur.  A handle is <I>readable</I> if it
+manages only input or both input and output; likewise, it is <I>writable</I> if
+it manages only output or both input and output.  A handle is <I>open</I> when
+first allocated.  Once it is closed it can no longer be used for either input
+or output, though an implementation cannot re-use its storage while references
+remain to it.  Handles are in the <tt>Show</tt> and <tt>Eq</tt> classes.  The string
+produced by showing a handle is system dependent; it should include 
+enough information to identify the handle for debugging.  A handle is
+equal according to <tt>==</tt> only to itself; no attempt
+is made to compare the internal state of different handles for equality.<a name="SemiClosed"></a><p>
+<a name="sect11.2.1"></a>
+<h4>11.2.1<tt>&nbsp;&nbsp;</tt>Semi-Closed Handles</h4>
+<p>
+The operation <tt>hGetContents</tt> puts a handle <I>hdl</I> into an intermediate
+state, <I>semi-closed</I>.  In this state, <I>hdl</I> is effectively closed,
+but items are read from <I>hdl</I> on demand and accumulated in a special
+stream returned by <tt>hGetContents</tt> <I>hdl</I>.
+ 
+Any operation except for <tt>hClose</tt> that fails because a handle is
+closed, also fails if a handle is semi-closed.  A semi-closed handle
+becomes closed:
+<UL><LI>
+if  <tt>hClose</tt> is applied to it;
+<LI>
+if an I/O error occurs when reading an item from the
+file item from the stream;
+<LI>
+or once the entire contents of the file has been read.
+</UL><p>
+Once a semi-closed handle becomes closed, the contents of the
+associated stream becomes fixed, and is the list of those items which
+were successfully read from that handle. Any I/O errors encountered while
+a handle is semi-closed are simply discarded.
+ <a name="StandardHandles"></a><p>
+<a name="sect11.2.2"></a>
+<h4>11.2.2<tt>&nbsp;&nbsp;</tt>Standard Handles</h4>
+<p>
+Three handles are allocated during program initialisation.  The first
+two (<tt>stdin</tt> and <tt>stdout</tt>) manage input or output from the Haskell 
+program's standard input or output channel respectively.  The third
+(<tt>stderr</tt>) manages output to the standard error channel.  These
+handles are initially open.<a name="OpeningClosing"></a><p>
+<a name="sect11.3"></a>
+<h3>11.3<tt>&nbsp;&nbsp;</tt>Opening and Closing Files</h3>
+<a name="Opening"></a><p>
+<a name="sect11.3.1"></a>
+<h4>11.3.1<tt>&nbsp;&nbsp;</tt>Opening Files</h4>
+<p>
+Computation <tt>openFile</tt> <I>file</I> <I>mode</I> allocates and
+returns a new, open handle to manage the file <I>file</I>.
+It manages
+input if <I>mode</I> is <tt>ReadMode</tt>,
+output if <I>mode</I> is <tt>WriteMode</tt> or
+<tt>AppendMode</tt>, and both input and output if mode is
+<tt>ReadWriteMode</tt>.<p>
+If the file does not exist and it is opened for output, it should be created
+as a new file.  If <I>mode</I> is <tt>WriteMode</tt> and the file already exists, then it
+should be truncated to zero length.  Some operating systems delete empty
+files, so there is no guarantee that the file will exist following an
+<tt>openFile</tt> with <I>mode</I> <tt>WriteMode</tt> unless it is subsequently written to
+successfully.  The handle is positioned at the end of the file if <I>mode</I> is
+<tt>AppendMode</tt>, and otherwise at the beginning (in which case its internal I/O
+position is 0).  The initial buffer mode is implementation-dependent.<p>
+If <tt>openFile</tt> fails on a file opened for output, the file may still
+have been created if it did not already exist.<p>
+Implementations should enforce as far as possible, locally to the
+Haskell  process, multiple-reader single-writer locking on files.
+Thus there may either be many handles on the same file which manage
+input, or just one handle on the file which manages output.  If any
+open or semi-closed handle is managing a file for output, no new
+handle can be allocated for that file.  If any open or semi-closed
+handle is managing a file for input, new handles can only be allocated
+if they do not manage output.  Whether two files are the same is
+implementation-dependent, but they should normally be the same if they
+have the same absolute path name and neither has been renamed, for
+example.<p>
+<I>Error reporting</I>: the <tt>openFile</tt> computation may fail with
+<tt>isAlreadyInUseError</tt> if the file is already open and cannot be
+reopened;
+<tt>isDoesNotExistError</tt> if the file does not exist; or
+<tt>isPermissionError</tt> if the user does not have
+permission to open the file.<a name="Closing"></a><p>
+<a name="sect11.3.2"></a>
+<h4>11.3.2<tt>&nbsp;&nbsp;</tt>Closing Files</h4>
+<p>
+Computation <tt>hClose</tt> <I>hdl</I> makes handle <I>hdl</I> closed.  Before the
+computation finishes, if <I>hdl</I> is writable its buffer is flushed as
+for <tt>hFlush</tt>.
+If the operation fails for any reason, any further operations on the 
+handle will still fail as if <I>hdl</I> had been successfully closed.<a name="FileSize"></a><p>
+<a name="sect11.4"></a>
+<h3>11.4<tt>&nbsp;&nbsp;</tt>Determining the Size of a File</h3>
+<p>
+For a handle <I>hdl</I> which is attached to a physical file, <tt>hFileSize
+</tt><I>hdl</I> returns the size of that file in 8-bit bytes (<I>&gt;=</I> 0).<a name="EOF"></a><p>
+<a name="sect11.4.1"></a>
+<h4>11.4.1<tt>&nbsp;&nbsp;</tt>Detecting the End of Input</h4>
+<p>
+For a readable handle <I>hdl</I>, computation <tt>hIsEOF</tt> <I>hdl</I> returns <tt>True
+</tt>if no further input can be taken from <I>hdl</I>; for a handle attached to a 
+physical file this means that the current I/O position is equal to the length of the file.
+Otherwise, it returns <tt>False</tt>.  The computation <tt>isEOF</tt> is identical,
+except that it works only on <tt>stdin</tt>.<a name="Buffering"></a><p>
+<a name="sect11.4.2"></a>
+<h4>11.4.2<tt>&nbsp;&nbsp;</tt>Buffering Operations</h4>
+<p>
+Three kinds of buffering are supported: line-buffering, 
+block-buffering or no-buffering.  These modes have the following effects.
+For output, items are written out from the internal buffer 
+according to the buffer mode:
+<UL><LI>
+<B>line-buffering:
+</B>the entire buffer is written out whenever a newline is output, the
+buffer overflows, a flush is issued, or the handle is closed.
+<LI>
+<B>block-buffering:
+</B>the entire buffer is written out whenever it overflows, a flush is
+issued, or the handle is closed.
+<LI>
+<B>no-buffering:
+</B>output is written immediately, and never stored in the buffer.
+</UL>
+The buffer is emptied as soon as it has been written out.<p>
+Similarly, input occurs according to the buffer mode for handle <I>hdl</I>.
+<UL><LI>
+<B>line-buffering:
+</B>when the buffer for <I>hdl</I> is not empty, the next item is obtained from
+the buffer; otherwise, when the buffer is empty, characters are read into
+the buffer until the next newline character is encountered or the buffer is full.  No
+characters are available until the newline character is available or the buffer is full.
+<LI>
+<B>block-buffering:</B> 
+when the buffer for <I>hdl</I> becomes empty, the
+next block of data is read into the buffer.
+<LI>
+<B>no-buffering:</B> 
+the next input item is read and returned.
+</UL><p>
+For most implementations, physical files will normally be block-buffered 
+and terminals will normally be line-buffered.<p>
+Computation <tt>hSetBuffering</tt> <I>hdl</I> <I>mode</I> sets the
+mode of buffering for handle <I>hdl</I> on subsequent reads and writes.
+<UL><LI>
+If <I>mode</I> is <tt>LineBuffering</tt>, line-buffering is
+enabled if possible.
+<LI>
+If <I>mode</I> is <tt>BlockBuffering</tt> <I>size</I>, then block-buffering
+is enabled if possible.  The size of the buffer is <I>n</I> items
+if <I>size</I> is <tt>Just&nbsp;</tt><I>n</I> and is otherwise implementation-dependent.
+<LI>
+If <I>mode</I> is <tt>NoBuffering</tt>, then buffering is disabled if possible.
+</UL><p>
+If the buffer mode is changed from <tt>BlockBuffering</tt> or
+<tt>LineBuffering</tt> to <tt>NoBuffering</tt>, then 
+<UL><LI>
+if <I>hdl</I> is writable, the buffer is flushed as for 
+<tt>hFlush</tt>;
+<LI>
+if <I>hdl</I> is not writable, the contents of the buffer is discarded.
+</UL><p>
+<I>Error reporting</I>: the <tt>hSetBuffering</tt> computation may fail with
+<tt>isPermissionError</tt> if
+the handle has already been used for reading or writing
+and the implementation does not allow the buffering mode to
+be changed.<p>
+Computation <tt>hGetBuffering</tt> <I>hdl</I> returns the current buffering mode
+for <I>hdl</I>.<p>
+The default buffering mode when a handle is opened is
+implementation-dependent and may depend on the file system object which is
+attached to that handle.<a name="Flushing"></a><p>
+<a name="sect11.4.3"></a>
+<h4>11.4.3<tt>&nbsp;&nbsp;</tt>Flushing Buffers</h4>
+<p>
+Computation <tt>hFlush</tt> <I>hdl</I> causes any items buffered for output in
+handle <I>hdl</I> to be sent immediately to the operating system.<p>
+<I>Error reporting</I>: the <tt>hFlush</tt> computation may fail with:
+<tt>isFullError</tt> if the device is full; <tt>isPermissionError</tt> if a
+system resource limit would be exceeded.  It is unspecified whether the
+characters in the buffer are discarded or retained under these circumstances.<a name="Seeking"></a><p>
+<a name="sect11.5"></a>
+<h3>11.5<tt>&nbsp;&nbsp;</tt>Repositioning Handles</h3>
+<p>
+<a name="sect11.5.1"></a>
+<h4>11.5.1<tt>&nbsp;&nbsp;</tt>Revisiting an I/O Position</h4><p>
+Computation <tt>hGetPosn</tt> <I>hdl</I> returns the current I/O position of <I>hdl</I> as a
+value of the abstract type <tt>HandlePosn</tt>.  If a call to <tt>hGetPosn</tt><I> h</I> returns a position <I>p</I>,
+then computation <tt>hSetPosn</tt> <I>p</I> sets the
+position of <I>h</I> to the position it held at the time of the call to <tt>hGetPosn</tt>.<p>
+<I>Error reporting</I>: the <tt>hSetPosn</tt> computation may fail with:
+<tt>isPermissionError</tt> if a system resource limit would be exceeded.<p>
+<a name="sect11.5.2"></a>
+<h4>11.5.2<tt>&nbsp;&nbsp;</tt>Seeking to a new Position</h4><p>
+Computation <tt>hSeek</tt> <I>hdl</I> <I>mode</I> <I>i</I> sets the position of handle
+<I>hdl</I> depending on <I>mode</I>.  If <I>mode</I> is:
+<UL><LI>
+<tt>AbsoluteSeek</tt>: the position of <I>hdl</I> is set to <I>i</I>.
+<LI>
+<tt>RelativeSeek</tt>: the position of <I>hdl</I> is set to offset <I>i</I> from
+the current position.
+<LI>
+<tt>SeekFromEnd</tt>: the position of <I>hdl</I> is set to offset <I>i</I> from
+the end of the file.
+</UL>
+The offset is given in terms of 8-bit bytes.<p>
+If <I>hdl</I> is block- or line-buffered, then seeking to a position which is not
+in the current buffer will first cause any items in the output buffer to be
+written to the device, and then cause the input buffer to be discarded.  Some
+handles may not be seekable (see <tt>hIsSeekable</tt>), or only support a subset of
+the possible positioning operations (for instance, it may only be possible to
+seek to the end of a tape, or to a positive offset from the beginning or
+current position).  It is not possible to set a negative I/O position, or for
+a physical file, an I/O position beyond the current end-of-file.<p>
+<I>Error reporting</I>:
+the <tt>hSeek</tt> computation may fail with:
+<tt>isPermissionError</tt> if a system resource limit would be exceeded.<a name="Query"></a><p>
+<a name="sect11.6"></a>
+<h3>11.6<tt>&nbsp;&nbsp;</tt>Handle Properties</h3>
+<p>
+The functions 
+<tt>hIsOpen</tt>, 
+<tt>hIsClosed</tt>,
+<tt>hIsReadable</tt>,
+<tt>hIsWritable</tt> and
+<tt>hIsSeekable
+</tt>return information about the properties of a handle.
+Each of these returns <tt>True</tt> if the handle has the specified property, and
+<tt>False</tt> otherwise.<p>
+<a name="sect11.7"></a>
+<h3>11.7<tt>&nbsp;&nbsp;</tt>Text Input and Output</h3><p>
+Here we define a standard set of input operations for reading
+characters and strings from text files, using handles.  Many of these
+functions are generalizations of Prelude functions.  I/O in the
+Prelude generally uses <tt>stdin</tt> and <tt>stdout</tt>; here, handles are explicitly
+specified by the I/O operation.<a name="hReady"></a><p>
+<a name="sect11.7.1"></a>
+<h4>11.7.1<tt>&nbsp;&nbsp;</tt>Checking for Input</h4>
+<a name="hWaitForInput"></a>
+<p>
+Computation <tt>hWaitForInput</tt> <I>hdl</I> <I>t</I> 
+waits until input is available on handle <I>hdl</I>.
+It returns <tt>True</tt> as soon as input is available on <I>hdl</I>, or <tt>False</tt> if no input is available
+within <I>t</I> milliseconds.<p>
+Computation <tt>hReady</tt> <I>hdl</I> indicates whether at least one item is
+available for input from handle <I>hdl</I>.<p>
+Computation <tt>hGetChar</tt> <I>hdl</I> reads a character from
+the file or channel managed by <I>hdl</I>.<p>
+Computation <tt>hGetLine</tt> <I>hdl</I> reads a line from
+the file or channel managed by <I>hdl</I>, similar to <tt>getLine</tt> in the
+Prelude. <p>
+<I>Error reporting</I>:
+the <tt>hWaitForInput</tt>, <tt>hReady</tt> and <tt>hGetChar</tt> computations may fail with:
+<tt>isEOFError</tt> if the end of file has been reached.<a name="hLookahead"></a><p>
+<a name="sect11.7.2"></a>
+<h4>11.7.2<tt>&nbsp;&nbsp;</tt>Reading Ahead</h4>
+<p>
+Computation <tt>hLookAhead</tt> <I>hdl</I> returns the next character from handle
+<I>hdl</I> without removing it from the input buffer, blocking until a
+character is available.<p>
+<I>Error reporting</I>:
+the <tt>hLookahead</tt> computation may fail with:
+<tt>isEOFError</tt> if the end of file has been reached.<a name="hGetContents"></a><p>
+<p>
+Computation <tt>hGetContents</tt> <I>hdl</I> returns the list of
+characters corresponding to the unread portion of the channel or file managed
+by <I>hdl</I>, which is made semi-closed.<p>
+<I>Error reporting</I>:
+the <tt>hGetContents</tt> computation may fail with:
+<tt>isEOFError</tt> if the end of file has been reached.<p>
+Computation <tt>hPutChar</tt> <I>hdl</I> <I>c</I> writes the character <I>c</I> to the file
+or channel managed by <I>hdl</I>.  Characters may be buffered if buffering
+is enabled for <I>hdl</I>.<p>
+Computation <tt>hPutStr</tt> <I>hdl</I> <I>s</I> writes the string
+<I>s</I> to the file or channel managed by <I>hdl</I>.<p>
+Computation <tt>hPrint</tt> <I>hdl</I> <I>t</I> writes the string representation of <I>t
+</I>given by the <tt>shows</tt> function to the file or channel managed by <I>hdl</I> and appends a newline.<p>
+<I>Error reporting</I>:
+the <tt>hPutChar</tt>, <tt>hPutStr</tt> and <tt>hPrint</tt> computations may fail with:
+<tt>isFull</tt>-<tt>Error</tt> if the device is full;
+or <tt>isPermissionError</tt> if another system resource limit would be exceeded.<p>
+<a name="sect11.8"></a>
+<h3>11.8<tt>&nbsp;&nbsp;</tt>Examples</h3><p>
+Here are some simple examples to illustrate Haskell  I/O.<p>
+<a name="sect11.8.1"></a>
+<h4>11.8.1<tt>&nbsp;&nbsp;</tt>Summing Two Numbers</h4><p>
+This program reads and sums two <tt>Integer</tt>s.
+<tt><br>
+
+<br>
+import&nbsp;IO<br>
+<br>
+main&nbsp;=&nbsp;do<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hSetBuffering&nbsp;stdout&nbsp;NoBuffering&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;putStr&nbsp;&nbsp;&nbsp;"Enter&nbsp;an&nbsp;integer:&nbsp;"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x1&nbsp;&lt;-&nbsp;readNum&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;putStr&nbsp;&nbsp;&nbsp;"Enter&nbsp;another&nbsp;integer:&nbsp;"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x2&nbsp;&lt;-&nbsp;readNum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;putStr&nbsp;&nbsp;("Their&nbsp;sum&nbsp;is&nbsp;"&nbsp;++&nbsp;show&nbsp;(x1+x2)&nbsp;++&nbsp;"\n")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;readNum&nbsp;::&nbsp;IO&nbsp;Integer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;readNum&nbsp;=&nbsp;&nbsp;do&nbsp;{&nbsp;line&nbsp;&lt;-&nbsp;getLine;&nbsp;readIO&nbsp;line&nbsp;}<br>
+
+<br>
+<p>
+</tt><a name="sect11.8.2"></a>
+<h4>11.8.2<tt>&nbsp;&nbsp;</tt>Copying Files</h4><p>
+A simple program to create a copy of a file, with all lower-case
+characters translated to upper-case.  This program will not allow a
+file to be copied to itself.  This version uses character-level I/O.
+Note that exactly two arguments must be supplied to the program.
+<tt><br>
+
+<br>
+import&nbsp;IO<br>
+import&nbsp;System<br>
+<br>
+main&nbsp;=&nbsp;do&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[f1,f2]&nbsp;&lt;-&nbsp;getArgs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h1&nbsp;&lt;-&nbsp;openFile&nbsp;f1&nbsp;ReadMode&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;h2&nbsp;&lt;-&nbsp;openFile&nbsp;f2&nbsp;WriteMode&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;copyFile&nbsp;h1&nbsp;h2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hClose&nbsp;h1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hClose&nbsp;h2<br>
+<br>
+copyFile&nbsp;h1&nbsp;h2&nbsp;=&nbsp;do<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eof&nbsp;&lt;-&nbsp;hIsEOF&nbsp;h1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;eof&nbsp;then&nbsp;return&nbsp;()&nbsp;else<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;do<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;c&nbsp;&lt;-&nbsp;hGetChar&nbsp;h1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;hPutChar&nbsp;h2&nbsp;(toUpper&nbsp;c)&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;copyFile&nbsp;h1&nbsp;h2<br>
+
+<br>
+<p>
+</tt>An equivalent but much shorter version, using string I/O is:
+<tt><br>
+
+<br>
+import&nbsp;System<br>
+<br>
+main&nbsp;=&nbsp;do<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[f1,f2]&nbsp;&lt;-&nbsp;getArgs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;s&nbsp;&lt;-&nbsp;readFile&nbsp;f1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;writeFile&nbsp;f2&nbsp;(map&nbsp;toUpper&nbsp;s)<br>
+
+<br>
+<p>
+<hr><i>The Haskell 98 Library Report</i><br><a href="index.html">top</a> | <a href="monad.html">back</a> | <a href="directory.html">next</a> | <a href="libindex.html">contents</a> <br><font size=2>1 February, 1999</font>
+</tt>

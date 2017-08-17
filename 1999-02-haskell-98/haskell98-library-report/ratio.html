@@ -1,0 +1,158 @@
+
+<title>The Haskell 98 Library Report: Rational Numbers</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Library Report</i><br> <a href="index.html">top</a> | <a href="introduction.html">back</a> | <a href="complex.html">next</a> | <a href="libindex.html">contents</a> <br><hr>
+<a name="sect2"></a>
+<h2>2<tt>&nbsp;&nbsp;</tt>Rational Numbers</h2><p>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module	Ratio&nbsp;(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Ratio,&nbsp;Rational,&nbsp;(%),&nbsp;numerator,&nbsp;denominator,&nbsp;approxRational&nbsp;)&nbsp;where<br>
+<br>
+infixl&nbsp;7&nbsp;&nbsp;%<br>
+data&nbsp;&nbsp;(Integral&nbsp;a)	=&gt;&nbsp;Ratio&nbsp;a&nbsp;=&nbsp;...<br>
+type&nbsp;&nbsp;Rational		=&nbsp;&nbsp;Ratio&nbsp;Integer<br>
+(%)			::&nbsp;(Integral&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Ratio&nbsp;a<br>
+numerator,&nbsp;denominator	::&nbsp;(Integral&nbsp;a)&nbsp;=&gt;&nbsp;Ratio&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+approxRational		::&nbsp;(RealFrac&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Rational<br>
+instance&nbsp;&nbsp;(Integral&nbsp;a)&nbsp;&nbsp;=&gt;&nbsp;Eq&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(Integral&nbsp;a)	=&gt;&nbsp;Ord&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(Integral&nbsp;a)	=&gt;&nbsp;Num&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(Integral&nbsp;a)	=&gt;&nbsp;Real&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(Integral&nbsp;a)	=&gt;&nbsp;Fractional&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(Integral&nbsp;a)	=&gt;&nbsp;RealFrac&nbsp;&nbsp;&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(Integral&nbsp;a)	=&gt;&nbsp;Enum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(Read&nbsp;a,Integral&nbsp;a)&nbsp;=&gt;&nbsp;Read&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where&nbsp;...<br>
+instance&nbsp;&nbsp;(Integral&nbsp;a)&nbsp;&nbsp;=&gt;&nbsp;Show&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where&nbsp;...<br>
+<br>
+
+</tt></td></tr></table>
+<p>
+For each <tt>Integral</tt> type t, there is
+a type <tt>Ratio</tt> t of rational pairs with components of
+type t.  The type name <tt>Rational</tt> is a synonym for
+<tt>Ratio&nbsp;Integer</tt>.  <p>
+<tt>Ratio</tt> is an instance of classes <tt>Eq</tt>, <tt>Ord</tt>, <tt>Num</tt>, <tt>Real</tt>, 
+<tt>Fractional</tt>, <tt>RealFrac</tt>, <tt>Enum</tt>, <tt>Read</tt>, and <tt>Show</tt>.  In each case,
+the instance for <tt>Ratio</tt> t simply "lifts" the corresponding operations
+over t.  If t is a bounded type, the results may be unpredictable;
+for example <tt>Ratio&nbsp;Int</tt> may give rise to integer overflow even for
+rational numbers of small absolute size.<p>
+The operator <tt>(%)</tt> forms the ratio of two
+integral numbers, reducing the fraction to terms with no common factor
+and such that the denominator is positive.  The functions
+<tt>numerator
+</tt>and <tt>denominator</tt> extract the components of a
+ratio; these are in reduced form with a positive denominator.
+<tt>Ratio</tt> is an abstract type.  For example, <tt>12&nbsp;%&nbsp;8</tt> is reduced to 3/2
+and <tt>12&nbsp;%&nbsp;(-8)</tt> is reduced to (-3)/2.<p>
+The <tt>approxRational</tt> function, applied to two real fractional numbers
+<tt>x</tt> and <tt>epsilon</tt>, returns the simplest rational number within the open
+interval <I>(</I><tt>x</tt><I>-</I><tt>epsilon</tt><I>, </I><tt>x</tt><I>+</I><tt>epsilon</tt><I>)</I>.
+A rational number <I>n/d</I> in reduced form is said to
+be simpler than another <I>n'/d'</I> if <I>|n| &lt;=|n'|</I> and <I>d &lt;=d'</I>.
+Note that it can be proved that any real interval contains a unique
+simplest rational.<a name="Ratio"></a><p>
+
+<a name="sect2.1"></a>
+<h3>2.1<tt>&nbsp;&nbsp;</tt>Library <tt>Ratio</tt></h3>
+
+<tt><br>
+--&nbsp;Standard&nbsp;functions&nbsp;on&nbsp;rational&nbsp;numbers<br>
+<br>
+module&nbsp;&nbsp;Ratio&nbsp;(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Ratio,&nbsp;Rational,&nbsp;(%),&nbsp;numerator,&nbsp;denominator,&nbsp;approxRational&nbsp;)&nbsp;where<br>
+<br>
+infixl&nbsp;7&nbsp;&nbsp;%<br>
+<br>
+prec&nbsp;=&nbsp;7&nbsp;::&nbsp;Int<br>
+<br>
+data&nbsp;&nbsp;(Integral&nbsp;a)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&gt;&nbsp;Ratio&nbsp;a&nbsp;=&nbsp;!a&nbsp;:%&nbsp;!a&nbsp;&nbsp;deriving&nbsp;(Eq)<br>
+type&nbsp;&nbsp;Rational&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;Ratio&nbsp;Integer<br>
+<br>
+(%)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Integral&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Ratio&nbsp;a<br>
+numerator,&nbsp;denominator&nbsp;&nbsp;::&nbsp;(Integral&nbsp;a)&nbsp;=&gt;&nbsp;Ratio&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+approxRational&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(RealFrac&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Rational<br>
+<br>
+<br>
+--&nbsp;"reduce"&nbsp;is&nbsp;a&nbsp;subsidiary&nbsp;function&nbsp;used&nbsp;only&nbsp;in&nbsp;this&nbsp;module.<br>
+--&nbsp;It&nbsp;normalises&nbsp;a&nbsp;ratio&nbsp;by&nbsp;dividing&nbsp;both&nbsp;numerator<br>
+--&nbsp;and&nbsp;denominator&nbsp;by&nbsp;their&nbsp;greatest&nbsp;common&nbsp;divisor.<br>
+--<br>
+--&nbsp;E.g.,&nbsp;12&nbsp;`reduce`&nbsp;8&nbsp;&nbsp;&nbsp;&nbsp;==&nbsp;&nbsp;3&nbsp;:%&nbsp;&nbsp;&nbsp;2<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;12&nbsp;`reduce`&nbsp;(-8)&nbsp;==&nbsp;&nbsp;3&nbsp;:%&nbsp;(-2)<br>
+<br>
+reduce&nbsp;_&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"Ratio.%&nbsp;:&nbsp;zero&nbsp;denominator"<br>
+reduce&nbsp;x&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;(x&nbsp;`quot`&nbsp;d)&nbsp;:%&nbsp;(y&nbsp;`quot`&nbsp;d)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;d&nbsp;=&nbsp;gcd&nbsp;x&nbsp;y<br>
+<br>
+x&nbsp;%&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;reduce&nbsp;(x&nbsp;*&nbsp;signum&nbsp;y)&nbsp;(abs&nbsp;y)<br>
+<br>
+numerator&nbsp;(x&nbsp;:%&nbsp;_)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x<br>
+<br>
+denominator&nbsp;(_&nbsp;:%&nbsp;y)&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;y<br>
+<br>
+<br>
+instance&nbsp;&nbsp;(Integral&nbsp;a)&nbsp;&nbsp;=&gt;&nbsp;Ord&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(x:%y)&nbsp;&lt;=&nbsp;(x':%y')&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;*&nbsp;y'&nbsp;&lt;=&nbsp;x'&nbsp;*&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(x:%y)&nbsp;&lt;&nbsp;&nbsp;(x':%y')&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;*&nbsp;y'&nbsp;&lt;&nbsp;&nbsp;x'&nbsp;*&nbsp;y<br>
+<br>
+instance&nbsp;&nbsp;(Integral&nbsp;a)&nbsp;&nbsp;=&gt;&nbsp;Num&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(x:%y)&nbsp;+&nbsp;(x':%y')&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;reduce&nbsp;(x*y'&nbsp;+&nbsp;x'*y)&nbsp;(y*y')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(x:%y)&nbsp;*&nbsp;(x':%y')&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;reduce&nbsp;(x&nbsp;*&nbsp;x')&nbsp;(y&nbsp;*&nbsp;y')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;negate&nbsp;(x:%y)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;(-x)&nbsp;:%&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;abs&nbsp;(x:%y)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;abs&nbsp;x&nbsp;:%&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;signum&nbsp;(x:%y)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;signum&nbsp;x&nbsp;:%&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromInteger&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;fromInteger&nbsp;x&nbsp;:%&nbsp;1<br>
+<br>
+instance&nbsp;&nbsp;(Integral&nbsp;a)&nbsp;&nbsp;=&gt;&nbsp;Real&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;toRational&nbsp;(x:%y)&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;toInteger&nbsp;x&nbsp;:%&nbsp;toInteger&nbsp;y<br>
+<br>
+instance&nbsp;&nbsp;(Integral&nbsp;a)&nbsp;&nbsp;=&gt;&nbsp;Fractional&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(x:%y)&nbsp;/&nbsp;(x':%y')&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;(x*y')&nbsp;%&nbsp;(y*x')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;recip&nbsp;(x:%y)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;if&nbsp;x&nbsp;&lt;&nbsp;0&nbsp;then&nbsp;(-y)&nbsp;:%&nbsp;(-x)&nbsp;else&nbsp;y&nbsp;:%&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromRational&nbsp;(x:%y)&nbsp;=&nbsp;&nbsp;fromInteger&nbsp;x&nbsp;:%&nbsp;fromInteger&nbsp;y<br>
+<br>
+instance&nbsp;&nbsp;(Integral&nbsp;a)&nbsp;&nbsp;=&gt;&nbsp;RealFrac&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;properFraction&nbsp;(x:%y)&nbsp;=&nbsp;(fromIntegral&nbsp;q,&nbsp;r:%y)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;(q,r)&nbsp;=&nbsp;quotRem&nbsp;x&nbsp;y<br>
+<br>
+instance&nbsp;&nbsp;(Integral&nbsp;a)&nbsp;&nbsp;=&gt;&nbsp;Enum&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;toEnum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;fromIntegral<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromEnum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;fromInteger&nbsp;.&nbsp;truncate	--&nbsp;May&nbsp;overflow<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFrom&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;numericEnumFrom		--&nbsp;These&nbsp;numericEnumXXX&nbsp;functions<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromThen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;numericEnumFromThen	--&nbsp;are&nbsp;as&nbsp;defined&nbsp;in&nbsp;Prelude.hs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromTo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;numericEnumFromTo	--&nbsp;but&nbsp;not&nbsp;exported&nbsp;from&nbsp;it!<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromThenTo&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;numericEnumFromThenTo<br>
+<br>
+instance&nbsp;&nbsp;(Read&nbsp;a,&nbsp;Integral&nbsp;a)&nbsp;&nbsp;=&gt;&nbsp;Read&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readsPrec&nbsp;p&nbsp;&nbsp;=&nbsp;&nbsp;readParen&nbsp;(p&nbsp;&gt;&nbsp;prec)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(\r&nbsp;-&gt;&nbsp;[(x%y,u)&nbsp;|&nbsp;(x,s)&nbsp;&nbsp;&nbsp;&lt;-&nbsp;reads&nbsp;r,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;("%",t)&nbsp;&lt;-&nbsp;lex&nbsp;s,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(y,u)&nbsp;&nbsp;&nbsp;&lt;-&nbsp;reads&nbsp;t&nbsp;])<br>
+<br>
+instance&nbsp;&nbsp;(Integral&nbsp;a)&nbsp;&nbsp;=&gt;&nbsp;Show&nbsp;(Ratio&nbsp;a)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;p&nbsp;(x:%y)&nbsp;&nbsp;=&nbsp;&nbsp;showParen&nbsp;(p&nbsp;&gt;&nbsp;prec)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(shows&nbsp;x&nbsp;.&nbsp;showString&nbsp;"&nbsp;%&nbsp;"&nbsp;.&nbsp;shows&nbsp;y)<br>
+<br>
+<br>
+<br>
+approxRational&nbsp;x&nbsp;eps&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;simplest&nbsp;(x-eps)&nbsp;(x+eps)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;simplest&nbsp;x&nbsp;y&nbsp;|&nbsp;y&nbsp;&lt;&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;simplest&nbsp;y&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;x&nbsp;==&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;xr<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;x&nbsp;&gt;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;simplest'&nbsp;n&nbsp;d&nbsp;n'&nbsp;d'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;y&nbsp;&lt;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;-&nbsp;simplest'&nbsp;(-n')&nbsp;d'&nbsp;(-n)&nbsp;d<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;&nbsp;=&nbsp;&nbsp;0&nbsp;:%&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;xr@(n:%d)&nbsp;=&nbsp;toRational&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(n':%d')&nbsp;&nbsp;=&nbsp;toRational&nbsp;y<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;simplest'&nbsp;n&nbsp;d&nbsp;n'&nbsp;d'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;assumes&nbsp;0&nbsp;&lt;&nbsp;n%d&nbsp;&lt;&nbsp;n'%d'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;r&nbsp;==&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;q&nbsp;:%&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;q&nbsp;/=&nbsp;q'&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;(q+1)&nbsp;:%&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;&nbsp;=&nbsp;&nbsp;(q*n''+d'')&nbsp;:%&nbsp;n''<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;(q,r)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;quotRem&nbsp;n&nbsp;d<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(q',r')&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;quotRem&nbsp;n'&nbsp;d'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(n'':%d'')&nbsp;=&nbsp;&nbsp;simplest'&nbsp;d'&nbsp;r'&nbsp;d&nbsp;r<br>
+<p>
+<hr><i>The Haskell 98 Library Report</i><br><a href="index.html">top</a> | <a href="introduction.html">back</a> | <a href="complex.html">next</a> | <a href="libindex.html">contents</a> <br><font size=2>1 February, 1999</font>
+</tt>

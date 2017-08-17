@@ -1,0 +1,170 @@
+
+<title>The Haskell 98 Library Report: Directory functions</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Library Report</i><br> <a href="index.html">top</a> | <a href="io.html">back</a> | <a href="system.html">next</a> | <a href="libindex.html">contents</a> <br><hr>
+<p>
+<a name="sect12"></a>
+<h2>12<tt>&nbsp;&nbsp;</tt>Directory Functions</h2><p>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module&nbsp;Directory&nbsp;(&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Permissions,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readable,&nbsp;writable,&nbsp;executable,&nbsp;searchable,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;createDirectory,&nbsp;removeDirectory,&nbsp;removeFile,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;renameDirectory,&nbsp;renameFile,&nbsp;getDirectoryContents,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;getCurrentDirectory,&nbsp;setCurrentDirectory,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;doesFileExist,&nbsp;doesDirectoryExist,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;getPermissions,&nbsp;setPermissions,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;getModificationTime&nbsp;)&nbsp;where<br>
+<br>
+import&nbsp;Time&nbsp;(&nbsp;ClockTime&nbsp;)<br>
+<br>
+data&nbsp;Permissions&nbsp;=&nbsp;...&nbsp;	--&nbsp;Abstract<br>
+<br>
+instance&nbsp;Eq&nbsp;&nbsp;&nbsp;Permissions&nbsp;where&nbsp;...<br>
+instance&nbsp;Ord&nbsp;&nbsp;Permissions&nbsp;where&nbsp;...<br>
+instance&nbsp;Read&nbsp;Permissions&nbsp;where&nbsp;...<br>
+instance&nbsp;Show&nbsp;Permissions&nbsp;where&nbsp;...<br>
+<br>
+readable,&nbsp;writable,&nbsp;executable,&nbsp;searchable&nbsp;::&nbsp;Permissions&nbsp;-&gt;&nbsp;Bool<br>
+<br>
+createDirectory&nbsp;	::&nbsp;FilePath&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+removeDirectory&nbsp;	::&nbsp;FilePath&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+removeFile&nbsp;		::&nbsp;FilePath&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+renameDirectory&nbsp;	::&nbsp;FilePath&nbsp;-&gt;&nbsp;FilePath&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+renameFile&nbsp;		::&nbsp;FilePath&nbsp;-&gt;&nbsp;FilePath&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+<br>
+getDirectoryContents&nbsp;	::&nbsp;FilePath&nbsp;-&gt;&nbsp;IO&nbsp;[FilePath]<br>
+getCurrentDirectory&nbsp;	::&nbsp;IO&nbsp;FilePath<br>
+setCurrentDirectory&nbsp;	::&nbsp;FilePath&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+<br>
+doesFileExist		::&nbsp;FilePath&nbsp;-&gt;&nbsp;IO&nbsp;Bool<br>
+doesDirectoryExist	::&nbsp;FilePath&nbsp;-&gt;&nbsp;IO&nbsp;Bool<br>
+<br>
+getPermissions		::&nbsp;FilePath&nbsp;-&gt;&nbsp;IO&nbsp;Permissions<br>
+setPermissions		::&nbsp;FilePath&nbsp;-&gt;&nbsp;Permissions&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+<br>
+getModificationTime	::&nbsp;FilePath&nbsp;-&gt;&nbsp;IO&nbsp;ClockTime<br>
+<br>
+
+</tt></td></tr></table>
+<p>
+These functions operate on directories in the file system.  <p>
+Any <tt>Directory</tt> operation could raise an <tt>isIllegalOperationError</tt>, as
+described in Section <a href="io.html#IOError">11.1</a>; all other permissible errors are
+described below.  Note that, in particular, if an implementation does
+not support an operation it should raise an <tt>isIllegalOperationError</tt>.<p>
+A directory contains a series of entries, each of which is a named
+reference to a file system object (file, directory etc.).  Some
+entries may be hidden, inaccessible, or have some administrative
+function (for instance, "." or ".." under POSIX), but all such
+entries are considered to form part of the directory contents.
+Entries in sub-directories are not, however, considered to form part
+of the directory contents.  Although there may be
+file system objects other than files and directories, this library
+does not distinguish between physical files and other non-directory
+objects.  All such objects should therefore be treated as if they are files.<p>
+Each file system object is referenced by a <I>path</I>.  There is
+normally at least one absolute path to each file system object.  In
+some operating systems, it may also be possible to have paths which
+are relative to the current directory.<p>
+Computation <tt>createDirectory</tt> <I>dir</I> creates a new directory <I>dir</I> which is
+initially empty, or as near to empty as the operating system allows.<p>
+<I>Error reporting</I>:
+the <tt>createDirectory</tt> computation may fail with:
+<tt>isPermissionError</tt> if the user is not permitted to create the directory;
+<tt>isAlreadyExistsError</tt> if the directory already exists.<p>
+Computation <tt>removeDirectory</tt> <I>dir</I> removes an existing directory
+<I>dir</I>.  The
+implementation may specify additional constraints which must be
+satisfied before a directory can be removed (for instance, the directory has to
+be empty, or may not be in use by other processes).  It is not legal
+for an implementation to partially remove a directory unless the
+entire directory is removed. A conformant implementation need not
+support directory removal in all situations (for instance, removal of the root
+directory).<p>
+Computation <tt>removeFile</tt> <I>file</I> removes the directory entry for an existing
+file <I>file</I>, where <I>file</I> is not itself a directory. The implementation may specify additional
+constraints which must be satisfied before a file can be removed (for instance, the
+file may not be in use by other processes).<p>
+<I>Error reporting</I>:
+the <tt>removeDirectory</tt> and <tt>removeFile</tt> computations may fail with:
+<tt>isPermissionError</tt> if the user is not permitted to remove the file/directory;
+or <tt>isDoesNot</tt>-<tt>ExistError</tt> if the file/directory does not exist.<p>
+Computation <tt>renameDirectory</tt> <I>old</I> <I>new</I> changes the name of an existing
+directory from <I>old</I> to <I>new</I>.  If the <I>new</I> directory already exists, it is atomically
+replaced by the <I>old</I> directory.  If the <I>new</I> directory is neither
+the <I>old</I> directory nor an alias of the <I>old</I> directory, it is removed
+as if by <tt>removeDirectory</tt>.  A conformant implementation need not
+support renaming directories in all situations (for instance, renaming to an
+existing directory, or across different physical devices), but the
+constraints must be documented.<p>
+Computation <tt>renameFile</tt> <I>old</I> <I>new</I> changes the name of an existing file
+system object from <I>old</I> to <I>new</I>.
+If the <I>new</I> object already exists, it is atomically replaced by the <I>old
+</I>object.  Neither path may refer to an existing directory.  A conformant
+implementation need not support renaming files in all situations
+(for instance, renaming across different physical devices), but the constraints must be
+documented.<p>
+<I>Error reporting</I>:
+the <tt>renameDirectory</tt> and <tt>renameFile</tt> computations may fail with:
+<tt>isPermissionError</tt> if the user is not permitted to rename the file/directory,
+or if either argument to <tt>renameFile</tt> is a directory;
+or <tt>isDoesNotExistError</tt> if the file/directory does not exist.<p>
+Computation <tt>getDirectoryContents</tt> <I>dir</I> returns a list of <I>all</I> entries
+in <I>dir</I>.<p>
+If the operating system has a notion of current directories,
+<tt>getCurrentDirectory</tt> returns an absolute path to the
+current directory of the calling process.<p>
+<I>Error reporting</I>:
+the <tt>getDirectoryContents</tt> and <tt>getCurrentDirectory</tt> computations may fail with:
+<tt>isPermissionError</tt> if the user is not permitted to access the directory;
+or <tt>isDoesNotExistError</tt> if the directory does not exist.<p>
+If the operating system has a notion of current directories,
+<tt>setCurrentDirectory</tt> <I>dir</I> changes the current directory of the
+calling process to <I>dir</I>.<p>
+<I>Error reporting</I>:
+the <tt>setCurrentDirectory</tt> computation may fail with:
+<tt>isPermission</tt>-<tt>Error</tt> if the user is not permitted to change directory
+to that specified;
+or <tt>isDoesNotExist</tt>-<tt>Error</tt> if the directory does not exist.<p>
+The <tt>Permissions</tt> type is used to record whether certain operations are
+permissible on a file/directory.  <tt>getPermissions</tt> and
+<tt>setPermissions</tt> get and set these permissions, respectively.  
+Permissions apply both to files and directories.  For
+directories, the <tt>executable</tt> field will be <tt>False</tt>, and for files the
+<tt>searchable</tt> field will be <tt>False</tt>.  Note that directories may be
+searchable without being readable, if permission has been given to use
+them as part of a path, but not to examine the directory contents.<p>
+Note that to change
+some, but not all permissions, a construct on the following lines must
+be used.  
+<tt><br>
+
+<br>
+makeReadable&nbsp;f&nbsp;=&nbsp;do<br>
+		&nbsp;&nbsp;&nbsp;&nbsp;p&nbsp;&lt;-&nbsp;getPermissions&nbsp;f<br>
+		&nbsp;&nbsp;&nbsp;&nbsp;setPermissions&nbsp;f&nbsp;(p&nbsp;{readable&nbsp;=&nbsp;True})<br>
+
+<br>
+
+</tt>The operation <tt>doesDirectoryExist</tt> returns <tt>True</tt> if the argument file
+exists and is a directory, and <tt>False</tt> otherwise. The operation <tt>doesFileExist</tt> returns <tt>True
+</tt>if the argument file exists and is not a directory, and <tt>False</tt> otherwise.<p>
+The <tt>getModificationTime</tt> operation returns the
+clock time at which the file/directory was last modified.<p>
+<I>Error reporting</I>:
+the <tt>get(set)Permissions</tt>,
+<tt>doesFile(Directory)Exist</tt>,
+and <tt>getMod</tt>-<tt>ificationTime
+</tt>computations may fail with:
+<tt>isPermissionError</tt> if the user is not permitted to access
+the appropriate information;
+or <tt>isDoesNotExistError</tt> if the file/directory does not exist.
+The <tt>setPermissions
+</tt>computation may also fail with:
+<tt>isPermissionError</tt> if the user is not permitted to change
+the permission for the specified file or directory;
+or <tt>isDoesNotExistError</tt> if the file/directory does not exist.<p>
+<hr><i>The Haskell 98 Library Report</i><br><a href="index.html">top</a> | <a href="io.html">back</a> | <a href="system.html">next</a> | <a href="libindex.html">contents</a> <br><font size=2>1 February, 1999</font>
+<p>

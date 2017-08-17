@@ -1,0 +1,23 @@
+
+<title>The Haskell 98 Library Report: CPU Time</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Library Report</i><br> <a href="index.html">top</a> | <a href="locale.html">back</a> | <a href="random.html">next</a> | <a href="libindex.html">contents</a> <br><hr>
+<a name="cputime"></a><a name="sect16"></a>
+<h2>16<tt>&nbsp;&nbsp;</tt>CPU Time</h2>
+<p>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module&nbsp;CPUTime&nbsp;(&nbsp;getCPUTime&nbsp;)&nbsp;where<br>
+<br>
+getCPUTime&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;Integer<br>
+cpuTimePrecision&nbsp;&nbsp;::&nbsp;Integer<br>
+
+</tt></td></tr></table>
+<p>
+Computation <tt>getCPUTime</tt> returns the number of picoseconds of CPU time
+used by the current program.  The precision of this result is given by
+<tt>cpuTimePrecision</tt>.  This is the smallest measurable difference in CPU
+time that the implementation can record, and is given as an integral
+number of picoseconds.<p>
+<hr><i>The Haskell 98 Library Report</i><br><a href="index.html">top</a> | <a href="locale.html">back</a> | <a href="random.html">next</a> | <a href="libindex.html">contents</a> <br><font size=2>1 February, 1999</font>
+<p>

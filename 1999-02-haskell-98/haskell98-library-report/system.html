@@ -1,0 +1,71 @@
+
+<title>The Haskell 98 Library Report: System functions</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Library Report</i><br> <a href="index.html">top</a> | <a href="directory.html">back</a> | <a href="time.html">next</a> | <a href="libindex.html">contents</a> <br><hr>
+<p>
+<a name="sect13"></a>
+<h2>13<tt>&nbsp;&nbsp;</tt>System Functions</h2><p>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module&nbsp;System&nbsp;(&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ExitCode(ExitSuccess,ExitFailure),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;getArgs,&nbsp;getProgName,&nbsp;getEnv,&nbsp;system,&nbsp;exitWith,&nbsp;exitFailure<br>
+&nbsp;&nbsp;)&nbsp;where<br>
+<br>
+data&nbsp;ExitCode&nbsp;=&nbsp;ExitSuccess&nbsp;|&nbsp;ExitFailure&nbsp;Int&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Read,&nbsp;Show)<br>
+<br>
+getArgs&nbsp;		::&nbsp;IO&nbsp;[String]<br>
+getProgName&nbsp;		::&nbsp;IO&nbsp;String<br>
+getEnv&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;		::&nbsp;String&nbsp;-&gt;&nbsp;IO&nbsp;String<br>
+system&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;		::&nbsp;String&nbsp;-&gt;&nbsp;IO&nbsp;ExitCode<br>
+exitWith&nbsp;&nbsp;&nbsp;		::&nbsp;ExitCode&nbsp;-&gt;&nbsp;IO&nbsp;a<br>
+exitFailure		::&nbsp;IO&nbsp;a<br>
+
+</tt></td></tr></table>
+<p>
+This library describes the interaction of the program with the
+operating system.  <p>
+Any <tt>System</tt> operation could raise an <tt>isIllegalOperationError</tt>, as
+described in Section <a href="io.html#IOError">11.1</a>; all other permissible errors are
+described below.  Note that, in particular, if an implementation does
+not support an operation it must raise an <tt>isIllegalOperationError</tt>.<p>
+The <tt>ExitCode</tt> type defines the exit codes that a program can return.
+<tt>ExitSuccess</tt> indicates successful termination; and <tt>ExitFailure
+</tt><I>code</I> indicates program failure with value <I>code</I>.  The exact
+interpretation of <I>code</I> is operating-system dependent.  In
+particular, some values of <I>code</I> may be prohibited (for instance, 0 on a
+POSIX-compliant system).<p>
+Computation <tt>getArgs</tt> returns a list of the program's command
+line arguments (not including the program name).
+Computation <tt>getProgName</tt> returns the name of the program
+as it was invoked.
+Computation <tt>getEnv</tt> <I>var</I> returns the value
+of the environment variable <I>var</I>.
+If variable <I>var</I> is undefined, the
+<tt>isDoesNotExistError</tt> exception is raised.
+ 
+Computation <tt>system</tt> <I>cmd</I> returns the exit code produced when the
+operating system processes the command <I>cmd</I>.<p>
+Computation <tt>exitWith</tt> <I>code</I> terminates the program, returning <I>code
+</I>to the program's caller.  Before the
+program terminates, any open or semi-closed handles are first closed.
+The caller may interpret the return code as it wishes, but the program
+should return <tt>ExitSuccess</tt> to mean normal completion, and
+<tt>ExitFailure&nbsp;</tt><I>n</I> to mean that the program encountered a problem from
+which it could not recover.  The value <tt>exitFailure</tt> is equal to
+<tt>exitWith&nbsp;(ExitFailure&nbsp;</tt><I>exitfail</I><tt>)</tt>, where <I>exitfail</I> is
+implementation-dependent.  <tt>exitWith</tt> bypasses the error handling in
+the I/O monad and cannot be intercepted by <tt>catch</tt>.<p>
+If a program terminates as a result of calling <tt>error</tt> or
+because its value is otherwise determined to be <I>_|_</I>, then it
+is treated identically to the computation <tt>exitFailure</tt>.  Otherwise, if any
+program <I>p</I> terminates without calling <tt>exitWith</tt> explicitly, it is treated
+identically to the computation
+<tt><br>
+
+(</tt><I>p</I><tt>&nbsp;&gt;&gt;&nbsp;exitWith&nbsp;ExitSuccess)&nbsp;`catch`&nbsp;\&nbsp;_&nbsp;-&gt;&nbsp;exitFailure
+<br>
+<p>
+<hr><i>The Haskell 98 Library Report</i><br><a href="index.html">top</a> | <a href="directory.html">back</a> | <a href="time.html">next</a> | <a href="libindex.html">contents</a> <br><font size=2>1 February, 1999</font>
+</tt>
