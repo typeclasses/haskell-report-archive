@@ -1,0 +1,53 @@
+%
+% $Header$
+%
+\section{Standard Prelude}
+\label{stdprelude}
+
+In this appendix the entire \Haskell{} prelude is given.  It is
+organised into a root module and eight sub-modules.
+
+\medskip
+\input{Prelude}\clearpage
+
+\subsection{Prelude {\tt PreludeBuiltin}}
+\label{preludebuiltin}
+\input{PreludeBuiltin}\clearpage
+
+\subsection{Prelude {\tt PreludeCore}}
+\label{preludecore}
+% The index entries for :, [], (), and tuples are here
+% it just so HAPPENS that they'll end up referring to the right page
+% HHAACCKK!!
+\index{[t]@\mbox{$\it \makebox{\tt [}t\makebox{\tt ]}$} (list type)}%
+\index{[]@{\ptt []} (nil)}%
+\index{(t1,...,tn)@\mbox{$\it \makebox{\tt (}t_1,\ldots ,t_n\makebox{\tt )}$} (tuple type)}
+\input{PreludeCore}\clearpage
+
+\subsection{Prelude {\tt PreludeRatio}}
+\label{preluderatio}
+\input{PreludeRatio}\clearpage
+
+\subsection{Prelude {\tt PreludeComplex}}
+\label{preludecomplex}
+\input{PreludeComplex}\clearpage
+
+\subsection{Prelude {\tt PreludeList}}
+\label{preludelist}
+\input{PreludeList}\clearpage
+
+\subsection{Prelude {\tt PreludeArray}}
+\label {preludearray}
+\input{PreludeArray}\clearpage
+
+\subsection{Prelude {\tt PreludeText}}
+\label{preludetext}
+\input{PreludeText}\clearpage
+
+\subsection{Prelude {\tt PreludeIO}}
+\label{preludeio}
+\input{PreludeIO}
+
+% Local Variables: 
+% mode: latex
+% End:

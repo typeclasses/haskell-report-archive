@@ -1,0 +1,6 @@
+This is makeindex, portable version 2.9 [13-Dec-1989].
+Scanning input file stdin.....done (1365 entries accepted, 0 rejected).
+Sorting entries..............done (15051 comparisons).
+Generating output file stdout.....done (841 lines written, 0 warnings).
+Output written in stdout.
+Transcript written in haskell.ilg.

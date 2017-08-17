@@ -1,0 +1,106 @@
+\noindent\bprogB
+\mbox{\tt --\ Complex\ Numbers}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt module\ PreludeComplex\ (\ Complex((:+))\ )\ \ where}
+\index{PreludeComplex@{\ptt PreludeComplex} (module)}%
+\eprogB\noindent\bprogB
+\mbox{\tt infix\ \ 6\ \ :+}
+\index{:+@{\ptt :+}}%
+\eprogB\noindent\bprogB
+\mbox{\tt data\ \ (RealFloat\ a)\ \ \ \ \ =>\ Complex\ a\ =\ a\ :+\ a\ \ deriving\ (Eq,Binary,Text)}
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ (RealFloat\ a)\ =>\ Num\ (Complex\ a)\ \ where}\\
+\mbox{\tt \ \ \ \ (x:+y)\ +\ (x':+y')\ \ \ =\ \ (x+x')\ :+\ (y+y')}\\
+\mbox{\tt \ \ \ \ (x:+y)\ -\ (x':+y')\ \ \ =\ \ (x-x')\ :+\ (y-y')}\\
+\mbox{\tt \ \ \ \ (x:+y)\ *\ (x':+y')\ \ \ =\ \ (x*x'-y*y')\ :+\ (x*y'+y*x')}\\
+\mbox{\tt \ \ \ \ negate\ (x:+y)\ \ \ \ \ \ \ =\ \ negate\ x\ :+\ negate\ y}\\
+\mbox{\tt \ \ \ \ abs\ z\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ magnitude\ z\ :+\ 0}\\
+\mbox{\tt \ \ \ \ signum\ 0\ \ \ \ \ \ \ \ \ \ \ \ =\ \ 0}\\
+\mbox{\tt \ \ \ \ signum\ z@(x:+y)\ \ \ \ \ =\ \ x/r\ :+\ y/r\ \ where\ r\ =\ magnitude\ z}\\
+\mbox{\tt \ \ \ \ fromInteger\ n\ \ \ \ \ \ \ =\ \ fromInteger\ n\ :+\ 0}
+\index{Num@{\ptt Num}!instance for {\ptt Complex}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ (RealFloat\ a)\ =>\ Fractional\ (Complex\ a)\ \ where}\\
+\mbox{\tt \ \ \ \ (x:+y)\ /\ (x':+y')\ \ \ =\ \ (x*x''+y*y'')\ /\ d\ :+\ (y*x''-x*y'')\ /\ d}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ x''\ =\ scaleFloat\ k\ x'}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ y''\ =\ scaleFloat\ k\ y'}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ k\ \ \ =\ -\ max\ (exponent\ x')\ (exponent\ y')}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ d\ \ \ =\ x'*x''\ +\ y'*y''}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ fromRational\ a\ \ \ \ \ \ =\ \ fromRational\ a\ :+\ 0}
+\index{Fractional@{\ptt Fractional}!instance for {\ptt Complex}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ (RealFloat\ a)\ =>\ Floating\ (Complex\ a)\ where}\\
+\mbox{\tt \ \ \ \ pi\ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ pi\ :+\ 0}\\
+\mbox{\tt \ \ \ \ exp\ (x:+y)\ \ \ \ \ =\ \ expx\ *\ cos\ y\ :+\ expx\ *\ sin\ y}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ expx\ =\ exp\ x}\\
+\mbox{\tt \ \ \ \ log\ z\ \ \ \ \ \ \ \ \ \ =\ \ log\ (magnitude\ z)\ :+\ phase\ z}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ sqrt\ 0\ \ \ \ \ \ \ \ \ =\ \ 0}\\
+\mbox{\tt \ \ \ \ sqrt\ z@(x:+y)\ \ =\ \ u\ :+\ (if\ y\ <\ 0\ then\ -v\ else\ v)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (u,v)\ =\ if\ x\ <\ 0\ then\ (v',u')\ else\ (u',v')}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ v'\ \ \ \ =\ abs\ y\ /\ (u'*2)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ u'\ \ \ \ =\ sqrt\ ((magnitude\ z\ +\ abs\ x)\ /\ 2)}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ sin\ (x:+y)\ \ \ \ \ =\ \ sin\ x\ *\ cosh\ y\ :+\ cos\ x\ *\ sinh\ y}\\
+\mbox{\tt \ \ \ \ cos\ (x:+y)\ \ \ \ \ =\ \ cos\ x\ *\ cosh\ y\ :+\ sin\ x\ *\ sinh\ y}\\
+\mbox{\tt \ \ \ \ tan\ (x:+y)\ \ \ \ \ =\ \ (sinx*coshy:+cosx*sinhy)/(cosx*coshy:+sinx*sinhy)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ sinx\ \ =\ sin\ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cosx\ \ =\ cos\ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sinhy\ =\ sinh\ y}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ coshy\ =\ cosh\ y}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ sinh\ (x:+y)\ \ \ \ =\ \ cos\ y\ *\ sinh\ x\ :+\ sin\ \ y\ *\ cosh\ x}\\
+\mbox{\tt \ \ \ \ cosh\ (x:+y)\ \ \ \ =\ \ cos\ y\ *\ cosh\ x\ :+\ (-\ sin\ y\ *\ sinh\ x)}\\
+\mbox{\tt \ \ \ \ tanh\ (x:+y)\ \ \ \ =\ \ (cosy*sinhx:+siny*coshx)/(cosy*coshx:+(-siny*sinhx))}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ siny\ \ =\ sin\ y}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cosy\ \ =\ cos\ y}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ sinhx\ =\ sinh\ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ coshx\ =\ cosh\ x}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ asin\ z@(x:+y)\ \ =\ \ y':+(-x')}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ \ (x':+y')\ =\ log\ ((-y:+x)\ +\ sqrt\ (1\ -\ z*z))}\\
+\mbox{\tt \ \ \ \ acos\ z@(x:+y)\ \ =\ \ y'':+(-x'')}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (x'':+y'')\ =\ log\ (z\ +\ ((-y'):+x'))}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (x':+y')\ \ \ =\ sqrt\ (1\ -\ z*z)}\\
+\mbox{\tt \ \ \ \ atan\ z@(x:+y)\ \ =\ \ y':+(-x')}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (x':+y')\ =\ log\ (((-y+1):+x)\ *\ sqrt\ (1/(1+z*z)))}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ asinh\ z\ \ \ \ \ \ \ \ =\ \ log\ (z\ +\ sqrt\ (1+z*z))}\\
+\mbox{\tt \ \ \ \ acosh\ z\ \ \ \ \ \ \ \ =\ \ log\ (z\ +\ (z+1)\ *\ sqrt\ ((z-1)/(z+1)))}\\
+\mbox{\tt \ \ \ \ atanh\ z\ \ \ \ \ \ \ \ =\ \ log\ ((z+1)\ *\ sqrt\ (1\ -\ 1/(z*z)))}
+\index{Floating@{\ptt Floating}!instance for {\ptt Complex}}%
+\eprogB\noindent\bprogB
+\mbox{\tt realPart,\ imagPart\ ::\ (RealFloat\ a)\ =>\ Complex\ a\ ->\ a}\\
+\mbox{\tt realPart\ (x:+y)\ \ =\ \ x}\\
+\mbox{\tt imagPart\ (x:+y)\ \ =\ \ y}
+\indextt{realPart}%
+\indextt{imagPart}%
+\eprogB\noindent\bprogB
+\mbox{\tt conjugate\ \ \ \ \ \ \ \ ::\ (RealFloat\ a)\ =>\ Complex\ a\ ->\ Complex\ a}\\
+\mbox{\tt conjugate\ (x:+y)\ =\ \ x\ :+\ (-y)}
+\indextt{conjugate}%
+\eprogB\noindent\bprogB
+\mbox{\tt mkPolar\ \ \ \ \ \ \ \ \ \ ::\ (RealFloat\ a)\ =>\ a\ ->\ a\ ->\ Complex\ a}\\
+\mbox{\tt mkPolar\ r\ theta\ \ =\ \ r\ *\ cos\ theta\ :+\ r\ *\ sin\ theta}
+\indextt{mkPolar}%
+\eprogB\noindent\bprogB
+\mbox{\tt cis\ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (RealFloat\ a)\ =>\ a\ ->\ Complex\ a}\\
+\mbox{\tt cis\ theta\ \ \ \ \ \ \ \ =\ \ cos\ theta\ :+\ sin\ theta}
+\indextt{cis}%
+\eprogB\noindent\bprogB
+\mbox{\tt polar\ \ \ \ \ \ \ \ \ \ \ \ ::\ (RealFloat\ a)\ =>\ Complex\ a\ ->\ (a,a)}\\
+\mbox{\tt polar\ z\ \ \ \ \ \ \ \ \ \ =\ \ (magnitude\ z,\ phase\ z)}
+\indextt{polar}%
+\eprogB\noindent\bprogB
+\mbox{\tt magnitude,\ phase\ ::\ (RealFloat\ a)\ =>\ Complex\ a\ ->\ a}\\
+\mbox{\tt magnitude\ (x:+y)\ =\ \ scaleFloat\ k}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (sqrt\ ((scaleFloat\ mk\ x){\char'136}2\ +\ (scaleFloat\ mk\ y){\char'136}2))}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ k\ \ =\ max\ (exponent\ x)\ (exponent\ y)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mk\ =\ -\ k}
+\indextt{magnitude}%
+\indextt{phase}%
+\eprogB\noindent\bprogB
+\mbox{\tt phase\ (x:+y)\ \ \ \ \ =\ \ atan2\ y\ x}
+\eprogB

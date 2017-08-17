@@ -1,0 +1,117 @@
+\noindent\bprogB
+\mbox{\tt module\ \ PreludeArray\ (\ Array,\ Assoc((:=)),\ array,\ listArray,\ (!),\ bounds,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ indices,\ elems,\ assocs,\ accumArray,\ (//),\ accum,\ amap,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ixmap}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )\ where}
+\index{PreludeArray@{\ptt PreludeArray} (module)}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ This\ module\ specifies\ the\ semantics\ of\ arrays\ only:\ it\ is\ not}\\
+\mbox{\tt --\ intended\ as\ an\ efficient\ implementation.}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt infixl\ 9\ \ !}\\
+\mbox{\tt infixl\ 9\ \ //}\\
+\mbox{\tt infix\ \ 1\ \ :=}
+\index{!@{\ptt {\char'041}}}%
+\index{//@{\ptt //}}%
+\index{:=@{\ptt :=}}%
+\eprogB\noindent\bprogB
+\mbox{\tt data\ \ Assoc\ a\ b\ =\ \ a\ :=\ b\ \ deriving\ (Eq,\ Ord,\ Ix,\ Text,\ Binary)}\\
+\mbox{\tt data\ \ (Ix\ a)\ \ \ \ =>\ Array\ a\ b\ =\ MkArray\ (a,a)\ (a\ ->\ b)\ deriving\ ()}
+\index{Assoc@{\ptt Assoc} (datatype)}%
+\eprogB\noindent\bprogB
+\mbox{\tt array\ \ \ \ \ \ \ \ \ \ \ ::\ (Ix\ a)\ =>\ (a,a)\ ->\ [Assoc\ a\ b]\ ->\ Array\ a\ b}\\
+\mbox{\tt listArray\ \ \ \ \ \ \ ::\ (Ix\ a)\ =>\ (a,a)\ ->\ [b]\ ->\ Array\ a\ b}\\
+\mbox{\tt (!)\ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (Ix\ a)\ =>\ Array\ a\ b\ ->\ a\ ->\ b}\\
+\mbox{\tt bounds\ \ \ \ \ \ \ \ \ \ ::\ (Ix\ a)\ =>\ Array\ a\ b\ ->\ (a,a)}\\
+\mbox{\tt indices\ \ \ \ \ \ \ \ \ ::\ (Ix\ a)\ =>\ Array\ a\ b\ ->\ [a]}\\
+\mbox{\tt elems\ \ \ \ \ \ \ \ \ \ \ ::\ (Ix\ a)\ =>\ Array\ a\ b\ ->\ [b]}\\
+\mbox{\tt assocs\ \ \ \ \ \ \ \ \ \ ::\ (Ix\ a)\ =>\ Array\ a\ b\ ->\ [Assoc\ a\ b]}\\
+\mbox{\tt accumArray\ \ \ \ \ \ ::\ (Ix\ a)\ =>\ (b\ ->\ c\ ->\ b)\ ->\ b\ ->\ (a,a)\ ->\ [Assoc\ a\ c]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ->\ Array\ a\ b}\\
+\mbox{\tt (//)\ \ \ \ \ \ \ \ \ \ \ \ ::\ (Ix\ a)\ =>\ Array\ a\ b\ ->\ [Assoc\ a\ b]\ ->\ Array\ a\ b}\\
+\mbox{\tt accum\ \ \ \ \ \ \ \ \ \ \ ::\ (Ix\ a)\ =>\ (b\ ->\ c\ ->\ b)\ ->\ Array\ a\ b\ ->\ [Assoc\ a\ c]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ->\ Array\ a\ b}\\
+\mbox{\tt amap\ \ \ \ \ \ \ \ \ \ \ \ ::\ (Ix\ a)\ =>\ (b\ ->\ c)\ ->\ Array\ a\ b\ ->\ Array\ a\ c}\\
+\mbox{\tt ixmap\ \ \ \ \ \ \ \ \ \ \ ::\ (Ix\ a,\ Ix\ b)\ =>\ (a,a)\ ->\ (a\ ->\ b)\ ->\ Array\ b\ c}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ->\ Array\ a\ c}
+\indextt{array}%
+\indextt{listArray}%
+\index{!@{\ptt {\char'041}}}%
+\indextt{bounds}%
+\indextt{indices}%
+\indextt{elems}%
+\indextt{assocs}%
+\indextt{accumArray}%
+\index{//@{\ptt //}}%
+\indextt{accum}%
+\indextt{amap}%
+\indextt{ixmap}%
+\eprogB\noindent\bprogB
+\mbox{\tt array\ b\ ivs\ =}\\
+\mbox{\tt \ \ \ \ if\ and\ [inRange\ b\ i\ |\ i:={\char'137}\ <-\ ivs]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ then\ MkArray\ b}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ({\char'134}j\ ->\ case\ [v\ |\ (i\ :=\ v)\ <-\ ivs,\ i\ ==\ j]\ of}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [v]\ \ \ ->\ v}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ []\ \ \ \ ->\ error\ "(!){\char'173}PreludeArray{\char'175}:\ {\char'134}}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\char'134}undefined\ array\ element"}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\char'137}\ \ \ \ \ ->\ error\ "(!){\char'173}PreludeArray{\char'175}:\ {\char'134}}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\char'134}multiply\ defined\ array\ element")}\\
+\mbox{\tt \ \ \ \ \ \ \ \ else\ error\ "array{\char'173}PreludeArray{\char'175}:\ out-of-range\ array\ association"}
+\eprogB\noindent\bprogB
+\mbox{\tt listArray\ b\ vs\ \ \ \ \ \ \ \ =\ array\ b\ (zipWith\ (:=)\ (range\ b)\ vs)}
+\eprogB\noindent\bprogB
+\mbox{\tt (!)\ (MkArray\ {\char'137}\ f)\ \ \ \ \ =\ f}
+\eprogB\noindent\bprogB
+\mbox{\tt bounds\ (MkArray\ b\ {\char'137})\ \ =\ b}
+\eprogB\noindent\bprogB
+\mbox{\tt indices\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ range\ .\ bounds}
+\eprogB\noindent\bprogB
+\mbox{\tt elems\ a\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ [a!i\ |\ i\ <-\ indices\ a]}
+\eprogB\noindent\bprogB
+\mbox{\tt assocs\ a\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ [i\ :=\ a!i\ |\ i\ <-\ indices\ a]}
+\eprogB\noindent\bprogB
+\mbox{\tt a\ //\ us\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ array\ (bounds\ a)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ([i\ :=\ a!i\ |\ i\ <-\ indices\ a\ {\char'134}{\char'134}\ [i\ |\ i:={\char'137}\ <-\ us]]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ++\ us)}
+\eprogB\noindent\bprogB
+\mbox{\tt accum\ f\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ foldl\ ({\char'134}a\ (i\ :=\ v)\ ->\ a\ //\ [i\ :=\ f\ (a!i)\ v])}
+\eprogB\noindent\bprogB
+\mbox{\tt accumArray\ f\ z\ b\ \ \ \ \ \ =\ accum\ f\ (array\ b\ [i\ :=\ z\ |\ i\ <-\ range\ b])}
+\eprogB\noindent\bprogB
+\mbox{\tt amap\ f\ a\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ array\ b\ [i\ :=\ f\ (a!i)\ |\ i\ <-\ range\ b]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ b\ =\ bounds\ a}
+\eprogB\noindent\bprogB
+\mbox{\tt ixmap\ b\ f\ a\ \ \ \ \ \ \ \ \ \ \ =\ array\ b\ [i\ :=\ a\ !\ f\ i\ |\ i\ <-\ range\ b]}
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ (Ix\ a,\ Eq\ b)\ \ =>\ Eq\ (Array\ a\ b)\ \ where}\\
+\mbox{\tt \ \ \ \ a\ ==\ a'\ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ assocs\ a\ ==\ assocs\ a'}
+\index{Eq@{\ptt Eq}!instance for {\ptt Array}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ (Ix\ a,\ Ord\ b)\ =>\ Ord\ (Array\ a\ b)\ \ where}\\
+\mbox{\tt \ \ \ \ a\ <=\ \ a'\ \ \ \ \ \ \ \ \ \ \ \ =\ \ assocs\ a\ <=\ \ assocs\ a'}
+\index{Ord@{\ptt Ord}!instance for {\ptt Array}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ (Ix\ a,\ Text\ a,\ Text\ b)\ =>\ Text\ (Array\ a\ b)\ \ where}\\
+\mbox{\tt \ \ \ \ showsPrec\ p\ a\ =\ showParen\ (p\ >\ 9)\ (}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ showString\ "array\ "\ .}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shows\ (bounds\ a)\ .\ showChar\ '\ '\ .}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shows\ (assocs\ a)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ )}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ readsPrec\ p\ =\ readParen\ (p\ >\ 9)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ ({\char'134}r\ ->\ [(array\ b\ as,\ u)\ |\ ("array",s)\ <-\ [lex\ r],}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (b,t)\ \ \ \ \ \ \ <-\ reads\ s,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (as,u)\ \ \ \ \ \ <-\ reads\ t\ \ \ ]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ++}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [(listArray\ b\ xs,\ u)\ |\ ("listArray",s)\ <-\ [lex\ r],}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (b,t)\ \ \ \ \ \ \ \ \ \ \ <-\ reads\ s,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (xs,u)\ \ \ \ \ \ \ \ \ \ <-\ reads\ t\ ])}
+\index{Text@{\ptt Text}!instance for {\ptt Array}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ (Ix\ a,\ Binary\ a,\ Binary\ b)\ =>\ Binary\ (Array\ a\ b)\ \ where}\\
+\mbox{\tt \ \ \ \ showBin\ a\ =\ showBin\ (bounds\ a)\ .\ showBin\ (elems\ a)}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ readBin\ bin\ =\ (listArray\ b\ vs,\ bin'')}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (b,bin')\ \ \ =\ readBin\ bin}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (vs,bin'')\ =\ readBin\ bin'}
+\index{Binary@{\ptt Binary}!instance for {\ptt Array}}%
+\eprogB

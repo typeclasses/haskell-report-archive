@@ -1,0 +1,32 @@
+\subsection{Minor Syntax Changes in Version 1.1}
+\label{syntax-changes}
+
+This section is a list of the non-trivial changes to the \Haskell{}
+syntax between versions~1.0 and 1.1 of this report, {\em excluding} those
+mentioned in the 1.1~preface (page~\ref{preface-changes-11}).  Other
+clarifications and corrections are reflected in the full syntax in the
+following sections.
+
+\begin{enumerate}
+\item
+Empty declarations and declaration lists ending with \mbox{\tt ;} have been
+added, to aid automatic program generation.
+
+\item
+Guards have been eliminated from lambda expressions. 
+
+\item
+List comprehensions must have at least one qualifier. 
+
+\item
+\mbox{\tt Case} expressions may have more than one guard per clause.
+
+\item
+Instance declarations can only have \mbox{$\it valdefs$}
+in their body; in particular, they cannot have type signatures in
+their body.
+\end{enumerate}
+
+% Local Variables: 
+% mode: latex
+% End:

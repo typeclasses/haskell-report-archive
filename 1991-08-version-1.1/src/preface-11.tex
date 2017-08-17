@@ -1,0 +1,149 @@
+%
+% $Header$
+%
+\begin{center}
+\Large\bf Preface to Version~1.1
+\end{center}
+
+\vspace{.2in}
+
+\noindent
+Following the Version~1.0 \Haskell{}~report, several sites have
+implemented \Haskell{} (or a subset thereof) and people have started
+to use these implementations.  Based on this experience of
+implementation and use, it became apparent that a modest revision of
+the language would be desirable, in which some improvements in syntax
+could be made and certain features generalised.  This Version~1.1
+report is the result.
+
+This revision was specifically {\em not} intended to add any
+substantial new features to the language, but rather to ``tidy up''
+the existing language.  Despite this narrow focus, a wide
+debate ensued, conducted on the \Haskell{} mailing list
+\index{Haskell mailing list@\Haskell{} mailing list}
+(see page~\pageref{haskell-mailing-list}) rather than just among members of
+the original committee.
+
+In this minor revision, the tricky issues identified in the preface to
+Version~1.0 remain, so that preface should be read in conjunction with
+this one.
+
+\subsection*{Summary of changes}
+\label{preface-changes-11}
+
+The main changes (other than concrete syntax) are as follows.
+
+\begin{itemize}
+\item
+Class methods
+\index{class method}
+may be polymorphic and overloaded in type variables
+other than the class variable (Section~\ref{class-decls}).
+
+\item
+The ``monomorphism restriction''
+\index{monomorphism restriction}
+has been made more precise, and
+relaxed in the case where the programmer supplies a type signature
+(Section~\ref{function-bindings}).
+
+\item
+The meaning of contexts in \mbox{\tt data} declarations has been clarified
+\index{context!in data declaration@in {\ptt data} declaration}
+(Section~\ref{datatype-decls}), and \mbox{\tt type} synonym declarations are no
+longer permitted to have contexts (Section~\ref{type-synonym-decls}).
+\index{type synonym}
+
+\item
+If the \mbox{\tt deriving} clause on a \mbox{\tt data} declaration is omitted, no
+instances are automatically derived (Section~\ref{derived-decls}).
+\index{derived instance}
+
+\item
+A module \mbox{$\it m$} may refer to all of its own local definitions in an export
+list using \mbox{$\it m\makebox{\tt ..}$} (Section~\ref{export}).
+\index{export list}
+\end{itemize}
+
+\noindent
+The main syntactic changes are as follows:
+\begin{itemize}
+\item
+A new form of expression, a \mbox{\tt let}-expression,
+\index{let expression}
+has been added, which replaces and has the same semantics as a \mbox{\tt where}
+expression.  (In particular, the bindings it introduces are mutually
+recursive; \Haskell{} has no non-recursive \mbox{\tt let} construct.)
+Bindings may also be introduced by a \mbox{\tt where} clause, but such
+\mbox{\tt where} clauses are now attached to a group of guarded right-hand
+sides, and scope over the guards.  The previous inability to scope
+definitions over guards was a significant shortcoming of the language.
+
+\item
+Sections
+\index{section}
+have been introduced for binary operators.  For example, the
+expression \mbox{\tt (/\ 2)} is the function which divides its argument by 2,
+and \mbox{\tt (2\ /)} is the function which divides 2 by its argument.
+
+\item
+The standard prelude has been debugged and revised.
+
+%\item
+%The syntax of interfaces has been changed, to make it clearer
+%what is being {\em exported} and what is merely being {\em named}.
+
+\end{itemize}
+
+\noindent
+A few other nontrivial changes to the syntax are listed in
+Appendix~\ref{syntax-changes}.
+
+\subsection*{Implementations}\label{implementors}
+
+Several groups are working on implementations of \Haskell{}, including
+those at Chalmers (contact: \mbox{\tt hbc@cs.chalmers.se}), Glasgow
+(\mbox{\tt haskell-request@dcs.glasgow.ac.uk}), Syracuse (\mbox{\tt polar@top.cis.syr.edu}), and Yale
+(\mbox{\tt haskell-request@cs.yale.edu}).  Official announcements about these
+implementations will appear on the \Haskell{} technical mailing list
+\index{Haskell mailing list@\Haskell{} mailing list}
+(see page~\pageref{haskell-mailing-list}).
+
+\subsection*{Formal Semantics}
+\index{formal semantics}
+
+Work has also been undertaken at Glasgow on a formal static and
+dynamic semantics for \Haskell{}
+\cite{dynamic-semantics,static-semantics}.  These efforts are well
+advanced but as yet incomplete.
+
+\subsection*{Acknowledgements}
+
+Language design is an evolutionary process, and the group of people
+involved undergoes evolution as well.  We wish to thank past members
+of the \Haskell{} Committee---Arvind, Mike Reeve, David Wise, and
+Jonathan Young---for their previous contributions and continued
+support.  We also thank those who braved the storm of electronic mail
+on the \Haskell{} mailing list, and responded with constructive
+suggestions for the revised language.  The following were especially
+helpful and active:
+Lennart Augustsson,
+Cordelia Hall,
+Kent Karlsson,
+Mark Jones,
+Mark Lillibridge,
+and Satish Thatte.  
+
+%\ToDo{past authors sentence (Simon)}
+
+Numerous others contributed to the debate, and we thank them also.
+
+\begin{flushright}
+The \Haskell{} Committee\\
+19 August 1991
+\end{flushright}
+
+% Local Variables: 
+% mode: latex
+% End:
+

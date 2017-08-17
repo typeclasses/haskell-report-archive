@@ -1,0 +1,930 @@
+%
+% $Header$
+%
+\section{Basic Types}
+\label{basic-types}
+
+\subsection{Booleans}
+\label{booleans}
+\index{boolean}
+
+The boolean type @Bool@ is an enumeration; Figure~\ref{prelude-bool}
+shows its definition and standard functions @&&@, @||@, @not@, and @otherwise@.
+
+\begin{figure}
+\outline{
+@
+data  Bool  =  False | True
+
+(&&), (||)		:: Bool -> Bool -> Bool
+True  && x		=  x
+False && x		=  False
+True  || x		=  True
+False || x		=  x
+
+not			:: Bool -> Bool
+not True		=  False
+not False		=  True
+
+otherwise		:: Bool
+otherwise 		= True
+@
+}
+\ecaption{Standard functions on booleans}
+\label{prelude-bool}
+\indextycon{Bool}
+\indextt{False}\indextt{True}
+\index{||@@{\ptt {\char'174}{\char'174}}}
+\index{&&@@{\ptt \&\&}}
+\indextt{not}
+\indextt{otherwise}
+\end{figure}
+
+\subsection{Characters and Strings}
+\label{characters}
+\index{character}\index{string}
+
+The character type @Char@\indextycon{Char}
+is an enumeration, and consists of 256 values, of which the first 128
+are the ASCII\index{ASCII character set} character set.  The lexical syntax for
+characters is defined in Section~\ref{lexemes-char}; character
+literals are nullary constructors in the datatype @Char@.  The
+standard prelude provides an instance declaration for @Char@ in classes
+@Enum@ and @Ix@ and two functions relating characters to
+@Int@s in the range $[ 0 , 255 ]$:
+\bprog
+@
+ord :: Char -> Int
+chr :: Int  -> Char
+@
+\eprogNoSkip\indextt{chr}\indextt{ord}
+
+Note that ASCII control characters each have several representations
+in character literals: numeric escapes, ASCII mnemonic escapes,
+and the @\^@$X$ notation.
+In addition, there are the following equivalences:
+@\a@ and @\BEL@, @\b@ and @\BS@, @\f@ and @\FF@, @\r@ and @\CR@,
+@\t@ and @\HT@, @\v@ and @\VT@, and @\n@ and @\LF@.
+
+A {\em string} is a list of characters:\nopagebreak[4]
+\bprog
+@
+type  String  =  [Char]
+@
+\eprog\indexsynonym{String}
+Strings may be abbreviated using the lexical syntax described in
+Section~\ref{lexemes-char}.  For example, @"A string"@ abbreviates
+\[
+@[@\fwq@A@\fwq@,@\fwq@ @\fwq@,@\fwq@s@\fwq@,@\fwq@t@\fwq@,@\fwq@r@\fwq@,@ \
+\fwq@i@\fwq@,@\fwq@n@\fwq@,@\fwq@g@\fwq@]@
+\]
+
+\subsection{Functions}
+\label{basic-functions}
+\index{function}
+
+Functions are defined via lambda abstractions and function
+definitions.  Besides application, an infix composition operator is
+defined:
+\bprog
+@
+(.) :: (b -> c) -> (a -> b) -> a -> c
+(f . g) x = f (g x)
+@
+\eprog\index{.@@{\ptt .}}
+The function @until@\indextt{until} applies a
+function to an initial value zero or more times until the result
+satisfies a given predicate:
+\bprog
+@
+until :: (a -> Bool) -> (a -> a) -> a -> a
+until p f x | p x        =  x
+	    | otherwise  =  until p f (f x)
+@
+\eprog
+The function @flip@,\indextt{flip} applied to a binary function, reverses
+the order of the arguments:
+\bprog
+@
+flip :: (a -> b -> c) -> b -> a -> c
+flip f x y  =  f y x
+@
+\eprogNoSkip
+
+\subsection{Lists}
+\label{basic-lists}
+\index{list}
+
+Lists are an algebraic datatype of two constructors, although
+with special syntax, as described in Section~\ref{lists}.
+The first constructor is the null list, written @[]@,
+\index{[]@@{\ptt []} (nil)}%
+and the second is @:@ (``cons'').
+\index{:@@{\ptt :}}
+See the standard prelude (Appendix~\ref{preludelist}) for the
+definitions of the standard list functions.  {\em
+Arithmetic sequences}
+\index{arithmetic sequence}
+and {\em list comprehensions},
+\index{list comprehension}
+two convenient
+syntaxes for special kinds of lists, are described in
+Sections~\ref{arithmetic-sequences} and \ref{list-comprehensions},
+respectively.
+
+\subsection{Tuples}
+\label{basic-tuples}
+\index{tuple}
+
+Tuples are also algebraic datatypes with special syntax, as defined
+in Section~\ref{tuples}.  Each tuple type has a single constructor.
+Six functions, named @zip@, @zip3@, "...", @zip7@, are provided
+\indextt{zip}%
+\indextt{zip3}%
+\indextt{zip4}%
+\indextt{zip5}%
+\indextt{zip6}%
+\indextt{zip7}%
+by the standard prelude (Appendix~\ref{preludelist}).  These produce
+lists of $n$-tuples from $n$ lists,
+for $2 \leq n \leq 7\/$.  The resulting lists are as long as the
+shortest argument list; excess elements of other argument lists are
+ignored.
+
+\subsection{Unit Datatype}
+\label{basic-trivial}
+
+The unit datatype @()@ has one
+member, the nullary constructor @()@
+(and thus an overloading of syntax)---see also Section~\ref{unit-expression}.
+\index{trivial type}
+
+\subsection{Binary Datatype}
+\label{bin-type}
+
+The @Bin@\indextycon{Bin} datatype is a
+primitive abstract datatype
+including the value @nullBin@\indextt{nullBin} (the empty or nullary
+binary value), the function @appendBin@\indextt{appendBin}, and the
+predicate @isNullBin@\indextt{isNullBin}
+(which returns @True@ when applied to @nullBin@ and @False@ when
+applied to all other values of
+type @Bin@).  Also, derived instances of the @Binary@ class
+\index{Binary@@{\ptt Binary}!derived instance}
+generate definitions for @showBin@ and @readBin@, as described in
+Section~\ref{derived-decls} and Appendix~\ref{derived-appendix}.  The @Bin@
+datatype is used primarily for efficient and transparent I/O, as
+described in Section~\ref{io}.
+
+\subsection{Numbers}
+\label{numbers}
+\index{number}
+
+\subsubsection{Introduction}
+
+\Haskell{} provides several kinds of numbers; the numeric
+types and the operations upon them have been heavily influenced by
+Common Lisp \cite{steele:common-lisp} and Scheme \cite{RRRRS}.  Numeric
+function names and operators are usually overloaded, using
+several type classes with an inclusion relation shown
+in Figure~\ref{numeric-inclusions}
+(cf.~Figure~\ref{standard-classes}, page~\pageref{standard-classes}).
+(Some classes are immediate subclasses of two other classes;
+there are pairs of classes with a nontrivial
+intersection.) The class @Num@\indextt{Num} of numeric types is a subclass of
+@Eq@\indextt{Eq}, since all numbers may be compared for equality;
+its subclass @Real@\indextt{Real} is also a subclass of
+@Ord@\indextt{Ord}, since the other comparison operations apply to
+all but complex numbers.  The class @Integral@\indextt{Integral}
+contains both fixed- and arbitrary-precision integers; the class
+@Fractional@\indextt{Fractional} contains all nonintegral types;
+and the class @Floating@\indextt{Floating} contains all floating-point
+types, both real and complex.
+
+%\WeSay{John and Joe changed this figure so that now Text is above Num
+%(this is to insure you can print numbers if an error occurs while in
+%one of these classes.  Take a look at the commented text.}
+\begin{figure}
+\outline{
+%@@
+%			     Eq    Text
+%			    / \    /
+%			   /   \  /
+%			  Ord  Num
+%			   \   / \
+%			    \ /   \
+%			    Real Fractional
+%			    / \   / \
+%			   /   \ /   \
+%		    Integral RealFrac Floating
+%				 \   /
+%				  \ /
+%				RealFloat
+%
+%@@
+\input{class-fig.tex}
+\struthack{11pt}
+}
+\ecaption{Numeric class inclusions (cf.~Figure~\protect\ref{standard-classes}, page~\protect\pageref{standard-classes})}
+\label{numeric-inclusions}
+\end{figure}
+
+Table~\ref{standard-numeric-types} lists the standard numeric types.
+The type @Int@\indextycon{Int} is a fixed-precision type, covering at least the range
+$[ - 2^{29} + 1, 2^{29} - 1]\/$. The range chosen by an implementation must either be
+symmetric about zero or contain one more negative value than positive
+(to accommodate twos-complement representation) and should be large
+enough to serve as array indices.  The constants
+@minInt@\indextt{minInt} and @maxInt@\indextt{maxInt}
+(Figure~\ref{basic-numeric-2}, page~\pageref{basic-numeric-2}) define the limits of
+@Int@\indextycon{Int} in each implementation.
+@Float@\indextycon{Float} is a
+floating-point type, also implementation-defined; it is desirable that
+this type be at least equal in range and precision to the IEEE
+single-precision type.  Similarly, @Double@\indextycon{Double} should
+cover IEEE double-precision.  An implementation may provide other
+numeric types, such as additional
+precisions of integer and
+floating-point.  The results of exceptional
+conditions (such as overflow or underflow) on the fixed-precision
+numeric types are undefined; an implementation may choose error
+("\bot", semantically), a truncated value, or a special value such as
+infinity, indefinite, etc.
+
+\begin{table}
+\[
+\begin{tabular}{|l|l|l|}
+\hline
+\mc{1}{|c|}{Type} & 
+	\mc{1}{c|}{Class} &
+	\mc{1}{c|}{Description} \\ \hline
+@Integer@ & @Integral@ & Arbitrary-precision integers \\
+@Int@ & @Integral@ & Fixed-precision integers \\
+@(Integral a) => Ratio a@ & @RealFrac@ & Rational numbers \\
+@Float@ & @RealFloat@ & Real floating-point, single precision \\
+@Double@ & @RealFloat@ & Real floating-point, double precision \\
+@(RealFloat a) => Complex a@ & @Floating@ & Complex floating-point \\
+\hline
+\end{tabular}
+\]
+\ecaption{Standard numeric types}
+\label{standard-numeric-types}
+\index{numeric type}
+\end{table}
+
+The interface text (Section~\ref{module-interfaces}) associated with
+the standard numeric classes, types, and operations is shown
+in Figures~\ref{basic-numeric-1}--\ref{basic-numeric-3}.
+
+\begin{figure}
+\outline{
+@
+class  (Eq a, Text a) => Num a  where
+    (+), (-), (*)	:: a -> a -> a
+    negate		:: a -> a
+    abs, signum		:: a -> a
+    fromInteger		:: Integer -> a
+    x - y		=  x + negate y
+
+class  (Num a, Ord a) => Real a	where
+    toRational		::  a -> Rational
+
+class  (Real a) => Integral a  where
+    div, rem, mod	:: a -> a -> a
+    divRem		:: a -> a -> (a,a)
+    even, odd		:: a -> Bool
+    toInteger		:: a -> Integer
+    x `div` y		=  q  where (q,r) = divRem x y
+    x `rem` y		=  r  where (q,r) = divRem x y
+    x `mod` y 		=  if signum x == - (signum y) then r + y else r
+			   where r = x `rem` y
+    even x		=  x `rem` 2 == 0
+    odd			=  not . even
+
+class  (Num a) => Fractional a  where
+    (/)			:: a -> a -> a
+    fromRational	:: Rational -> a
+
+class  (Fractional a) => Floating a  where
+    pi			:: a
+    exp, log, sqrt	:: a -> a
+    (**), logBase	:: a -> a -> a
+    sin, cos, tan	:: a -> a
+    asin, acos, atan	:: a -> a
+    sinh, cosh, tanh	:: a -> a
+    asinh, acosh, atanh :: a -> a
+    x ** y		=  exp (log x * y)
+    logBase x y		=  log y / log x
+    sqrt x		=  x ** 0.5
+    tan  x		=  sin  x / cos  x
+    tanh x		=  sinh x / cosh x
+
+class  (Real a, Fractional a) => RealFrac a  where
+    properFraction	:: (Integral b) => a -> (b,a)
+    approxRational	:: a -> a -> Rational
+@
+}
+\ecaption{Numeric classes and related operations}
+\label{basic-numeric-1}
+\indextt{Num}\indextt{+}\indextt{-}\indextt{*}
+\indextt{negate}\indextt{abs}\indextt{signum}         
+\indextt{fromInteger}
+\indextt{Real}\indextt{toRational}
+\indextt{Integral}\indextt{divRem}\indextt{mod}\indextt{div}\indextt{rem}
+\indextt{even}\indextt{odd}
+\indextt{Fractional}\indextt{/}\indextt{fromRational}       
+\indextt{Floating}\indextt{pi}\indextt{exp}\indextt{log}\indextt{sqrt} 
+\indextt{**}\indextt{logBase}
+\indextt{sin}\indextt{cos}\indextt{tan}                        
+\indextt{asin}\indextt{acos}\indextt{atan}               
+\indextt{sinh}\indextt{cosh}\indextt{tanh}               
+\indextt{asinh}\indextt{acosh}\indextt{atanh}      
+\indextt{RealFrac}\indextt{properFraction}\indextt{approxRational}
+\end{figure}
+
+\begin{figure}
+\outline{
+@
+class  (RealFrac a, Floating a) => RealFloat a  where
+    floatRadix		:: a -> Integer
+    floatDigits		:: a -> Int
+    floatRange		:: a -> (Int,Int)
+    decodeFloat		:: a -> (Integer,Int)
+    encodeFloat		:: Integer -> Int -> a
+    exponent		:: a -> Int
+    significand		:: a -> a
+    scaleFloat		:: Int -> a -> a
+
+    exponent x		=  if m == 0 then 0 else n + floatDigits x
+			   where (m,n) = decodeFloat x
+    significand x	=  encodeFloat m (- (floatDigits x))
+			   where (m,_) = decodeFloat x
+    scaleFloat k x	=  encodeFloat m (n+k)
+			   where (m,n) = decodeFloat x
+
+instance  Integral Int
+instance  Integral Integer
+
+minInt, maxInt		::  Int
+fromIntegral		::  (Integral a, Num b) => a -> b
+gcd, lcm		::  (Integral a) => a -> a-> a
+(^)			::  (Num a, Integral b) => a -> b -> a
+(^^)			::  (Fractional a, Integral b) => a -> b -> a
+
+data  (Integral a)      => Ratio a
+type  Rational		=  Ratio Integer
+instance  (Integral a)  => RealFrac (Ratio a)
+
+(%)			::  (Integral a) => a -> a -> Ratio a
+numerator, denominator	::  (Integral a) => Ratio a -> a
+
+instance  RealFloat Float
+instance  RealFloat Double
+
+fromRealFrac	        :: (RealFrac a, Fractional b) => a -> b
+
+truncate, round		::  (RealFrac a, Integral b) => a -> b
+ceiling, floor		::  (RealFrac a, Integral b) => a -> b
+atan2			::  (RealFloat a) => a -> a -> a
+@
+}
+\ecaption{Numeric classes and related operations (continued)}
+\label{basic-numeric-2}
+\indextt{RealFloat}
+\indextt{floatRadix}\indextt{floatDigits}\indextt{floatRange} 
+\indextt{decodeFloat}\indextt{encodeFloat}
+\indextt{exponent}\indextt{significand}\indextt{scaleFloat}
+\indextt{Int}\indextt{Integer}\indextt{minInt}\indextt{maxInt}                
+\indextt{fromIntegral}
+\indextt{gcd}\indextt{lcm} 
+\index{^@@{\ptt {\char'136}}} % this is ^
+\index{^^@@{\ptt {\char'136}{\char'136}}} % this is ^^
+\indextycon{Ratio}\indexsynonym{Rational}           
+\indextt{RealFrac}
+\index{%@@{\ptt {\char'045}}}\indextt{numerator}\indextt{denominator}         
+\indextycon{Float}\indextycon{Double}
+\indextt{fromRealFrac}
+\indextt{truncate}\indextt{round}
+\indextt{ceiling}\indextt{floor}    
+\indextt{atan2}
+\end{figure}
+\begin{figure}
+\outline{
+@
+data  (RealFloat a)    => Complex a = a :+ a  deriving (Eq, Binary, Text)
+instance (RealFloat a) => Floating (Complex a)
+
+realPart, imagPart     ::  (RealFloat a) => Complex a -> a
+conjugate	       ::  (RealFloat a) => Complex a -> Complex a
+mkPolar		       ::  (RealFloat a) => a -> a -> Complex a
+cis		       ::  (RealFloat a) => a -> Complex a
+polar		       ::  (RealFloat a) => Complex a -> (a,a)
+magnitude, phase       ::  (RealFloat a) => Complex a -> a
+@
+}
+\ecaption{Numeric classes and related operations (continued)}
+\label{basic-numeric-3}
+\indextycon{Complex}
+\indextt{:+}\indextt{Floating}
+\indextt{realPart}\indextt{imagPart}
+\indextt{conjugate}\indextt{mkPolar}\indextt{cis}
+\indextt{polar}\indextt{magnitude}\indextt{phase}
+\end{figure}
+
+\subsubsection{Numeric Literals}
+\label{numeric-literals}
+
+The syntax of numeric literals is given in
+Section~\ref{lexemes-numeric}.  An integer literal represents the
+application
+of the function @fromInteger@\indextt{fromInteger} to the appropriate value of type
+@Integer@.  Similarly, a floating literal stands for an application of
+@fromRational@\indextt{fromRational} to a value of type @Rational@ (that is, 
+@Ratio Integer@).  Given the typings:
+\bprog
+@
+fromInteger  :: (Num a) => Integer -> a
+fromRational :: (Fractional a) => Rational -> a
+@
+\eprog\indextt{fromInteger}\indextt{fromRational}%
+integer and floating literals have the
+typings @(Num a) => a@ and @(Fractional a) => a@, respectively.
+Numeric literals are defined in this indirect way so that they may be
+interpreted as values of any appropriate numeric type.
+For example, @fromInteger@ for complex
+numbers is defined as follows:
+\bprog
+@
+fromInteger n = fromInteger n :+ 0
+@
+\eprog
+See Section~\ref{default-decls} for a discussion of overloading ambiguity.
+
+\subsubsection{Constructed Numbers}
+\label{constructed-numbers}
+
+There are two kinds of numeric types formed by data constructors:
+namely, @Ratio@ and @Complex@.  For each @Integral@ type $t$, there is
+a type @Ratio@\indextycon{Ratio} $t$ of rational pairs with components of
+type $t$. (The type name @Rational@\indexsynonym{Rational} is a synonym for
+@Ratio Integer@.)  Similarly, for each real floating-point type $t$,
+@Complex@\indextycon{Complex} $t$ is a type of complex numbers with real
+and imaginary components of type $t$.
+
+The operator @(%)@\index{%@@{\ptt {\char'045}}} forms the ratio of two
+integral numbers.  The functions @numerator@\indextt{numerator}
+and @denominator@\indextt{denominator} extract the components of a
+ratio; these are in reduced form with a positive denominator.
+
+Complex numbers are an algebraic type:
+\index{algebraic datatype}
+\bprog
+@
+data  (RealFloat a) => Floating (Complex a)  =  a :+ a
+@
+\eprog\indextycon{Floating}%
+The constructor @(:+)@\indextt{:+} forms a complex number from its
+real and imaginary rectangular components.  A complex number may also
+be formed from polar components of magnitude and phase by the function
+@mkPolar@\indextt{mkPolar}.  The function @cis@\indextt{polar}
+produces a complex number from an angle "t":
+\bprog
+@
+cis t = cos t :+ sin t
+@
+\eprog
+Put another way, @cis@ "t" is a complex value with magnitude "1"
+and phase "t" (modulo "2\pi").
+
+The function @polar@\indextt{polar} takes a complex number and
+returns a (magnitude, phase) pair in canonical form: The magnitude is
+nonnegative, and the phase, in the range $(- \pi , \pi ]$; if the
+magnitude is zero, then so is the phase.  Several
+component-extraction functions are provided:
+\bprog
+@
+realPart (x:+y)	=  x
+imagPart (x:+y)	=  y
+magnitude z	=  r  where (r,t) = polar z
+phase z		=  t  where (r,t) = polar z
+@
+\eprog\indextt{realPart}\indextt{imagPart}%
+\indextt{magnitude}\indextt{phase}%
+Also defined on complex numbers is the conjugate function:
+\bprog
+@
+conjugate (x:+y) =  x:+(-y)
+@
+\eprogNoSkip\indextt{conjugate}
+
+\subsubsection{Arithmetic and Number-Theoretic Operations}
+\label{arithmetic-operators}
+\index{arithmetic}
+
+The infix operations @(+)@\indextt{+}, @(*)@\indextt{*},
+@(-)@\indextt{-} and the unary function
+@negate@\indextt{negate} (which can also be written as a prefix minus sign; see
+section~\ref{operators}) apply to all numbers.  The operations
+@div@\indextt{div}, @rem@\indextt{rem}, and
+@mod@\indextt{mod} apply only to integral numbers, while the operation
+@(/)@\indextt{/} applies only to fractional ones.  The @div@ and
+@rem@ operations satisfy the law:
+\[\ba{c}
+@(x @\bkqB@div@\bkqA@ y)*y + (x @\bkqB@rem@\bkqA@ y) == x@
+\ea\]
+The result of @x @\bkqB@div@\bkqA@ y@ has the same sign as @x * y@
+and is truncated toward zero.  The modulo function differs from the
+remainder function when the signs of the dividend and divisor differ, the
+remainder always having the sign of the dividend, and the modulo
+having the sign of the divisor.  For example,
+\bprog
+@
+-13 @\bkqB@rem@\bkqA@ 4 == -1
+-13 @\bkqB@mod@\bkqA@ 4 == 3
+
+13 @\bkqB@rem@\bkqA@ -4 == 1
+13 @\bkqA@mod@\bkqA@ -4 == -3
+@
+\eprog
+The @divRem@ operation takes a dividend and a divisor as arguments
+and returns a (quotient, remainder) pair:
+\bprog
+@
+divRem x y  =  (x @\bkqB@div@\bkqA@ y, x @\bkqB@rem@\bkqA@ y)
+@
+\eprog
+Also available on integers are the even and odd predicates:
+\bprog
+@
+even x	    =  x @\bkqB@rem@\bkqA@ 2 == 0
+odd	    =  not . even
+@
+\eprog\indextt{even}\indextt{odd}
+Finally, there are the greatest common divisor and least common
+multiple functions: @gcd@\indextt{gcd} $x$ $y$ is the greatest
+integer that divides both $x$ and $y$.  @lcm@\indextt{lcm} $x$ $y$
+is the smallest positive integer that both $x$ and $y$ divide.
+
+\subsubsection{Exponentiation and Logarithms}
+\index{exponentiation}\index{logarithm}
+
+The one-argument exponential function @exp@\indextt{exp} and the
+logarithm function @log@\indextt{log} act on floating-point numbers and
+use base $e$.  @logBase@\indextt{logBase} $a$ $x$ returns the
+logarithm of $x$ in base $a$.  @sqrt@\indextt{sqrt} returns the
+principal square root of a floating-point number.
+There are three two-argument exponentiation operations:
+@(^)@\index{^@@{\ptt {\char'136}}} raises any
+number to a nonnegative integer power,
+@(^^)@\index{^^@@{\ptt {\char'136}{\char'136}}} raises a
+fractional number to any integer power, and @(**)@\indextt{**}
+takes two floating-point arguments.  The value of $x$@^0@ or $x$@^^0@
+is @1@ for any $x$, including zero; @0**@$y$ is undefined.
+  
+\subsubsection{Magnitude and Sign}
+\label{magnitude-sign}
+\index{magnitude}\index{sign}
+
+A number has a {\em magnitude}
+and a {\em sign}.  The functions @abs@\indextt{abs} and
+@signum@\indextt{signum} apply to any number and satisfy the law:
+\bprog
+@
+abs x * signum x == x
+@
+\eprog
+For real numbers, these functions are defined by:
+\bprog
+@
+abs x    | x >= 0  = x
+         | x <  0  = -x
+
+signum x | x >  0  = 1
+         | x == 0  = 0
+         | x <  0  = -1
+@
+\eprog
+For complex numbers, the definitions are different:\nopagebreak
+\bprog
+@
+abs z		  =  magnitude z :+ 0
+signum 0	  =  0
+signum z@@(x:+y)   =  x/r :+ y/r  where r = magnitude z
+@
+\eprog
+That is, @abs@ $z$ is a number with the magnitude of $z$, but oriented
+in the positive real direction, whereas @signum@ $z$ has the phase of
+$z$, but unit magnitude.  (@abs@ for a complex number differs from
+@magnitude@ only in type.  See Section~\ref{constructed-numbers}.)
+
+\subsubsection{Trigonometric Functions}
+\index{trigonometric function}
+
+The circular and hyperbolic sine\index{sine}, cosine\index{cosine},
+and tangent\index{tangent} functions and their inverses are provided
+for floating-point numbers.  A version of arctangent\index{arctangent}
+taking two real floating-point arguments is also provided: For real floating
+$x$ and $y$, @atan2@\indextt{atan2} $y$ $x$ differs from 
+@atan (@$y\/$@/@$x\/$@)@\indextt{atan} in that its range is 
+$( -\pi , \pi ]$ rather than $(- \pi / 2 , \pi / 2 )$ (because the signs
+of the arguments provide quadrant information), and that it is defined
+when $x$ is zero.
+
+The precise definition of the above functions is as in Common Lisp
+\cite{steele:common-lisp}, which in turn follows Penfield's proposal
+for APL
+\cite{penfield:complex-apl}.
+See these references for discussions of branch cuts, discontinuities,
+and implementation.
+
+\subsubsection{Coercions and Component Extraction}
+\label{coercion}
+\index{coercion}
+
+The @ceiling@\indextt{ceiling}, @floor@\indextt{floor},
+@truncate@\indextt{truncate}, and @round@\indextt{round}
+functions each take a real fractional argument and return an integral
+result.  \mbox{@ceiling@ $x$} returns the least integer not less than $x$, and
+\mbox{@floor@ $x$}, the greatest integer not greater than $x$.  \mbox{@truncate@ $x$}
+yields the integer nearest $x$ between $0$ and $x$, inclusive.
+\mbox{@round@ $x$} returns the nearest integer to $x$, the even integer if
+$x$ is equidistant between two integers.
+
+The function @properFraction@\indextt{properFraction} takes a real
+fractional number $x$ and returns a pair comprising $x$ as a
+proper fraction: an integral number with the same sign as $x$ and a
+fraction with the same type and sign as $x$ and with absolute
+value less than 1.  The @ceiling@, @floor@, @truncate@, and @round@
+functions can be defined in terms of this one.
+
+Two functions convert numbers to type @Rational@:
+@toRational@\indextt{toRational} returns the rational equivalent of
+its real argument with full precision;
+@approxRational@\indextt{approxRational} takes two real fractional arguments and returns an
+approximation to the first within the tolerance given by the second.
+Subject to the tolerance constraint, the result has the smallest
+denominator possible.
+
+The operations of class @RealFloat@\indextt{RealFloat} allow efficient, machine-independent
+access to the components of a floating-point number.
+The functions @floatRadix@\indextt{floatRadix},
+@floatDigits@\indextt{floatDigits}, and
+@floatRange@\indextt{floatRange} give the parameters of a
+floating-point type:  the radix of the representation, the number of
+digits of this radix in the significand, and the lowest and highest
+values the exponent may assume, respectively.
+The function @decodeFloat@\indextt{decodeFloat}
+applied to a real floating-point number returns the significand
+expressed as an @Integer@ and an appropriately scaled exponent (an
+@Int@).  If \mbox{@decodeFloat x@} yields \mbox{@(@"m"@,@"n"@)@}, then @x@ is
+equal in value to "mb^n", where "b" is the floating-point radix, and
+furthermore, either "m" and "n" are both zero or else
+"b^{d-1}<=m<b^d", where "d" is the value of \mbox{@floatDigits x@}.
+@encodeFloat@\indextt{encodeFloat} performs the inverse of this
+transformation.  The functions @significand@\indextt{significand}
+and @exponent@\indextt{exponent} together provide the same
+information as @decodeFloat@,  but rather than an @Integer@,
+\mbox{@significand x@} yields a value of the same type as @x@, scaled to lie
+in the open interval "(-1,1)".  \mbox{@exponent 0@} is zero.  @scaleFloat@
+multiplies a floating-point number by an integer power of the radix.
+
+Also available are the following coercion functions:
+\bprog
+@
+fromIntegral :: (Integral a, Num b) => a -> b
+fromRealFrac :: (RealFrac a, Fractional b) => a -> b
+@
+\eprogNoSkip\indextt{fromIntegral}\indextt{fromRealFrac}
+
+\subsection{Arrays}
+\label{arrays}
+\index{array}
+
+\Haskell{} provides indexable {\em arrays}, which may be thought of as
+functions whose domains are isomorphic to contiguous subsets of the
+integers.
+Functions restricted in this way can be
+implemented efficiently; in particular, a programmer may
+reasonably expect rapid access to the components.  To ensure
+the possibility of such an implementation, arrays are treated as data, not as
+general functions.
+
+Types that are instances of class @Ix@\indextt{Ix} (see
+Section~\ref{instance-decls}) may be indices of arrays; a one-dimensional 
+array might have index type @Int@, a two-dimensional array
+@(Int,Char)@ etc.
+
+\subsubsection{Array Construction}
+
+If @a@ is an index type and @b@ is any type, the type of arrays with
+indices in @a@ and elements in @b@ is written @Array a b@.\indextycon{Array}
+An array may be created by the function @array@:
+\bprog
+@
+array :: (Ix a) => (a,a)  -> [Assoc a b] -> Array a b
+data  Assoc a b  =  a := b
+@
+\eprog\indextt{array}\indextycon{Assoc}\indextt{:=}
+The first argument of @array@ is a pair of {\em bounds}, each of the
+index type of the array.  These bounds are the lowest and
+highest indices in the array, in that order.  For example, a
+one-origin vector of length @10@ has bounds @(1,10)@, and a one-origin @10@
+by @10@ matrix has bounds @((1,1),(10,10))@.
+
+The second argument of @array@ is a list of {\em associations}
+of the form $index$ @:=@ $value$.  Typically, this list will
+be expressed as a comprehension.  An association @i := x@ defines the
+value of the array at index @i@ to be @x@.  The array is undefined if
+any index in the list is out of bounds.  If any two associations in the
+list have the same index, the value at that index is undefined.
+Because the indices must be checked for these errors, @array@ is
+strict in the bounds argument and in the indices of the association list,
+but nonstrict in the values.  Thus, recurrences such as the following are
+possible:
+\bprog
+@
+a = array (1,100) ((1 := 1) : [i := i * a!(i-1) | i <- [2..100]])
+@
+\eprog
+Not every index within the bounds of the array need
+appear in the association list, but the values associated with indices
+that do not appear will be undefined.
+Figure~\ref{array-examples} shows some examples that use the
+@array@ constructor.
+
+\begin{figure}
+\outline{
+@
+-- Scaling an array of numbers by a given number:
+scale :: (Num a, Ix b) => a -> Array b a -> Array b a
+scale x a = array b [i := a!i * x | i <- range b]
+	    where b = bounds a
+
+-- Inverting an array that holds a permutation of its indices
+invPerm :: (Ix a) => Array a a -> Array a a
+invPerm a = array b [a!i := i | i <- range b]
+	    where b = bounds a
+
+-- The inner product of two vectors
+inner :: (Ix a, Num b) => Array a b -> Array a b -> b
+inner v w = if b == bounds w
+		then sum [v!i * w!i | i <- range b]
+		else error "inconformable arrays for inner product"
+	    where b = bounds v
+@
+}
+\ecaption{Array examples}
+\label{array-examples}
+\end{figure}
+
+@(!)@\index{!@@{\ptt {\char'041}}} denotes
+array subscripting; the @bounds@\indextt{bounds} function
+applied to an array returns its bounds:
+\bprog
+@
+(!)    :: (Ix a) => Array a b -> a -> b
+bounds :: (Ix a) => Array a b -> (a,a)
+@
+\eprog
+The functions @indices@\indextt{indices}, @elems@\indextt{elems}, and
+@assocs@,\indextt{assocs} when applied to an array, return lists of
+the indices, elements, or associations, respectively, in index order:
+\bprog
+@
+indices:: (Ix a) => Array a b -> [a]
+indices = range . bounds
+
+elems:: (Ix a) => Array a b -> [b]
+elems a = [a!i | i <- indices a]
+
+assocs: (Ix a) => Array a b -> [Assoc a b]
+assocs a = [ i := a!i | i <- indices a]
+@
+\eprog
+An array may be constructed from a pair of bounds and a list
+of values in index order using the function @listArray@:\nopagebreak
+\bprog
+@
+listArray:: (Ix a) => (a,a) -> [b] -> Array a b
+listArray bnds xs = array bnds (zipWith (:=) (range bnds) xs)
+@
+\eprogNoSkip
+
+\subsubsection{Accumulated Arrays}
+\index{array!accumulated}
+
+Another array creation function, @accumArray@,\indextt{accumArray}
+relaxes the restriction that a given index may appear at most once in
+the association list, using an {\em accumulating function} which
+combines the values of associations with the same index
+\cite{nikhil:id-nouveau,wadler:array-primitive}:
+\bprog
+@
+accumArray::(Ix a) => (b->c->b) -> b -> (a,a) -> [Assoc a c] -> Array a b
+@
+\eprog\indextt{accumArray}%
+The first argument of @accumArray@ is the accumulating function; the
+second is an initial value; the remaining two arguments are a bounds
+pair and an association list, as for the @array@ function.
+For example, given a list of values of some index type, @hist@
+produces a histogram of the number of occurrences of each index within
+a specified range:
+\bprog
+@
+hist :: (Ix a, Num b) => (a,a) -> [a] -> Array a b
+hist bnds is = accumArray (+) 0 bnds [i := 1 | i<-is, inRange bnds i]
+@
+\eprog
+If the accumulating function is strict, then @accumArray@ is
+strict in the values, as well as the indices, in the
+association list.  Thus, unlike ordinary arrays,
+accumulated arrays should not in general be recursive.
+
+\subsubsection{Incremental Array Updates}
+
+% no indent, please!
+\bprogB
+@
+(//)  :: (Ix a) => Array a b -> [Assoc a b] -> Array a b
+accum :: (Ix a) => (b -> c -> b) -> Array a b -> [Assoc a c] -> Array a b
+@
+\eprogNoSkip\indextt{//}\indextt{accum}
+
+The operator @(//)@ takes an array and a list of @Assoc@ pairs and returns
+an array identical to the left argument except that it has
+been updated by the associations in the right argument.  (As with
+the @array@ function, the indices in the association list must
+be unique for the updated elements to be defined.)  For example,
+if @m@ is a 1-origin, @n@ by @n@ matrix, then
+@m//[(i,i) := 0 | i <- [1..n]]@ is the same matrix, except with
+the diagonal zeroed.
+
+@accum@ "f" takes an array
+and an association list and accumulates pairs from the list into
+the array with the accumulating function "f".  Thus @accumArray@
+can be defined using @accum@:\nopagebreak[4]
+\bprog
+@
+accumArray f z b = accum f (array b [i := z | i <- range b])
+@
+\eprogNoSkip
+
+\subsubsection{Derived Arrays}
+\index{array!derived}
+
+The two functions @amap@\indextt{amap} and @ixmap@\indextt{ixmap}
+derive new arrays from existing ones; they may be
+thought of as providing function composition on the left and right,
+respectively, with the mapping that the original array embodies:
+\bprog
+@
+amap :: (Ix a) => (b -> c) -> Array a b -> Array a c
+amap f a = array b [i := f (a!i) | i <- range b]
+	   where b = bounds a
+
+ixmap :: (Ix a, Ix a') => (a',a') -> (a'->a) -> Array a b -> Array a' b
+ixmap bnds f a = array bnds [i := a ! f i | i <- range bnds]
+@
+\eprog\indextt{amap}\indextt{ixmap}%
+@amap@ is the array analogue of the @map@ function on lists, while
+@ixmap@ allows for transformations on array indices.
+Figure~\ref{derived-array-examples} shows some examples.
+
+\begin{figure}
+\outline{
+@
+-- A rectangular subarray
+subArray :: (Ix a) => (a,a) -> Array a b -> Array a b
+subArray bnds = ixmap bnds (\i->i)
+
+-- A row of a matrix
+row :: (Ix a, Ix b) => a -> Array (a,b) c -> Array b c
+row i x = ixmap (l',u') (\j->(i,j)) x where ((l,l'),(u,u')) = bounds x
+
+-- Diagonal of a square	matrix
+diag :: (Ix a) => Array (a,a) b -> Array a b
+diag x = ixmap (l,u) (\i->(i,i)) x
+	 where ((l,l'),(u,u')) | l == l' && u == u'  = bounds x
+
+-- Projection of first components of an array of pairs
+firstArray :: (Ix a) => Array a (b,c) -> Array a b
+firstArray = amap (\(x,y)->x)
+@
+}
+\ecaption{Derived array examples}
+\label{derived-array-examples}
+\end{figure}
+
+\subsection{Errors}
+\label{basic-errors}\index{error}
+
+All errors in \Haskell{} are semantically equivalent to $\bot$.
+@error:: String -> a@\indextt{error} takes a string
+argument and returns $\bot$.  An application of
+@error@ terminates evaluation of the
+program and displays the string as appropriate.
+
+% Local Variables: 
+% mode: latex
+% End:
+

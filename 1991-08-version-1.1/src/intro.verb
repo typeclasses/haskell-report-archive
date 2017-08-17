@@ -1,0 +1,299 @@
+%
+% $Header$
+%
+\section{Introduction}
+\label{introduction}
+
+\Haskell{}\index{Haskell@@\Haskell{}} is a general purpose, purely functional
+programming language incorporating many recent innovations in
+programming language research,
+including higher-order functions,
+non-strict semantics, static polymorphic typing, user-defined
+algebraic datatypes, pattern-matching, list comprehensions, a module
+system, and a rich set of primitive datatypes, including lists,
+arrays, arbitrary and fixed precision integers, and floating-point
+numbers.  \Haskell{} is both the culmination
+and solidification of many years of research on functional
+languages---the design has been influenced by languages as old as
+ISWIM and as new as Miranda.
+
+Although the initial emphasis was on standardisation, \Haskell{}
+also has several new features that both simplify and
+generalise the design.  For example,
+\begin{enumerate}
+\item Rather than using {\em ad hoc} techniques for
+overloading,\index{overloading}
+\Haskell{} provides an explicit overloading facility, integrated with
+the polymorphic type system\index{type system}, that allows the
+precise definition of overloading behaviour for any operator or function.
+
+%For example, this facility provides a simple way to handle
+%``equality types'' (types whose elements may be tested for generic
+%equality), a problem that arises with Hindley-Milner style
+%polymorphism, and that is usually treated in an {\em ad hoc} manner.
+
+\item The conventional notion of ``abstract data
+type''\index{abstract datatype}
+has been unbundled
+into two orthogonal components:
+data abstraction\index{data abstraction}
+and information hiding.\index{information hiding}
+
+\item \Haskell{} has a flexible I/O facility that unifies two
+popular styles of purely functional I/O---the {\em stream} model and
+the {\em continuation} model---and both styles can be mixed within the same
+program.  The system supports most of the standard operations provided by
+conventional operating systems while retaining referential
+transparency within a program.
+
+\item Recognising the importance of arrays, \Haskell{} has a
+family of multidimensional non-strict immutable arrays\index{array}
+whose special interaction with list comprehensions provides a
+convenient ``array comprehension'' syntax for defining arrays
+monolithically.
+\end{enumerate}
+
+This report defines the syntax for \Haskell{} programs and an
+informal abstract semantics for the meaning of such
+programs; the formal abstract semantics is in preparation.%
+\index{formal semantics}
+We leave as implementation
+dependent the ways in which \Haskell{} programs are to be
+manipulated, interpreted, compiled, etc.  This includes such issues as
+the nature of batch versus interactive programming environments, and
+the nature of error messages returned for undefined programs
+(i.e.~programs that formally evaluate to $\bot$).
+
+\subsection{Program Structure}\index{program structure}
+\label{programs}
+
+In this section, we describe the abstract syntactic and semantic structure of
+\Haskell{}, as well as how it relates to the organisation of the
+rest of the report.
+\begin{enumerate}
+\item At the topmost level a \Haskell{} program is a set
+of {\em modules} (described in Section~\ref{modules}).  Modules provide
+a way to control namespaces
+and to re-use software in large programs.
+
+\item The top level of a module consists of a collection of
+{\em declarations}, of which there are several kinds, all described
+in Section~\ref{declarations}.  Declarations
+define things such as ordinary values, datatypes, type
+classes, and fixity information.
+
+\item At the next lower level are {\em expressions}, described
+in Section~\ref{expressions}.  An expression denotes a {\em value}
+and has a {\em static type}; expressions are at the heart of
+\Haskell{} programming ``in the small.''
+
+\item At the bottom level is \Haskell{}'s {\em
+lexical structure}, defined in Section~\ref{lexical-structure}.  The
+lexical structure captures the concrete
+representation of \Haskell{} programs in text files.
+
+\end{enumerate}
+This report proceeds bottom-up with respect
+to \Haskell{}'s syntactic structure.
+
+The sections not mentioned above are Section~\ref{basic-types}, which
+describes the standard built-in datatypes in \Haskell{}, and
+Section~\ref{io}, which discusses the I/O facility in \Haskell{}
+(i.e.~how \Haskell{} programs communicate with the outside world).
+Also, there are several appendices describing the
+standard prelude, the
+concrete syntax,
+%% static and dynamic formal semantics,
+the semantics of I/O,
+and the specification of derived instances.
+
+Examples of \Haskell{} program fragments in running text are given
+in typewriter font:
+% highlighted with a vertical line to the left of the text:
+% as in:
+\bprog
+@
+ let x = 1
+     z = x+y
+ in  z+1
+@
+\eprog
+``Holes'' in program fragments representing arbitrary
+pieces of \Haskell{} code are written in italics, as in 
+"@if@ e_1 @then@ e_2 @else@ e_3".  Generally the italicised names will
+be mnemonic, such as "e" for expressions, "d" for
+declarations, "t" for types, etc.
+
+\subsection{The \Haskell{} Kernel}
+\index{Haskell kernel@@\Haskell{} kernel}
+\label{intro-kernel}
+
+\Haskell{} has adopted many of the convenient syntactic structures
+that have become popular
+in functional programming.  In all cases, their formal
+semantics can be given via translation into a proper subset of
+\Haskell{} called the \Haskell{} {\em kernel}.  It is
+essentially a slightly sugared variant of the lambda calculus with
+a straightforward denotational semantics.  The translation of each
+syntactic structure into the kernel is given as the syntax is
+introduced.
+% and the formal semantics of the kernel is given in
+% Appendix~\ref{formal-semantics}.
+This modular design facilitates
+reasoning about \Haskell{} programs and provides useful guidelines
+for implementors of the language.
+
+% In specifying the translation of special syntax, named entities are
+% often referred to ``as defined in the standard prelude.''  This means
+% that even if these names are rebound (i.e.~the standard prelude name
+% is not currently in scope), the translation still takes on the meaning
+% as defined in the standard prelude.  In other words, the meaning of
+% \Haskell{}'s syntax is invariant.
+
+\subsection{Values and Types}
+\index{value}\index{type}
+\label{errors}\index{error}
+
+An expression\index{expression} evaluates to a {\em value} and has a
+static {\em type}.  Values and types are not mixed in
+\Haskell{}.
+However, the type system
+allows user-defined datatypes of various sorts, and permits not only
+parametric polymorphism\index{polymorphism} (using a
+traditional Hindley-Milner\index{Hindley-Milner type system} type structure) but
+also {\em ad hoc} polymorphism, or {\em overloading} (using
+{\em type classes}).
+
+Errors in \Haskell{} are semantically equivalent to
+$\bot$.  Technically, they are not distinguishable
+from nontermination, so the language includes no mechanism
+for detecting or acting upon errors.  Of course, implementations
+will probably try to provide useful information about
+errors.
+% A more elaborate treatment of errors is left as a future extension to
+% \Haskell{}.
+
+\subsection{Namespaces}
+\index{namespaces}
+\label{namespaces}
+
+There are six kinds of names in \Haskell{}: those for {\em variables} and
+{\em constructors} denote values; those for {\em type variables}, {\em
+type constructors}, and {\em type classes} refer to entities related
+to the type system; and {\em module names} refer to modules.
+There are three constraints on naming:\nopagebreak[4]
+\begin{enumerate}
+\item Names for variables and type variables are identifiers beginning
+      with small letters; the other four kinds of names are
+      identifiers beginning with capitals.
+\item Constructor operators are operators beginning with ``@:@'';
+      variable operators are operators not beginning with ``@:@''.
+\item An identifier must not be used as the name of a type constructor
+      and a class in the same scope.
+\end{enumerate}
+These are the only constraints; for example,
+@Int@ may simultaneously be the name of a module, class, and constructor
+within a single scope.
+
+\Haskell{} provides a lexical syntax for infix {\em
+operators} (either functions or constructors).  To emphasise
+that operators are bound to the same things as identifiers, and to
+allow the two to be used interchangeably, there is a simple way to
+convert between the two: any function or constructor identifier may be
+converted into an operator by enclosing it in grave accents, and any
+operator may be converted into an identifier by enclosing it in
+parentheses.  For example, @x + y@ is equivalent to
+@(+) x y@, and @f x y@ is the same as
+\mbox{@x@ \bkqB@f@\bkqA@ y@}.
+These lexical matters are discussed further in
+Section~\ref{lexical-structure}.
+
+\subsection{Layout}\index{layout}
+\label{lexemes-layout}
+
+In the syntax given in the rest of the report, {\em declaration
+lists} are always preceded by one of the keywords @let@, @where@,
+or @of@, and are enclosed within curly braces (@{ }@) with
+the individual declarations separated (or terminated) by semicolons
+(@;@). For example, the syntax of a @let@ expression is:
+\[
+"@let {@ decl_1 @;@ decl_2 @;@ ... @;@ decl_n @} in @ exp"
+\]
+
+\input{layout}
+
+As an example, Figure~\ref{layout-before} shows a (somewhat contrived)
+module and Figure~\ref{layout-after} shows the result of applying the
+layout rule to it.  Note in particular: (a)~the line beginning @}};pop@,
+where the termination of the previous line invokes three applications
+of the layout rule, corresponding to the depth (3) of the nested
+@where@ clauses, (b)~the close braces in the @where@ clause nested
+within the tuple and @case@ expression, inserted because the end of the
+tuple was detected, and (c)~the close brace at the very end, inserted
+because of the column 0 indentation of the end-of-file token.
+
+\begin{figure}
+\outline{
+@
+module AStack( Stack, push, pop, top, size ) where
+data Stack a = Empty 
+             | MkStack a (Stack a)
+
+push :: a -> Stack a -> Stack a
+push x s = MkStack x s
+
+size :: Stack a -> Integer
+size s = length (stkToLst s)  where
+           stkToLst  Empty         = []
+           stkToLst (MkStack x s)  = x:xs where xs = stkToLst s
+
+pop :: Stack a -> (a, Stack a)
+pop (MkStack x s)
+  = (x, case s of r -> i r where i x = x) -- (pop Empty) is an error
+
+top :: Stack a -> a
+top (MkStack x s) = x                     -- (top Empty) is an error
+@
+}
+\ecaption{A sample program}
+\label{layout-before}
+\outline{
+@
+module AStack( Stack, push, pop, top, size ) where
+{data Stack a = Empty 
+             | MkStack a (Stack a)
+
+;push :: a -> Stack a -> Stack a
+;push x s = MkStack x s
+
+;size :: Stack a -> Integer
+;size s = length (stkToLst s)  where
+           {stkToLst  Empty         = []
+           ;stkToLst (MkStack x s)  = x:xs where {xs = stkToLst s
+
+}};pop :: Stack a -> (a, Stack a)
+;pop (MkStack x s)
+  = (x, case s of {r -> i r where {i x = x}}) -- (pop Empty) is an error
+
+;top :: Stack a -> a
+;top (MkStack x s) = x                        -- (top Empty) is an error
+}
+@
+}
+\ecaption{Sample program with layout expanded}
+\label{layout-after}
+
+\end{figure}
+
+When comparing indentations for standard \Haskell{} programs, a
+fixed-width font with this tab convention is assumed: tab
+stops are 8 characters apart (with the first tab stop in column 9),
+and a tab character causes the insertion of enough spaces (always
+$\geq 1$) to align the current position with the next tab stop.
+Particular implementations may alter this rule to accommodate
+variable-width fonts and alternate tab conventions, but standard
+\Haskell{} (i.e., portable) programs must observe this rule.
+
+% Local Variables: 
+% mode: latex
+% End:

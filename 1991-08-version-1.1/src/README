@@ -1,0 +1,62 @@
+This directory contains the Haskell Report, version 1.1.
+
+The .verb files are the Report proper, written as souped-up LaTeX
+files; "haskell.verb" is the top-level file.  The .verb files are
+pre-processed into .tex (ordinary LaTeX) files by "verbatim".  The .hs
+files are the Haskell source for the standard prelude.
+
+TO PRINT THE REPORT
+
+You must have a "big" TeX/LaTeX to produce the Report from its
+sources.  If your LaTeX uses the new font-selection scheme, you will
+need to make adjustments as described at the top of the "haskell.verb"
+driver file.
+
+Alternatively, you may grab the file "hsReport-1.1.dvi.Z" (compressed
+DVI file) or "hsReport-1.1.ps.Z" (compressed PostScript file) from
+wherever you got this distribution, and print directly.
+
+The report is set up to make pages suitable for **TWO-SIDED**
+duplication.  If you have a "big" TeX/LaTeX and the program
+"makeindex", type "make" and then print "haskell.dvi" in your
+favo[u]rite way; we do:
+
+    % make haskell.dvi
+    % dvips -P<your-printer> haskell.dvi
+
+In the unlikely event that your first LaTeX run changes the page
+numbering (e.g., you get a "Warning: Label(s) may have changed"
+message), you will need to RE-RUN "make haskell.dvi" one or two times
+so that cross-references can stabilise, before printing.
+
+If you want a **ONE-SIDED** format, make the adjustments indicated in
+the "haskell.verb" driver file.
+
+"makeindex" is in the Unix TeX distribution; you can also get it by
+anonymous FTP from ucbarpa.berkeley.edu.  Otherwise, you can almost
+certainly use a pre-built "haskell.ind" file supplied with the
+distribution...
+
+    * If you messed up your "haskell.ind" file, restore it with 
+      "cp haskell.ind.two-sided haskell.ind".
+      (or "...one-sided", as appropriate)
+
+    * Remove the makeindex-using rule in the Makefile
+
+    * Type "make haskell.dvi", etc., as described above.
+
+    * Be prepared for the page numbers in the index to be wrong if,
+      for some reason, your LaTeX breaks pages at different places
+      from our LaTeX (shouldn't happen, but...).
+
+Don't delete the TeXified standard prelude files (Prelude*.tex) unless
+you can run "splitAndIndexPgm" with which to re-make from the
+Prelude*.hs files.  You must have "perl" to run "splitAndIndexPgm".
+"perl" is available by anonymous FTP from many sites, including
+comp.sources.unix archives, jpl-devvax.jpl.nasa.gov and
+prep.ai.mit.edu.
+
+Please send comments about this distribution to Will Partain,
+partain@dcs.glasgow.ac.uk.  Weightier matters about Haskell should be
+directed to the Haskell mailing list discussed in the Preface.  Happy
+Haskell hacking!

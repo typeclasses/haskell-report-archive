@@ -1,0 +1,394 @@
+\noindent\bprogB
+\mbox{\tt module\ \ PreludeText\ (}\\
+\mbox{\tt \ \ \ \ \ \ \ \ Text(readsPrec,showsPrec,readList,showList),}\\
+\mbox{\tt \ \ \ \ \ \ \ \ ReadS,\ ShowS,\ reads,\ shows,\ show,\ read,\ lex,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ showChar,\ showString,\ readParen,\ showParen\ )\ where}
+\index{PreludeText@{\ptt PreludeText} (module)}%
+\eprogB\noindent\bprogB
+\mbox{\tt type\ \ ReadS\ a\ =\ String\ ->\ [(a,String)]}\\
+\mbox{\tt type\ \ ShowS\ \ \ =\ String\ ->\ String}
+\index{ReadS@{\ptt ReadS} (type synonym)}%
+\index{ShowS@{\ptt ShowS} (type synonym)}%
+\eprogB\noindent\bprogB
+\mbox{\tt class\ \ Text\ a\ \ where}\\
+\mbox{\tt \ \ \ \ readsPrec\ ::\ Int\ ->\ ReadS\ a}\\
+\mbox{\tt \ \ \ \ showsPrec\ ::\ Int\ ->\ a\ ->\ ShowS}\\
+\mbox{\tt \ \ \ \ readList\ \ ::\ ReadS\ [a]}\\
+\mbox{\tt \ \ \ \ showList\ \ ::\ [a]\ ->\ ShowS}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ readList\ \ \ \ =\ readParen\ False\ ({\char'134}r\ ->\ [pr\ |\ ("[",s)\ \ <-\ lex\ r,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pr\ \ \ \ \ \ \ <-\ readl\ s])}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ readl\ \ s\ =\ [([],t)\ \ \ |\ ("]",t)\ \ <-\ lex\ s]\ ++}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [(x:xs,u)\ |\ (x,t)\ \ \ \ <-\ reads\ s,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (xs,u)\ \ \ <-\ readl'\ t]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readl'\ s\ =\ [([],t)\ \ \ |\ ("]",t)\ \ <-\ lex\ s]\ ++}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [(x:xs,v)\ |\ (",",t)\ \ <-\ lex\ s,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (x,u)\ \ \ \ <-\ read\ t,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (xs,v)\ \ \ <-\ readl'\ u]}\\
+\mbox{\tt \ \ \ \ showList\ []\ =\ showString\ "[]"}\\
+\mbox{\tt \ \ \ \ showList\ (x:xs)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ showChar\ '['\ .\ shows\ x\ .\ showl\ xs}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ showl\ []\ \ \ \ \ =\ showChar\ ']'}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ showl\ (x:xs)\ =\ showChar\ ','\ .\ shows\ x\ .\ showl\ xs}
+\indextt{readsPrec}%
+\indextt{showsPrec}%
+\indextt{readList}%
+\indextt{showList}%
+\indextt{Text}%
+\eprogB\noindent\bprogB
+\mbox{\tt reads\ \ \ \ \ \ \ \ \ \ \ ::\ (Text\ a)\ =>\ ReadS\ a}\\
+\mbox{\tt reads\ \ \ \ \ \ \ \ \ \ \ =\ \ readsPrec\ 0}
+\indextt{reads}%
+\eprogB\noindent\bprogB
+\mbox{\tt shows\ \ \ \ \ \ \ \ \ \ \ ::\ (Text\ a)\ =>\ a\ ->\ ShowS}\\
+\mbox{\tt shows\ \ \ \ \ \ \ \ \ \ \ =\ \ showsPrec\ 0}
+\indextt{shows}%
+\eprogB\noindent\bprogB
+\mbox{\tt read\ \ \ \ \ \ \ \ \ \ \ \ ::\ (Text\ a)\ =>\ String\ ->\ a}\\
+\mbox{\tt read\ s\ \ \ \ \ \ \ \ \ \ =\ \ case\ [x\ |\ (x,t)\ <-\ reads\ s,\ ("","")\ <-\ lex\ t]\ of}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [x]\ ->\ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ []\ \ ->\ error\ "read{\char'173}PreludeText{\char'175}:\ no\ parse"}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\char'137}\ \ \ ->\ error\ "read{\char'173}PreludeText{\char'175}:\ ambiguous\ parse"}
+\indextt{read}%
+\eprogB\noindent\bprogB
+\mbox{\tt show\ \ \ \ \ \ \ \ \ \ \ \ ::\ (Text\ a)\ =>\ a\ ->\ String}\\
+\mbox{\tt show\ x\ \ \ \ \ \ \ \ \ \ =\ \ shows\ x\ ""}
+\indextt{show}%
+\eprogB\noindent\bprogB
+\mbox{\tt showChar\ \ \ \ \ \ \ \ ::\ Char\ ->\ ShowS}\\
+\mbox{\tt showChar\ \ \ \ \ \ \ \ =\ \ (:)}
+\indextt{showChar}%
+\eprogB\noindent\bprogB
+\mbox{\tt showString\ \ \ \ \ \ ::\ String\ ->\ ShowS}\\
+\mbox{\tt showString\ \ \ \ \ \ =\ \ (++)}
+\indextt{showString}%
+\eprogB\noindent\bprogB
+\mbox{\tt showParen\ \ \ \ \ \ \ ::\ Bool\ ->\ ShowS\ ->\ ShowS}\\
+\mbox{\tt showParen\ b\ p\ \ \ =\ \ if\ b\ then\ showChar\ '('\ .\ p\ .\ showChar\ ')'\ else\ p}
+\indextt{showParen}%
+\eprogB\noindent\bprogB
+\mbox{\tt readParen\ \ \ \ \ \ \ ::\ Bool\ ->\ ReadS\ a\ ->\ ReadS\ a}\\
+\mbox{\tt readParen\ b\ g\ \ \ =\ \ if\ b\ then\ mandatory\ else\ optional}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ optional\ r\ \ =\ g\ r\ ++\ mandatory\ r}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ mandatory\ r\ =\ [(x,u)\ |\ ("(",s)\ <-\ lex\ r,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (x,t)\ \ \ <-\ optional\ s,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (")",u)\ <-\ lex\ t\ \ \ \ ]}
+\indextt{readParen}%
+\eprogB\noindent\bprogB
+\mbox{\tt lex\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ ReadS\ String}\\
+\mbox{\tt lex\ ""\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ [("","")]}\\
+\mbox{\tt lex\ (c:s)\ |\ isSpace\ c\ \ \ =\ lex\ (dropWhile\ isSpace\ s)}\\
+\mbox{\tt lex\ ('-':'-':s)\ \ \ \ \ \ \ \ \ =\ case\ dropWhile\ (/=\ '{\char'134}n')\ s\ of}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ '{\char'134}n':t\ ->\ lex\ t}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\char'137}\ \ \ \ \ \ ->\ []\ --\ unterminated\ end-of-line}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ --\ comment}
+\indextt{lex}%
+\eprogB\noindent\bprogB
+\mbox{\tt lex\ ('{\char'173}':'-':s)\ \ \ \ \ \ \ \ \ =\ lexNest\ lex\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lexNest\ f\ ('-':'{\char'175}':s)\ =\ f\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lexNest\ f\ ('{\char'173}':'-':s)\ =\ lexNest\ (lexNest\ f)\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lexNest\ f\ (c:s)\ \ \ \ \ \ \ \ \ \ \ \ \ =\ lexNest\ f\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lexNest\ {\char'137}\ ""\ \ \ \ \ \ \ \ \ \ =\ []\ --\ unterminated}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ --\ nested\ comment}
+\eprogB\noindent\bprogB
+\mbox{\tt lex\ ('-':'>':s)\ \ \ \ \ \ \ \ \ =\ [("->",s)]}\\
+\mbox{\tt lex\ ('<':'-':s)\ \ \ \ \ \ \ \ \ =\ [("<-",s)]}\\
+\mbox{\tt lex\ ('{\char'134}'':s)\ \ \ \ \ \ \ \ \ \ \ \ =\ [('{\char'134}'':ch++"'",\ t)\ |\ (ch,t)\ \ <-\ lexLitChar\ s,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ch\ /=\ "'"\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ]}\\
+\mbox{\tt lex\ ('"':s)\ \ \ \ \ \ \ \ \ \ \ \ \ =\ [('"':str,\ t)\ \ \ \ \ \ |\ (str,t)\ <-\ lexString\ s]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lexString\ ('"':s)\ =\ [("{\char'134}"",s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lexString\ s\ =\ [(ch++str,\ u)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ (ch,t)\ \ <-\ lexStrItem\ s,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (str,u)\ <-\ lexString\ t\ \ ]}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lexStrItem\ ('{\char'134}{\char'134}':'{\char'46}':s)\ =\ [("{\char'134}{\char'134}{\char'46}",s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lexStrItem\ ('{\char'134}{\char'134}':c:s)\ |\ isSpace\ c}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ [("{\char'134}{\char'134}{\char'46}",t)\ |\ '{\char'134}{\char'134}':t\ <-\ [dropWhile\ isSpace\ s]]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lexStrItem\ s\ \ \ \ \ \ \ \ \ \ \ \ =\ lexLitChar\ s}
+\eprogB\noindent\bprogB
+\mbox{\tt lex\ (c:s)\ |\ isSingle\ c\ \ =\ [([c],s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ |\ isSym1\ c\ \ \ \ =\ [(c:sym,t)\ \ \ \ \ \ \ \ \ |\ (sym,t)\ <-\ [span\ isSym\ s]]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ |\ isAlpha\ c\ \ \ =\ [(c:nam,t)\ \ \ \ \ \ \ \ \ |\ (nam,t)\ <-\ [span\ isIdChar\ s]]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ |\ isDigit\ c\ \ \ =\ [(c:ds++fe,t)\ \ \ \ \ \ |\ (ds,s)\ \ <-\ [span\ isDigit\ s],}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (fe,t)\ \ <-\ lexFracExp\ s\ \ \ \ \ ]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ |\ otherwise\ \ \ =\ []\ \ \ \ --\ bad\ character}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isSingle\ c\ \ =\ \ c\ `elem`\ ",;()[]{\char'173}{\char'175}{\char'137}"}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isSym1\ c\ \ \ \ =\ \ c\ `elem`\ "-{\char'176}"\ ||\ isSym\ c}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isSym\ c\ \ \ \ \ =\ \ c\ `elem`\ "!@{\char'43}{\char'44}{\char'45}{\char'46}*+./<=>?{\char'134}{\char'134}{\char'136}|:"}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ isIdChar\ c\ \ =\ \ isAlphanum\ c\ ||\ c\ `elem`\ "{\char'137}'"}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lexFracExp\ ('.':s)\ =\ [('.':ds++e,u)\ |\ (ds,t)\ <-\ lexDigits\ s,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (e,u)\ \ <-\ lexExp\ t\ \ \ \ ]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lexFracExp\ s\ \ \ \ \ \ \ =\ [("",s)]}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lexExp\ (e:s)\ |\ e\ `elem`\ "eE"}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ [(e:c:ds,u)\ |\ (c:t)\ \ <-\ [s],\ c\ `elem`\ "+-",}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (ds,u)\ <-\ lexDigits\ t]\ ++}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [(e:ds,t)\ \ \ |\ (ds,t)\ <-\ lexDigits\ s]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lexExp\ s\ =\ [("",s)]}
+\eprogB\noindent\bprogB
+\mbox{\tt lexDigits\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ ReadS\ String\ }\\
+\mbox{\tt lexDigits\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ nonnull\ isDigit}
+\indextt{lexDigits}%
+\eprogB\noindent\bprogB
+\mbox{\tt nonnull\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (char\ ->\ Bool)\ ->\ ReadS\ String}\\
+\mbox{\tt nonnull\ p\ s\ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ [(cs,t)\ |\ (cs@({\char'137}:{\char'137}),t)\ <-\ [span\ p\ s]]}
+\indextt{nonnull}%
+\eprogB\noindent\bprogB
+\mbox{\tt lexLitChar\ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ ReadS\ String}\\
+\mbox{\tt lexLitChar\ ('{\char'134}{\char'134}':s)\ \ \ \ \ =\ \ [('{\char'134}{\char'134}':esc,\ t)\ |\ (esc,t)\ <-\ lexEsc\ s]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ lexEsc\ (c:s)\ \ \ \ \ |\ c\ `elem`\ "abfnrtv{\char'134}{\char'134}{\char'134}"'"\ =\ [([c],s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ lexEsc\ ('{\char'136}':c:s)\ |\ c\ >=\ '@'\ {\char'46}{\char'46}\ c\ <=\ '{\char'137}'\ \ =\ [(['{\char'136}',c],s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ lexEsc\ s@(d:{\char'137})\ \ \ |\ isDigit\ d\ \ \ \ \ \ \ \ \ \ \ \ \ =\ lexDigits\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ lexEsc\ ('o':s)\ \ =\ \ [('o':os,\ t)\ |\ (os,t)\ <-\ nonnull\ isOctDigit\ s]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ lexEsc\ ('x':s)\ \ =\ \ [('x':xs,\ t)\ |\ (xs,t)\ <-\ nonnull\ isHexDigit\ s]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ lexEsc\ s@(c:{\char'137})\ \ \ |\ isUpper\ c}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ case\ [(mne,s')\ |\ mne\ <-\ "DEL"\ :\ elems\ asciiTab,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ([],s')\ <-\ [match\ mne\ s]\ \ \ \ \ \ ]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ of\ (pr:{\char'137})\ ->\ [pr]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ []\ \ \ \ \ ->\ []}\\
+\mbox{\tt \ \ \ \ \ \ \ \ lexEsc\ {\char'137}\ \ \ \ \ \ \ \ =\ \ []}\\
+\mbox{\tt lexLitChar\ (c:s)\ \ \ \ \ \ \ \ =\ \ [([c],s)]}
+\indextt{lexLitChar}%
+\eprogB\noindent\bprogB
+\mbox{\tt isOctDigit\ c\ \ =\ \ c\ >=\ '0'\ {\char'46}{\char'46}\ c\ <=\ '7'}\\
+\mbox{\tt isHexDigit\ c\ \ =\ \ isDigit\ c\ ||\ c\ >=\ 'A'\ {\char'46}{\char'46}\ c\ <=\ 'F'}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ||\ c\ >=\ 'a'\ {\char'46}{\char'46}\ c\ <=\ 'f'}
+\eprogB\noindent\bprogB
+\mbox{\tt match\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (Eq\ a)\ =>\ [a]\ ->\ [a]\ ->\ ([a],[a])}\\
+\mbox{\tt match\ (x:xs)\ (y:ys)\ |\ x\ ==\ y\ \ =\ \ match\ xs\ ys}\\
+\mbox{\tt match\ xs\ \ \ \ \ ys\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ (xs,ys)}
+\indextt{match}%
+\eprogB\noindent\bprogB
+\mbox{\tt asciiTab\ =\ listArray\ ('{\char'134}NUL',\ '\ ')}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ ["NUL",\ "SOH",\ "STX",\ "ETX",\ "EOT",\ "ENQ",\ "ACK",\ "BEL",}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ "BS",\ \ "HT",\ \ "LF",\ \ "VT",\ \ "FF",\ \ "CR",\ \ "SO",\ \ "SI",\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ "DLE",\ "DC1",\ "DC2",\ "DC3",\ "DC4",\ "NAK",\ "SYN",\ "ETB",}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ "CAN",\ "EM",\ \ "SUB",\ "ESC",\ "FS",\ \ "GS",\ \ "RS",\ \ "US",\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ "SP"]\ }
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Trivial\ type}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ \ Text\ ()\ \ where}\\
+\mbox{\tt \ \ \ \ readsPrec\ p\ \ \ \ =\ readParen\ False}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ({\char'134}r\ ->\ [((),t)\ |\ ("(",s)\ <-\ lex\ r,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (")",t)\ <-\ lex\ s\ ]\ )}\\
+\mbox{\tt \ \ \ \ showsPrec\ p\ ()\ =\ showString\ "()"}
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Binary\ type}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ \ Text\ Bin\ \ where}\\
+\mbox{\tt \ \ \ \ readsPrec\ p\ s\ \ =\ \ error\ "readsPrec{\char'173}PreludeText{\char'175}:\ Cannot\ read\ Bin."}\\
+\mbox{\tt \ \ \ \ showsPrec\ p\ b\ \ =\ \ showString\ "<<Bin>>"}
+\index{Text@{\ptt Text}!instance for {\ptt Bin}}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Character\ type}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ \ Text\ Char\ \ where}\\
+\mbox{\tt \ \ \ \ readsPrec\ p\ \ \ \ \ \ =\ readParen\ False}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ({\char'134}r\ ->\ [(c,t)\ |\ ('{\char'134}'':s,t)<-\ lex\ r,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (c,{\char'137})\ \ \ \ \ <-\ readLitChar\ s])}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ showsPrec\ p\ '{\char'134}''\ =\ showString\ "'{\char'134}{\char'134}''"}\\
+\mbox{\tt \ \ \ \ showsPrec\ p\ c\ \ \ \ =\ showChar\ '{\char'134}''\ .\ showLitChar\ c\ .\ showChar\ '{\char'134}''}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ readList\ =\ readParen\ False\ ({\char'134}r\ ->\ [pr\ |\ ('"':s,\ t)\ <-\ lex\ r,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ pr\ <-\ readl\ s\ \ \ \ \ \ \ ])}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ readl\ ('"':s)\ \ \ \ \ \ =\ [("",s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readl\ ('{\char'134}{\char'134}':'{\char'46}':s)\ =\ readl\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readl\ s\ \ \ \ \ \ \ \ \ \ \ \ =\ [(c:cs,u)\ |\ (c\ ,t)\ <-\ readLitChar\ s,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (cs,u)\ <-\ readl\ t\ \ \ \ \ \ \ ]}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ showList\ cs\ =\ showChar\ '"'\ .\ showl\ cs}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ showl\ ""\ \ \ \ \ \ \ =\ showChar\ '"'}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ showl\ ('"':cs)\ =\ showString\ "{\char'134}{\char'134}{\char'134}""\ .\ showl\ cs}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ showl\ (c:cs)\ \ \ =\ showLitChar\ c\ .\ showl\ cs}
+\index{Text@{\ptt Text}!instance for {\ptt Char}}%
+\eprogB\noindent\bprogB
+\mbox{\tt readLitChar\ \ \ \ \ \ \ \ \ \ \ \ \ ::\ ReadS\ Char}\\
+\mbox{\tt readLitChar\ ('{\char'134}{\char'134}':s)\ \ \ \ =\ \ readEsc\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readEsc\ ('a':s)\ \ =\ [('{\char'134}a',s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readEsc\ ('b':s)\ \ =\ [('{\char'134}b',s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readEsc\ ('f':s)\ \ =\ [('{\char'134}f',s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readEsc\ ('n':s)\ \ =\ [('{\char'134}n',s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readEsc\ ('r':s)\ \ =\ [('{\char'134}r',s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readEsc\ ('t':s)\ \ =\ [('{\char'134}t',s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readEsc\ ('v':s)\ \ =\ [('{\char'134}v',s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readEsc\ ('{\char'134}{\char'134}':s)\ =\ [('{\char'134}{\char'134}',s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readEsc\ ('"':s)\ \ =\ [('"',s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readEsc\ ('{\char'134}'':s)\ =\ [('{\char'134}'',s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readEsc\ ('{\char'136}':c:s)\ |\ c\ >=\ '@'\ {\char'46}{\char'46}\ c\ <=\ '{\char'137}'}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ [(chr\ (ord\ c\ -\ ord\ '@'),\ s)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readEsc\ s@(d:{\char'137})\ |\ isDigit\ d}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ [(chr\ n,\ t)\ |\ (n,t)\ <-\ readDec\ s]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readEsc\ ('o':s)\ \ =\ [(chr\ n,\ t)\ |\ (n,t)\ <-\ readOct\ s]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readEsc\ ('x':s)\ \ =\ [(chr\ n,\ t)\ |\ (n,t)\ <-\ readHex\ s]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readEsc\ s@(c:{\char'137})\ |\ isUpper\ c}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ let\ table\ =\ ('{\char'134}DEL'\ :=\ "DEL")\ :\ assocs\ asciiTab}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ in\ case\ [(c,s')\ |\ (c\ :=\ mne)\ <-\ table,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ([],s')\ <-\ [match\ mne\ s]]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ of\ (pr:{\char'137})\ ->\ [pr]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ []\ \ \ \ \ ->\ []}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readEsc\ {\char'137}\ \ \ \ \ \ \ \ =\ []}\\
+\mbox{\tt readLitChar\ (c:s)\ \ \ \ \ \ \ =\ \ [(c,s)]}
+\indextt{readLitChar}%
+\eprogB\noindent\bprogB
+\mbox{\tt showLitChar\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Char\ ->\ ShowS}\\
+\mbox{\tt showLitChar\ c\ |\ c\ >\ '{\char'134}DEL'\ =\ \ protectEsc\ isDigit\ (showInt\ (ord\ c))}\\
+\mbox{\tt showLitChar\ '{\char'134}DEL'\ \ \ \ \ \ \ \ \ =\ \ showString\ "{\char'134}{\char'134}DEL"}\\
+\mbox{\tt showLitChar\ '{\char'134}{\char'134}'\ \ \ \ \ \ \ \ \ \ \ =\ \ showString\ "{\char'134}{\char'134}{\char'134}{\char'134}"}\\
+\mbox{\tt showLitChar\ c\ |\ c\ >=\ '\ '\ \ \ =\ \ showChar\ c}\\
+\mbox{\tt showLitChar\ '{\char'134}a'\ \ \ \ \ \ \ \ \ \ \ =\ \ showString\ "{\char'134}{\char'134}a"}\\
+\mbox{\tt showLitChar\ '{\char'134}b'\ \ \ \ \ \ \ \ \ \ \ =\ \ showString\ "{\char'134}{\char'134}b"}\\
+\mbox{\tt showLitChar\ '{\char'134}f'\ \ \ \ \ \ \ \ \ \ \ =\ \ showString\ "{\char'134}{\char'134}f"}\\
+\mbox{\tt showLitChar\ '{\char'134}n'\ \ \ \ \ \ \ \ \ \ \ =\ \ showString\ "{\char'134}{\char'134}n"}\\
+\mbox{\tt showLitChar\ '{\char'134}r'\ \ \ \ \ \ \ \ \ \ \ =\ \ showString\ "{\char'134}{\char'134}r"}\\
+\mbox{\tt showLitChar\ '{\char'134}t'\ \ \ \ \ \ \ \ \ \ \ =\ \ showString\ "{\char'134}{\char'134}t"}\\
+\mbox{\tt showLitChar\ '{\char'134}v'\ \ \ \ \ \ \ \ \ \ \ =\ \ showString\ "{\char'134}{\char'134}v"}\\
+\mbox{\tt showLitChar\ '{\char'134}SO'\ \ \ \ \ \ \ \ \ \ =\ \ protectEsc\ (==\ 'H')\ (showString\ "{\char'134}{\char'134}SO")}\\
+\mbox{\tt showLitChar\ c\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ showString\ ('{\char'134}{\char'134}'\ :\ asciiTab!c)}
+\indextt{showLitChar}%
+\eprogB\noindent\bprogB
+\mbox{\tt protectEsc\ p\ f\ \ \ \ \ \ \ \ \ \ \ \ \ =\ f\ .\ cont}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ cont\ s@(c:{\char'137})\ |\ p\ c\ =\ "{\char'134}{\char'134}{\char'46}"\ ++\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ cont\ s\ \ \ \ \ \ \ \ \ \ \ \ \ =\ s}
+\eprogB\noindent\bprogB
+\mbox{\tt readDec,\ readOct,\ readHex\ ::\ (Integral\ a)\ =>\ ReadS\ a}\\
+\mbox{\tt readDec\ =\ readInt\ 10\ isDigit\ ({\char'134}d\ ->\ ord\ d\ -\ ord\ '0')}\\
+\mbox{\tt readOct\ =\ readInt\ \ 8\ isOctDigit\ ({\char'134}d\ ->\ ord\ d\ -\ ord\ '0')}\\
+\mbox{\tt readHex\ =\ readInt\ 16\ isHexDigit\ hex}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ where\ hex\ d\ =\ ord\ d\ -\ (if\ isDigit\ d\ then\ ord\ '0'}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ else\ ord\ (if\ isUpper\ d\ then\ 'A'\ else\ 'a')}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -\ 10)}
+\indextt{readDec}%
+\indextt{readOct}%
+\indextt{readHex}%
+\eprogB\noindent\bprogB
+\mbox{\tt readInt\ ::\ (Integral\ a)\ =>\ a\ ->\ (Char\ ->\ Bool)\ ->\ (Char\ ->\ Int)\ ->\ ReadS\ a}\\
+\mbox{\tt readInt\ radix\ isDig\ digToInt\ s\ =}\\
+\mbox{\tt \ \ \ \ [(foldl1\ ({\char'134}n\ d\ ->\ n\ *\ radix\ +\ d)\ (map\ (fromIntegral\ .\ digToInt)\ ds),\ r)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ |\ (ds,r)\ <-\ nonnull\ isDig\ s\ ]}
+\indextt{readInt}%
+\eprogB\noindent\bprogB
+\mbox{\tt showInt\ ::\ (Integral\ a)\ =>\ a\ ->\ ShowS}\\
+\mbox{\tt showInt\ n\ =\ if\ n\ <\ 0\ then\ showChar\ '-'\ .\ showInt'\ (-n)\ else\ showInt'\ n}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ where\ showInt'\ n\ r\ =\ let\ (n',d)\ =\ divRem\ n\ 10}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ r'\ =\ chr\ (ord\ '0'\ +\ fromIntegral\ d)\ :\ r}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ in\ if\ n'\ ==\ 0\ then\ r'\ else\ showInt\ n'\ r'}
+\indextt{showInt}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Standard\ integral\ types}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ \ Text\ Int\ \ where}\\
+\mbox{\tt \ \ \ \ readsPrec\ p\ =\ readSigned\ readDec}\\
+\mbox{\tt \ \ \ \ showsPrec\ \ \ =\ showSigned\ showInt}
+\index{Text@{\ptt Text}!instance for {\ptt Int}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Text\ Integer\ \ where}\\
+\mbox{\tt \ \ \ \ readsPrec\ p\ =\ readSigned\ readDec}\\
+\mbox{\tt \ \ \ \ showsPrec\ \ \ =\ showSigned\ showInt}
+\index{Text@{\ptt Text}!instance for {\ptt Integer}}%
+\eprogB\noindent\bprogB
+\mbox{\tt readSigned::\ (Real\ a)\ =>\ ReadS\ a\ ->\ ReadS\ a}\\
+\mbox{\tt readSigned\ readPos\ =\ readParen\ False\ read'}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ read'\ r\ \ =\ read''\ r\ ++}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [(-x,t)\ |\ ("-",s)\ <-\ lex\ r,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (x,t)\ \ \ <-\ read''\ s]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ read''\ r\ =\ [(n,s)\ \ |\ (str,s)\ <-\ lex\ r,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (n,"")\ \ <-\ readPos\ str]}
+\indextt{readSigned}%
+\eprogB\noindent\bprogB
+\mbox{\tt showSigned::\ (Real\ a)\ =>\ (a\ ->\ ShowS)\ ->\ Int\ ->\ a\ ->\ ShowS}\\
+\mbox{\tt showSigned\ showPos\ p\ x\ =\ showParen\ (x\ <\ 0\ {\char'46}{\char'46}\ p\ >\ 6)\ (showPos\ x)}
+\indextt{showSigned}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Standard\ real\ floating-point\ types}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ \ Text\ Float\ \ where}\\
+\mbox{\tt \ \ \ \ readsPrec\ p\ =\ readSigned\ readFloat}\\
+\mbox{\tt \ \ \ \ showsPrec\ \ \ =\ showSigned\ showFloat}
+\index{Text@{\ptt Text}!instance for {\ptt Float}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Text\ Double\ \ where}\\
+\mbox{\tt \ \ \ \ readsPrec\ p\ =\ readSigned\ readFloat}\\
+\mbox{\tt \ \ \ \ showsPrec\ \ \ =\ showSigned\ showFloat}
+\index{Text@{\ptt Text}!instance for {\ptt Double}}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ The\ functions\ readFloat\ and\ showFloat\ below\ use\ rational\ arithmetic}\\
+\mbox{\tt --\ to\ insure\ correct\ conversion\ between\ the\ floating-point\ radix\ and}\\
+\mbox{\tt --\ decimal.\ \ It\ is\ often\ possible\ to\ use\ a\ higher-precision\ floating-}\\
+\mbox{\tt --\ point\ type\ to\ obtain\ the\ same\ results.}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt readFloat\ r\ =\ [(fromRational\ ((n{\char'45}1)*10{\char'136}{\char'136}(k-d)),\ t)\ |\ (n,d,s)\ <-\ readFix\ r,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (k,t)\ \ \ <-\ readExp\ s]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ readFix\ r\ =\ [(read\ (ds++ds'),\ length\ ds',\ t)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ (ds,'.':s)\ <-\ lexDigits\ r,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (ds',t)\ \ \ \ <-\ lexDigits\ s\ ]}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readExp\ (e:s)\ |\ e\ `elem`\ "eE"\ =\ readExp'\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readExp\ s\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ [(0,s)]}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readExp'\ ('-':s)\ =\ [(-k,t)\ |\ (k,t)\ <-\ readDec\ s]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readExp'\ ('+':s)\ =\ readDec\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readExp'\ s\ \ \ \ \ \ \ =\ readDec\ s}
+\eprogB\noindent\bprogB
+\mbox{\tt --\ The\ number\ of\ decimal\ digits\ m\ below\ is\ chosen\ to\ guarantee\ }\\
+\mbox{\tt --\ read(show\ x)\ =\ x.\ \ See}\\
+\mbox{\tt --\ \ \ \ \ \ Matula,\ D.\ W.\ \ A\ formalization\ of\ floating-point\ numeric\ base}\\
+\mbox{\tt --\ \ \ \ \ \ conversion.\ \ IEEE\ Transactions\ on\ Computers\ C-19,\ 8\ (1970\ August),}\\
+\mbox{\tt --\ \ \ \ \ \ 681-692.}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt showFloat\ x\ =}\\
+\mbox{\tt \ \ \ \ if\ x\ ==\ 0\ then\ showString\ ("0."\ ++\ take\ (m-1)\ (repeat\ '0'))}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ else\ if\ e\ >=\ m-1\ ||\ e\ <\ 0\ then\ showSci\ else\ showFix}\\
+\mbox{\tt \ \ \ \ where}\\
+\mbox{\tt \ \ \ \ showFix\ \ \ \ \ =\ showString\ whole\ .\ showChar\ '.'\ .\ showString\ frac}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (whole,frac)\ =\ splitAt\ (e+1)\ (show\ sig)}\\
+\mbox{\tt \ \ \ \ showSci\ \ \ \ \ =\ showChar\ d\ .\ showChar\ '.'\ .\ showString\ frac}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ .\ showChar\ 'e'\ .\ showInt\ e}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (d:frac)\ =\ show\ sig}\\
+\mbox{\tt \ \ \ \ (m,\ sig,\ e)\ =\ if\ b\ ==\ 10\ then\ (w,\ \ \ s,\ \ \ n+w-1)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ else\ (m',\ sig',\ e'\ \ \ )}\\
+\mbox{\tt \ \ \ \ m'\ \ \ \ \ \ \ \ \ \ =\ ceiling\ ((fromInt\ w\ *\ log\ (fromInteger\ b))/log\ 10)\ +\ 1}\\
+\mbox{\tt \ \ \ \ (sig',\ e')\ \ =\ if\ \ \ \ \ \ sig1\ >=\ 10{\char'136}m'\ \ \ \ \ then\ (round\ (t/10),\ e1+1)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ else\ if\ sig1\ <\ \ 10{\char'136}(m'-1)\ then\ (round\ (t*10),\ e1-1)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ else\ (sig1,\ \ \ \ \ \ \ \ \ e1\ \ )}\\
+\mbox{\tt \ \ \ \ sig1\ \ \ \ \ \ \ \ =\ round\ t}\\
+\mbox{\tt \ \ \ \ t\ \ \ \ \ \ \ \ \ \ \ =\ s{\char'45}1\ *\ (b{\char'45}1){\char'136}{\char'136}n\ *\ 10{\char'136}{\char'136}(m'-e1-1)}\\
+\mbox{\tt \ \ \ \ e1\ \ \ \ \ \ \ \ \ \ =\ floor\ (logBase\ 10\ x)}\\
+\mbox{\tt \ \ \ \ (s,\ n)\ \ \ \ \ \ =\ decodeFloat\ x}\\
+\mbox{\tt \ \ \ \ b\ \ \ \ \ \ \ \ \ \ \ =\ floatRadix\ x}\\
+\mbox{\tt \ \ \ \ w\ \ \ \ \ \ \ \ \ \ \ =\ floatDigits\ x}
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Lists}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ \ (Text\ a)\ =>\ Text\ [a]\ \ where}\\
+\mbox{\tt \ \ \ \ readsPrec\ p\ =\ readList}\\
+\mbox{\tt \ \ \ \ showsPrec\ p\ =\ showList}
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Tuples}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ \ (Text\ a,\ Text\ b)\ =>\ Text\ (a,b)\ \ where}\\
+\mbox{\tt \ \ \ \ readsPrec\ p\ =\ readParen\ False}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ({\char'134}r\ ->\ [((x,y),\ w)\ |\ ("(",s)\ <-\ lex\ r,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (x,t)\ \ \ <-\ reads\ s,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (",",u)\ <-\ lex\ t,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (y,v)\ \ \ <-\ reads\ u,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (")",w)\ <-\ lex\ v\ ]\ )}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ showsPrec\ p\ (x,y)\ =\ showChar\ '('\ .\ shows\ x\ .\ showChar\ ','\ .}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ shows\ y\ .\ showChar\ ')'}\\
+\mbox{\tt --\ et\ cetera}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt }\\[-8pt]
+\mbox{\tt --\ Functions}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ \ Text\ (a\ ->\ b)\ \ where}\\
+\mbox{\tt \ \ \ \ readsPrec\ p\ s\ \ =\ \ error\ "readsPrec{\char'173}PreludeText{\char'175}:\ Cannot\ read\ functions."}\\
+\mbox{\tt \ \ \ \ showsPrec\ p\ f\ \ =\ \ showString\ "<<function>>"}
+\eprogB

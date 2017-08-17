@@ -1,0 +1,90 @@
+interface PreludeBuiltin  where
+
+infixr 5 :
+
+-- The following are algebraic types with special syntax.  All of their
+-- standard instances are derived here, except for class Text, for
+-- which the special syntax must be taken into account.  See PreludeText
+-- for the Text instances of lists and the trivial type and a scheme
+-- for Tuple Text instances.
+--
+-- data [a] = [] | a : [a]  deriving (Eq, Ord, Binary)	   Lists
+-- data () = ()  deriving (Eq, Ord, Ix, Enum, Binary)	   Trivial Type
+-- data (a,b) = (a,b)  deriving (Eq, Ord, Ix, Binary)	   Pairs
+-- data (a,b,c) = (a,b,c)  deriving (Eq, Ord, Ix, Binary)  Triples
+-- et cetera						   Other Tuples
+
+
+-- The primitive types:
+
+data Char
+data Int
+data Integer
+data Float
+data Double
+data Bin
+
+instance Binary Char
+instance Binary Int
+instance Binary Integer
+instance Binary Float
+instance Binary Double
+
+primMinInt, primMaxInt		:: Int
+primCharToInt			:: Char -> Int
+primIntToChar			:: Int -> Char
+primIntToInteger		:: Int -> Integer
+primIntegerToInt		:: Integer -> Int
+
+primEqInt, primLeInt		:: Int -> Int -> Bool
+primPlusInt, primMulInt		:: Int -> Int -> Int
+primNegInt			:: Int -> Int
+primDivRemInt			:: Int -> Int -> (Int,Int)
+
+primEqInteger, primLeInteger	:: Integer -> Integer -> Bool
+primPlusInteger, primMulInteger	:: Integer -> Integer -> Integer
+primNegInteger			:: Integer -> Integer
+primDivRemInteger		:: Integer -> Integer -> (Integer,Integer)
+
+primFloatRadix				:: Integer
+primFloatDigits, primFloatMinExp,
+    primFloatMaxExp			:: Int
+primDecodeFloat				:: Float -> (Integer,Int)
+primEncodeFloat				:: Integer -> Int -> Float
+primEqFloat, primLeFloat		:: Float -> Float -> Bool
+primPlusFloat, primMulFloat,
+    primDivFloat			:: Float -> Float -> Float
+primNegFloat				:: Float -> Float
+
+primPiFloat				:: Float
+primExpFloat, primLogFloat,
+    primSqrtFloat, primSinFloat,
+    primCosFloat, primTanFloat,
+    primAsinFloat, primAcosFloat,
+    primAtanFloat, primSinhFloat,
+    primCoshFloat, primTanhFloat,
+    primAsinhFloat, primAcoshFloat,
+    primAtanhFloat			:: Float -> Float
+
+primDoubleRadix				:: Integer
+primDoubleDigits, primDoubleMinExp,
+    primDoubleMaxExp			:: Int
+primDecodeDouble			:: Double -> (Integer,Int)
+primEncodeDouble			:: Integer -> Int -> Double
+primEqDouble, primLeDouble		:: Double -> Double -> Bool
+primPlusDouble, primMulDouble,
+    primDivDouble			:: Double -> Double -> Double
+primNegDouble				:: Double -> Double
+primPiDouble				:: Double
+primExpDouble, primLogDouble,
+    primSqrtDouble, primSinDouble,
+    primCosDouble, primTanDouble,
+    primAsinDouble, primAcosDouble,
+    primAtanDouble, primSinhDouble,
+    primCoshDouble, primTanhDouble,
+    primAsinhDouble, primAcoshDouble,
+    primAtanhDouble			:: Double -> Double
+
+primNullBin				:: Bin
+primIsNullBin				:: Bin -> Bool
+primAppendBin				:: Bin -> Bin -> Bin

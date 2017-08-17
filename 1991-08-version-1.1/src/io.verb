@@ -1,0 +1,848 @@
+%
+% $Header$
+%
+\section{Input/Output}
+\label{io}
+\index{input/output}
+
+\Haskell{}'s I/O system is based on the view that a program
+communicates to the outside world via {\em streams of messages}:
+a program issues a stream of {\em requests} to the
+operating system and in return receives a stream of {\em responses}.
+Since a stream in \Haskell{} is only a lazy list,
+a \Haskell{} program has the type:
+\bprog
+@
+type  Dialogue = [Response] -> [Request]
+@
+\eprog\indexsynonym{Dialogue}%
+The datatypes @Response@\indextycon{Response} and
+@Request@\indextycon{Request} are defined below.  Intuitively,
+@[Response]@ is an ordered list of {\em responses} and @[Request]@ is
+an ordered list of {\em requests}; the $n\/$th response is the
+operating system's reply to the $n\/$th request.
+
+With this view of I/O, there is no need for any special-purpose
+syntax or constructs for I/O; the I/O system is defined
+entirely in terms of how the operating system responds to a program
+with the above type---i.e.~what response it issues for each request.
+An abstract specification of this behaviour is defined by
+giving a definition of the operating system as a function that takes
+as input an initial state and a collection of \Haskell{} programs,
+each with the above type.  This specification appears in
+Appendix~\ref{io-semantics}, using standard \Haskell{} syntax
+augmented with a single non-deterministic merge operator.
+
+% Due to the equivalence of stream-based and continuation-based I/O (see
+% the technical report by Hudak and Sundaresh \cite{hudak:io}),
+One can
+define a continuation-based
+version of I/O in terms of a stream-based version.  Such a definition
+is provided in Section~\ref{continuation-io}.
+The specific I/O requests available in each style are identical;
+what differs is the way they are expressed.  This means that programs
+in either style may be combined with a well-defined semantics.  In
+both cases arbitrary I/O requests within conventional operating
+systems may be induced while retaining referential transparency within
+a \Haskell{} program.
+
+The required requests for a valid implementation are:
+\bprog
+@
+data  Request = 
+     -- file system requests:
+               ReadFile      String         
+             | WriteFile     String String
+             | AppendFile    String String
+             | ReadBinFile   String 
+             | WriteBinFile  String Bin
+             | AppendBinFile String Bin
+             | DeleteFile    String
+             | StatusFile    String
+     -- channel system requests:
+             | ReadChan	     String 
+             | AppendChan    String String
+             | ReadBinChan   String 
+             | AppendBinChan String Bin
+             | StatusChan    String
+@
+\eprogNoSkip
+% utter page-breaking hack
+\bprog
+@
+     -- environment requests:
+             | Echo          Bool
+             | GetArgs
+             | GetEnv        String
+             | SetEnv        String String
+
+stdin       = "stdin"
+stdout      = "stdout"
+stderr      = "stderr"
+stdecho     = "stdecho"
+@
+\eprog%
+\indextycon{Request}\indextt{ReadFile}\indextt{WriteFile}%
+\indextt{AppendFile}\indextt{ReadBinFile}\indextt{WriteBinFile}%
+\indextt{AppendBinFile}\indextt{DeleteFile}\indextt{StatusFile}%
+\indextt{ReadChan}\indextt{AppendChan}%
+\indextt{ReadBinChan}\indextt{AppendBinChan}%
+\indextt{StatusChan}\indextt{GetArgs}%
+\indextt{GetEnv}\indextt{SetEnv}%
+\indextt{stdin}\indextt{stdout}\indextt{stderr}\indextt{stdecho}%
+Conceptually the above requests can be organised into three groups:
+those relating to the {\em file system}\index{file} component of the
+operating system (the first eight), those relating to the {\em channel
+system}\index{channel} (the next five), and those relating to the
+{\em environment} (the last four).  
+
+The file system is fairly conventional: a mapping of file names to
+contents.  The channel system consists of a collection of {\em
+channels}, examples of which include standard input (@stdin@),
+standard output (@stdout@), standard error (@stderr@), and standard
+echo (@stdecho@) channels.  A channel is a one-way communication
+medium---it either consumes values from the program (via @AppendChan@
+or @AppendBinChan@) or produces values for the program (by responding
+to @ReadChan@ or @ReadBinChan@).  Channels communicate to and from
+{\em agents}\index{agent} (a concept made more precise in
+Appendix~\ref{io-semantics}).  Examples of agents include line printers, disk
+controllers, networks, and human beings.  As an example of the latter,
+the {\em user} is normally the consumer of standard output and the
+producer of standard input.  Channels cannot be deleted, nor is there
+a notion of creating a channel.
+
+Apart from these required requests, several optional requests are
+described in Appendix~\ref{io-options}.  Although not required for a
+valid \Haskell{} implementation, they may be useful in
+particular implementations.
+
+Requests to the file system are in general order-dependent; if $i>j$
+then the response to the $i$th request may depend on the $j$th
+request.  In the case of the channel system the nature of the
+dependencies is dictated by the agents.  In all cases external
+effects may also be felt ``between'' internal effects.
+%All of this is formalised in Appendix~\ref{io-semantics}.
+
+Responses are defined by:
+\bprog
+@
+data  Response = Success
+               | Str String
+               | StrList [String]
+               | Bn  Bin
+               | Failure IOError
+
+data  IOError  = WriteError   String
+               | ReadError    String
+               | SearchError  String
+               | FormatError  String
+               | OtherError   String
+@
+\eprog%
+\indextycon{Response}%
+\indextt{Success}\indextt{Str}%
+\indextt{Failure}\indextt{Bn}%
+\indextt{IOError}%
+\indextt{WriteError}\indextt{ReadError}\indextt{SearchError}%
+\indextt{FormatError}\indextt{OtherError}%
+The response to a request is either @Success@, when no value is
+returned; "@Str @s" ["@Bn @b"], when a string [binary] value "s" ["b"]
+is returned; or "@Failure @e",
+indicating failure with I/O error $e$.
+
+The nature of a failure is defined by the @IOError@ datatype, which
+captures the most common kinds of errors.  The @String@ components of
+these errors are implementation dependent, and may be used to refine
+the description of the error (for example, for @ReadError@, the
+string might be @"file locked"@, @"access rights violation"@, etc.).
+An implementation is free to extend @IOError@ as required.
+
+\subsection{I/O Modes}
+\label{io-modes}
+\index{input/output!mode}
+
+The I/O requests @ReadFile@, @WriteFile@, @AppendFile@, @ReadChan@,
+and @AppendChan@ all work with {\em text} values---i.e.~strings.  Any
+value whose type is an instance of the class @Text@ may be written to
+a file (or communicated on a channel) by using the appropriate output
+request if it is first converted to a string, using @shows@ (see
+Section~\ref{derived-decls}).  Similarly, @reads@ can be used with the
+appropriate input request to read such a value from a file (or a
+channel).  This is text mode I/O.
+
+For both efficiency and transparency,
+\Haskell{} also supports a corresponding set of {\em binary} I/O
+requests---@ReadBinFile@, @WriteBinFile@, @AppendBinFile@,
+@ReadBinChan@, and @AppendBinChan@.  @showBin@ and @readBin@ are using
+analogously to @shows@ and @reads@ (see Section~\ref{derived-decls})
+for values whose types are instances of the class @Binary@
+(see Section~\ref{bin-type}).
+
+Binary mode I/O ensures transparency {\em within} an
+implementation---i.e.~``what is read is what was written.''
+Implementations on conventional machines
+will probably be able to realise binary mode more efficiently than text
+mode.  On the other hand, the @Bin@ datatype itself is implementation
+dependent, and thus binary mode {\em should not} be used as a method
+to ensure transparency {\em between} implementations.
+
+In the remainder of this section, various aspects of text mode will be
+discussed, including the behaviour of standard channels such as @stdin@
+and @stdout@.
+
+\subsubsection{Transparent Character Set}
+\index{input/output!transparency}
+
+The {\em transparent character set}\index{transparent character set}
+is defined by:
+
+\begin{tabular}{l}
+the 52 uppercase and lowercase alphabetic characters \\
+the 10 decimal digits \\
+the 32 graphic characters: \\
+\ \ \ \ @!@ @"@ @#@ @$@ @%@ @&@ \fwq\ @(@ @)@ @*@ @+@ @,@ @-@ @.@ @/@ @:@ @;@ @<@ @=@ @>@ @?@ @@ @[@ @\@ @]@ @^@ @_@ \bkq\ @{@ @|@ @}@ @~@\\ 
+the space character\\
+\end{tabular}
+
+\noindent (This is identical to the "any" syntactic category defined
+in Section~\ref{whitespace}, with "tab" excluded.)
+
+A {\em transparent line}\index{transparent line} is a list of no more
+than 254 transparent characters followed by a @\n@ character (i.e.~no
+more than 255
+characters in total).  A {\em transparent string}\index{transparent
+string} is the finite concatenation of zero or more transparent lines.
+
+\Haskell{}'s {\em text mode for files is transparent whenever the string
+being used is transparent}.  An implementation must
+ensure that a transparent string written to a file in text mode is
+identical to the string read back from the same file in text mode
+(assuming there were no intervening external effects).
+
+The transparent character set is restricted because of
+the inconsistent treatment of text files by operating systems.  For
+example, some systems translate the newline character @\n@ into
+@CR/LF@, and others into just @CR@ or just @LF@---so none of these
+characters can be in the transparent character set.  Similarly, some
+systems truncate lines exceeding a certain length, others do not.
+\Haskell{}'s transparent string is intended to provide a useful degree
+of portability of text file manipulating programs.  Of course, an
+implementation is free to guarantee a higher degree of transparency
+than that defined here (such as longer lines or more character types).
+
+Besides this definition of text mode transparency, the standard
+input and output channels carry with them notions of standard {\em
+presentation} and {\em acceptance}, as defined below.
+
+\subsubsection{Presentation}
+\label{presentation}
+\index{input/output!presentation}
+
+{\em Standard text mode presentation}
+guarantees a minimum kind of presentable output on standard output
+devices; thus it is only defined for @AppendChan@ using the channels
+@stdout@, @stderr@, and @stdecho@.  Abstractly, these channels are
+assumed to be attached to a sequence of rectangular grids of
+characters called {\em pages}; each page consists of a number of lines
+and columns, with the first line presented at the ``top'' and the
+first column presented to the ``left.''  The width of a column is
+assumed to be constant.  (On a paper printing device, we expect an
+abstract page to correspond to a physical page; on a terminal
+display, it will correspond to whatever abstraction is presented by the
+terminal, but at a minimum the terminal should support display of at
+least one full page.)
+
+Characters obtained from @AppendChan@ requests are written
+sequentially into these pages starting at the top left hand corner of
+the first page.  The characters are written in order horizontally
+across the page until a newline character (@\n@) is processed, at
+which point the subsequent characters are written starting in column
+one of line two, and so on.  If a form feed character (@\f@) is
+processed, writing starts at the top left hand corner of the second
+page, and so on.
+
+Maximum line length and page length for the output channels @stdout@,
+@stdecho@, and @stderr@ may be obtained via the @StatusChan@ request
+as described in Section~\ref{channel-system-requests}.  These are
+implementation-dependent constants, but must be at least 40 characters
+and 20 lines, respectively.  @AppendChan@ may induce a
+@FormatError@ if either of these limits is exceeded.
+
+Presentation of the transparent character set may be in any readable
+font.  Presentation of @\n@ and @\f@ is as defined above.
+Presentation of any other character is not defined---presentation of
+such a character may invalidate standard presentation
+of all subsequent characters.  An implementation, of course, may
+guarantee other forms of useful presentation beyond what is
+specified here.
+
+To facilitate processing of text to and from standard input/output
+channels, the auxiliary functions shown in Figure~\ref{auxiliary-io}
+are provided in the standard prelude.
+\begin{figure}
+\outline{
+@
+span, break		:: (a -> Bool) -> [a] -> ([a],[a])
+span p xs		=  (takeWhile p xs, dropWhile p xs)
+break p			=  span (not . p)
+
+lines			:: String -> [String]
+lines ""		=  []
+lines s 		=  l : (if null s' then [] else lines (tail s'))
+			   where (l, s') = break ((==) '\n') s
+
+words			:: String -> [String]
+words s			=  case dropWhile isSpace s of
+				"" -> []
+				s' -> w : words s''
+				      where (w, s'') = break isSpace s'
+
+unlines			:: [String] -> String
+unlines ls		= concat (map (\l -> l ++ "\n") ls)
+
+unwords			:: [String] -> String
+unwords []		= ""
+unwords [w]		= w
+unwords (w:ws)		= w ++ concat (map (' ' :) ws)
+@
+}
+\caption{Auxiliary Functions for Text Processing of Standard Output}
+\label{auxiliary-io} 
+\indextt{span}\indextt{break}\indextt{lines}\indextt{words}
+\indextt{unlines}\indextt{unwords}
+\end{figure}
+
+\subsubsection{Acceptance}
+\index{input/output!acceptance}
+
+{\em Standard text mode acceptance}
+guarantees a minimum kind of character input from standard input
+devices; thus it is only defined for @ReadChan@ using the channel
+@stdin@.  Abstractly, @stdin@ is assumed to be attached to a {\em
+keyboard}.  The only requirement of the keyboard is that it have keys
+to support the transparent character set plus the newline (@\n@)
+character.
+
+\subsubsection{Echoing}
+\label{echoing}
+\index{input/output!echoing}
+
+The channel @stdecho@ is assumed connected to the display associated
+with the device to which @stdin@ is connected.  It may be possible for
+@stdout@ and @stdecho@ to be connected to the same device, but this is
+not required.  It may be possible in some operating systems to
+redirect @stdout@ to a file while still displaying information to
+the user on @stdecho@.
+
+The @Echo@ request (described in Section~\ref{environment-requests})
+controls echoing of @stdin@ on @stdecho@.  When echoing
+is enabled, characters typed at the terminal connected to @stdin@ are
+echoed onto @stdecho@, with
+optional implementation-specific line-editing functions available.
+% each @DEL@ character treated as a
+% request to ``delete previous character'' (up to the previous newline).
+The list of characters returned by a read request to
+@stdin@ should be the result of this processing.  As an
+entire line may be erased by the user, a program will not see
+any of the line until a @\n@ character is typed.
+
+A display may receive data from four
+different sources: echoing from @stdin@, and explicit output to
+@stdecho@, @stdout@, and @stderr@.  The result is an interleaving of
+these character streams, but it is not an arbitrary one, because of
+two constraints: (1)~{\em explicit} output (via @AppendChan@) must
+appear as the concatenation of the individual streams; i.e.~they
+cannot be interleaved (this is consistent with the hyperstrict nature
+of @AppendChan@), and (2)~if echoing is on, characters from @stdin@
+that a program depends on for some I/O request must appear on the
+display before that I/O occurs.  These constraints permit a
+user to type ahead, but prevent a system from printing a reply
+before echoing the user's request.
+
+\subsection{File System Requests}
+\label{file-system-requests}
+\index{file system request}
+
+In this section, each request is described using the
+stream model---the corresponding behaviour using the
+continuation model should be obvious.  Optional requests, not required
+of a valid \Haskell{} implementation, are described in
+Appendix~\ref{io-options}.
+
+\begin{itemize}
+\item
+@
+ReadFile    name
+ReadBinFile name
+@
+\indextt{ReadFile}\indextt{ReadBinFile}
+
+Returns the contents of file @name@ treated as a text
+[binary] file.  If successful, the response will be of the form
+@Str s@ [@Bn b@], where @s@ [@b@] is a string [binary] value.  If the
+file is not found, the response @Failure (SearchError string)@ is
+induced; if it is unreadable for some other reason, the 
+@Failure (ReadError string)@ error is induced.
+
+%For example, to sum together all of the elements of a file named
+%@"grades"@ that was written with a list of integers (i.e.~written in
+%text mode with @show gradeList@), one would first issue
+%the request @ReadFile "grades"@.  If the response is of the form
+%@Str filedGradeList@, then the grades may be summed with:
+%\bprog
+%@@
+%foldl (+) 0 (read filedGradeList)
+%@@
+%\eprog
+
+\item
+@
+WriteFile    name string
+WriteBinFile name bin
+@
+\indextt{WriteFile}\indextt{WriteBinFile}
+
+Writes @string@ [@bin@] to file @name@.  If
+the file does not exist, it is created.  If it already exists, it is
+overwritten.  A successful response has form @Success@; the only
+failure possible has the form @Failure (WriteError string)@.
+
+Both of these requests are ``hyperstrict'' in their second argument:
+no response is returned until the entire list of values is
+completely evaluated.
+
+\item
+@
+AppendFile    name string
+AppendBinFile name bin
+@
+\indextt{AppendFile}\indextt{AppendBinFile}
+
+Identical to @WriteFile@ [@WriteBinFile@], except that (1)~the @string@ [@bin@] argument
+is appended to the current contents of the file named @name@; (2)~if
+the I/O mode does not match the previous mode with which @name@ was
+written, the behaviour is not specified; and (3)~if the file does not
+exist, the response @Failure (SearchError string)@ is induced.
+All other errors have form
+@Failure (WriteError string)@, and both
+requests are hyperstrict in their second argument.
+
+\item
+@
+DeleteFile name
+@
+\indextt{DeleteFile}
+
+Deletes file @name@, with successful response @Success@.  If
+the file does not exist, the response @Failure (SearchError string)@
+is induced.  If it cannot be deleted for some other reason, a response
+of the form @Failure (WriteError string)@ is induced.
+
+\item
+@
+StatusFile name
+@
+\indextt{StatusFile}
+
+Induces @Failure (SearchError string)@ if an object @name@
+does not exist, otherwise induces @Str status@ where @status@ is a
+string containing, in this order: (1)~either \fwq@t@\fwq,\
+\fwq@b@\fwq,\ \fwq@d@\fwq, or \fwq@u@\fwq\ depending on whether the
+object is a text file, binary file, directory, or something else,
+respectively (if text and binary files cannot be distinguished,
+\fwq@f@\fwq\ indicates either text or binary file);
+(2)~\fwq@r@\fwq\ if the object is readable by this program,
+\fwq@-@\fwq\ if not; and (3)~\fwq@w@\fwq\ if the object is writable by this
+program, \fwq@-@\fwq\ if not.  For example @"dr-"@ denotes a directory
+that can be read but not written.  An implementation is
+free to append more status information to this string.
+% for example, if @name@ is a directory, an implementation may
+% include a directory listing in an implementation-dependent format.
+\end{itemize}
+
+{\em Note 1.} A proper implementation of @ReadFile@ or @ReadBinFile@ may
+have to make copies of files in order to preserve referential
+transparency---a successful read of a file returns a {\em lazy list}
+whose contents should be preserved, despite future writes to or
+deletions of that file, even if the lazy list has not yet been completely
+evaluated.
+
+{\em Note 2.} Given the two juxtaposed requests:
+\bprog
+@
+[ ..., WriteFile name contents1, ReadFile name, ... ]
+@
+\eprog
+with the corresponding responses:
+\bprog
+@
+[ ..., Success, Str contents2, ... ]
+@
+\eprog
+then @contents1 == contents2@ if @contents1@ is a transparent string,
+assuming that there were no external effects.  A
+similar result would hold if the binary versions were used.
+
+
+\subsection{Channel System Requests}
+\label{channel-system-requests}
+\index{channel system request}
+
+Channels are inherently different from files---they contain
+ephemeral streams of data as opposed to persistent stationary
+values.  The most common channels are standard input (@stdin@),
+standard output (@stdout@), standard error (@stderr@), and standard
+echo (@stdecho@); these four are the only required channels
+in a valid implementation.
+
+\begin{itemize}
+\item
+@
+ReadChan    name
+ReadBinChan name
+@
+\indextt{ReadChan}\indextt{ReadBinChan}
+
+Opens channel @name@ for input.  A successful response
+returns the contents of the channel as a lazy stream of characters [a binary
+value].  If the channel does not exist the response 
+@Failure (SearchError string)@ is induced; all other errors have form
+@Failure (ReadError string)@.
+
+Unlike files, once a @ReadChan@ or @ReadBinChan@ request has been
+issued for a particular channel, it cannot be issued again for the
+same channel in that program.  This reflects the ephemeral nature of
+its contents and prevents a serious space leak.
+
+\item
+@
+AppendChan    name string
+AppendBinChan name bin
+@
+\indextt{AppendChan}\indextt{AppendBinChan}
+
+Writes @string@ [@bin@] to channel
+@name@.  The semantics is as for @AppendFile@, except:
+(1)~the second argument is appended to whatever was
+previously written (if anything); (2)~if @AppendChan@ and
+@AppendBinChan@ are both issued to the same channel, the resulting
+behaviour is not specified; (3)~if the channel does not exist, the
+% hacked format because of impossible linebreaking
+response @Failure@ @(SearchError@ @string)@ is induced; and (4)~if the
+maximum line or page length of @stdout@, @stderr@, or @stdecho@ is
+exceeded, the response @Failure@ @(FormatError@ @string)@ is induced (see
+Section~\ref{presentation}).  All other errors have form 
+@Failure@ @(WriteError@ @string)@.
+Both requests are hyperstrict in their second argument.
+
+\item
+@
+StatusChan name
+@
+\indextt{StatusChan}
+
+Induces @Failure (SearchError string)@ if channel @name@
+does not exist, otherwise induces @Str status@ where @status@ is a
+string containing implementation-dependent information about the named
+channel.  The only information required of a valid implementation is
+that for the output channels @stdout@, @stdecho@, and @stderr@: the
+beginning of the status string must contain two integers separated by
+a space, the first integer indicating the maximum line length (in
+characters) allowed on the channel, the second indicating the maximum
+page length (in lines) allowed (see Section~\ref{presentation}).
+A zero length implies that there is no bound.
+
+\end{itemize}
+
+\subsection{Environment Requests}
+\label{environment-requests}
+\index{environment request}
+
+\begin{itemize}
+\item
+@
+Echo bool
+@
+\indextt{Echo}
+
+\nopagebreak[4]
+@Echo True@ enables echoing of @stdin@ on @stdecho@; @Echo False@
+disables it (see Section~\ref{echoing}).  Either @Success@ or 
+@Failure (OtherError string)@ is induced.
+
+The echo mode can only be set once by a particular program, and it
+must be done before any I/O operation involving @stdin@.  If no @Echo@
+request is made, a valid implementation is expected to use the echoing
+mode of the OS at the time the program is run.
+
+\item
+@
+GetArgs
+@
+\indextt{GetArgs}
+
+\nopagebreak[4]
+Induces the response @StrList str_list@,
+where @str_list@ is a list of the program's command line arguments.
+
+\item
+@
+GetEnv name
+@
+\indextt{GetEnv}
+
+\nopagebreak[4]
+Returns the value of environment variable @name@.  If successful,
+the response will be of the form @Str s@, where @s@ is a string.  If
+the environment variable does not exist, a @SearchError@ is induced.
+
+\item
+@
+SetEnv name string
+@
+\indextt{SetEnv}
+
+\nopagebreak[4]
+Sets environment variable @name@ to value @string@, with response @Success@.
+If the environment variable does not exist, it is created.
+\end{itemize}
+
+\subsection{Continuation-based I/O}
+\label{continuation-io}
+
+\Haskell{} supports an alternative
+style of I/O called {\em continuation-based I/O}.  Under this model, a
+\Haskell{} program still has type
+@[Response]->[Request]@, but instead of the user manipulating the
+requests and responses directly, a collection of {\em 
+transactions}\index{transaction} defined in a continuation style,
+captures the effect of each request/response pair.
+
+Transactions are functions.  For each request @Req@ there
+corresponds a transaction @req@, as shown in
+Figure~\ref{continuation-fig}.  For example, @ReadFile@
+induces
+either a failure response @Failure msg@ or success response 
+@Str contents@.  In contrast the transaction @readFile@ would be used
+in continuation-based I/O, as for example,
+\bprog
+@
+readFile name (\ msg -> errorTransaction) 
+              (\ contents -> successTransaction)
+@
+\eprog
+where the second and third arguments are the {\em failure
+continuation} and {\em success continuation}, respectively.  If the
+transaction fails then the error continuation is applied to the error
+message; if it succeeds then the success continuation is applied to the
+contents of the file.
+The following type synonyms and auxiliary functions are defined for
+continuation-based I/O:
+\bprog
+@
+type  Dialogue     =  [Response] -> [Request]
+type  SuccCont     =                Dialogue
+type  StrCont      =  String     -> Dialogue
+type  StrListCont  =  [String]   -> Dialogue
+type  BinCont      =  Bin        -> Dialogue
+type  FailCont     =  IOError    -> Dialogue
+@
+\eprogNoSkip%
+\indexsynonym{Dialogue}\indexsynonym{SuccCont}%
+\indexsynonym{StrCont}\indexsynonym{BinCont}\indexsynonym{FailCont}%
+\indexsynonym{StrListCont}%
+\bprog
+@
+strDispatch fail succ (resp:resps) = 
+            case resp of Str val     -> succ val resps
+                         Failure msg -> fail msg resps
+strListDispatch fail succ (resp:resps) = 
+            case resp of StrList val -> succ val resps
+                         Failure msg -> fail msg resps
+binDispatch fail succ (resp:resps) = 
+            case resp of Bn val      -> succ val resps
+                         Failure msg -> fail msg resps
+succDispatch fail succ (resp:resps) = 
+            case resp of Success     -> succ resps
+                         Failure msg -> fail msg resps
+@
+\eprogNoSkip
+\indextt{strDispatch}\indextt{binDispatch}\indextt{succDispatch}%
+\indextt{strListDispatch}
+\begin{figure}
+\outline{
+@
+done	      ::                                                Dialogue
+readFile      :: String ->           FailCont -> StrCont     -> Dialogue
+writeFile     :: String -> String -> FailCont -> SuccCont    -> Dialogue
+appendFile    :: String -> String -> FailCont -> SuccCont    -> Dialogue
+readBinFile   :: String ->           FailCont -> BinCont     -> Dialogue
+writeBinFile  :: String -> Bin    -> FailCont -> SuccCont    -> Dialogue
+appendBinFile :: String -> Bin    -> FailCont -> SuccCont    -> Dialogue
+deleteFile    :: String ->           FailCont -> SuccCont    -> Dialogue
+statusFile    :: String ->           FailCont -> StrCont     -> Dialogue
+readChan      :: String ->           FailCont -> StrCont     -> Dialogue
+appendChan    :: String -> String -> FailCont -> SuccCont    -> Dialogue
+readBinChan   :: String ->           FailCont -> BinCont     -> Dialogue
+appendBinChan :: String -> Bin    -> FailCont -> SuccCont    -> Dialogue
+statusChan    :: String ->           FailCont -> StrCont     -> Dialogue
+echo          :: Bool   ->           FailCont -> SuccCont    -> Dialogue
+getArgs       ::                     FailCont -> StrListCont -> Dialogue
+getEnv        :: String ->           FailCont -> StrCont     -> Dialogue
+setEnv        :: String -> String -> FailCont -> SuccCont    -> Dialogue
+
+done resps = []
+readFile name fail succ resps =            --similarly for readBinFile
+   (ReadFile name) : strDispatch fail succ resps
+writeFile name contents fail succ resps =  --similarly for writeBinFile
+   (WriteFile name contents) : succDispatch fail succ resps
+appendFile name contents fail succ resps = --similarly for appendBinFile
+   (AppendFile name contents) : succDispatch fail succ resps
+deleteFile name fail succ resps =
+   (DeleteFile name) : succDispatch fail succ resps
+statusFile name fail succ resps =          --similarly for statusChan
+   (StatusFile name) : strDispatch fail succ resps
+readChan name fail succ resps =            --similarly for readBinChan
+   (ReadChan name) : strDispatch fail succ resps
+appendChan name contents fail succ resps = --similarly for appendBinChan
+   (AppendChan name contents) : succDispatch fail succ resps
+echo bool fail succ resps =
+   (Echo bool) : succDispatch fail succ resps
+getArgs fail succ resps =
+   GetArgs : strListDispatch fail succ resps
+getEnv name fail succ resps =
+   (GetEnv name) : strDispatch fail succ resps
+setEnv name contents fail succ resps =
+   (SetEnv name contents) : succDispatch fail succ resps
+@
+}
+\caption{Transactions of continuation-based I/O.}
+\label{continuation-fig}
+\indextt{done}\indextt{readFile}\indextt{writeFile}
+\indextt{appendFile}\indextt{readBinFile}\indextt{writeBinFile}
+\indextt{appendBinFile}\indextt{deleteFile}\indextt{statusFile}
+\indextt{readChan}\indextt{appendChan}
+\indextt{readBinChan}\indextt{appendBinChan}\indextt{statusChan}
+\indextt{echo}\indextt{getArgs}\indextt{getEnv}\indextt{setEnv}
+\end{figure}
+\bprog
+@
+abort     ::  FailCont
+abort err  =  done
+
+exit     ::  FailCont
+exit err  =  appendChan stdout msg abort done
+	     where msg = case err of ReadError   s -> s
+                                     WriteError  s -> s
+                                     SearchError s -> s
+                                     FormatError s -> s
+                                     OtherError  s -> s
+
+print   	:: (Text a) => a -> Dialogue
+print x		=  appendChan stdout (show x) abort done
+prints          :: (Text a) => a -> String -> Dialogue
+prints x s	=  appendChan stdout (shows x s) abort done
+
+interact  ::  (String -> String) -> Dialogue
+interact f = readChan stdin abort
+                      (\x -> appendChan stdout (f x) abort done)
+@
+\eprogNoSkip
+\indextt{abort}\indextt{exit}%
+\indextt{print}\indextt{prints}\indextt{interact}
+
+\subsection{A Small Example}
+
+Both of the following programs prompt the user for the name of a
+file, and then look up and display the contents of the file on
+standard-output.  The filename as typed by the user is also echoed.
+The first program uses the stream-based style (note the irrefutable
+patterns):\nopagebreak[4]
+\bprog
+@
+main ~(Success : ~((Str userInput) : ~(Success : ~(r4 : _)))) =
+  [ AppendChan stdout "please type a filename\n",
+    ReadChan stdin,
+    AppendChan stdout name,
+    ReadFile name,
+    AppendChan stdout (case r4 of Str contents    -> contents
+                                  Failure ioerror -> "can't open file")
+  ] where (name : _) = lines userInput
+@
+\eprog
+The second program uses the continuation-based style:\nopagebreak[4]
+\bprog
+@
+main = appendChan stdout "please type a filename\n" abort (
+       readChan stdin abort (\ userInput ->
+       let (name : _) = lines userInput in
+       appendChan stdout name abort (
+       readFile name (\ ioerror -> appendChan stdout 
+                                   "can't open file" abort done)
+                     (\ contents ->
+       appendChan stdout contents abort done)))))
+@
+\eprog
+
+More examples and a general discussion of both forms of I/O may
+be found in a report by Hudak and Sundaresh \cite{hudak:io}.
+\pagebreak[4]
+
+\subsection{An Example Involving Synchronisation}
+
+The following program reads two numbers and prints their sum.  After
+the initial @readChan@ request, the value of the input stream must be
+passed in and out of the functions which actually obtain the user
+input.  The programmer must control the synchronisation between the
+@appendChan@ requests and when the program stops to read input.  The
+@readChan@ request does not actually cause the program to stop and
+wait for the user to enter the entire input stream; only at demands
+for actual input characters will execution pause for input.  This
+program assures that this demand is properly synchronised with the
+@appendChan@ requests by verifying input values in the @readInt@
+function.
+\bprog
+@
+main :: Dialogue
+
+main = readChan stdin abort (\ userInput -> readNums (lines userInput))
+
+readNums :: [String] -> Dialogue
+
+readNums inputLines =
+   readInt "Enter first number: " inputLines
+     (\ num1 inputLines1 ->
+          readInt "Enter second number: " inputLines1
+             (\ num2 _ -> reportResult num1 num2))
+reportResult :: Int -> Int -> Dialogue
+
+reportResult num1 num2 =
+  appendChan stdout ("Their sum is: " ++ show (num1 + num2)) abort done
+@
+\eprog
+\bprog
+@
+-- readInt prints a prompt and then reads a line of input.  If the
+-- line contains an integer, the value of the integer is passed to the
+-- success continuation.  If a line cannot be parsed as an integer,
+-- an error message is printed and the user is asked to try again.
+-- If EOF is detected, the program is aborted.
+
+readInt :: String -> [String] -> (Int -> [String] -> Dialogue) -> Dialogue
+
+readInt prompt inputLines succ =
+  appendChan stdout prompt abort
+    (case inputLines of
+       (l1 : rest) -> case (reads l1) of
+                        [(x,"")] -> succ x rest
+                        _        -> appendChan stdout
+	                              "Error - retype the number\n" abort
+	                               (readInt prompt rest succ)
+       _           -> appendChan stdout "Early EOF" abort done)
+@
+\eprog
+
+% Local Variables: 
+% mode: latex
+% End:
+

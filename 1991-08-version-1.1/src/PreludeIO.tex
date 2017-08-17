@@ -1,0 +1,200 @@
+\noindent\bprogB
+\mbox{\tt --\ I/O\ functions\ and\ definitions}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt module\ PreludeIO\ \ where}
+\index{PreludeIO@{\ptt PreludeIO} (module)}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ File\ and\ channel\ names:}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt stdin\ \ \ \ \ \ \ =\ \ "stdin"}\\
+\mbox{\tt stdout\ \ \ \ \ \ =\ \ "stdout"}\\
+\mbox{\tt stderr\ \ \ \ \ \ =\ \ "stderr"}\\
+\mbox{\tt stdecho\ \ \ \ \ =\ \ "stdecho"}
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Requests\ and\ responses:}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt data\ Request\ =\ \ --\ file\ system\ requests:}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ReadFile\ \ \ \ \ \ String\ \ \ \ \ \ \ \ \ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ WriteFile\ \ \ \ \ String\ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ AppendFile\ \ \ \ String\ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ ReadBinFile\ \ \ String\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ WriteBinFile\ \ String\ Bin}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ AppendBinFile\ String\ Bin}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ DeleteFile\ \ \ \ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ StatusFile\ \ \ \ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ --\ channel\ system\ requests:}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ ReadChan\ \ \ \ \ \ String\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ AppendChan\ \ \ \ String\ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ ReadBinChan\ \ \ String\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ AppendBinChan\ String\ Bin}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ StatusChan\ \ \ \ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ --\ environment\ requests:}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ Echo\ \ \ \ \ \ \ \ \ \ Bool}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ GetArgs}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ GetEnv\ \ \ \ \ \ \ \ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ SetEnv\ \ \ \ \ \ \ \ String\ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ deriving\ Text}
+\index{Request@{\ptt Request} (datatype)}%
+\eprogB\noindent\bprogB
+\mbox{\tt data\ Response\ =\ \ \ \ \ \ \ \ \ \ \ Success}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ Str\ String\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ StrList\ [String]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ Bn\ \ Bin}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ Failure\ IOError}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ deriving\ Text}
+\index{Response@{\ptt Response} (datatype)}%
+\eprogB\noindent\bprogB
+\mbox{\tt data\ IOError\ =\ \ \ \ \ \ \ \ \ \ \ \ WriteError\ \ \ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ ReadError\ \ \ \ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ SearchError\ \ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ FormatError\ \ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ OtherError\ \ \ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ deriving\ Text}
+\index{IOError@{\ptt IOError} (datatype)}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Continuation-based\ I/O:}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt type\ Dialogue\ \ \ \ =\ \ [Response]\ ->\ [Request]}\\
+\mbox{\tt type\ SuccCont\ \ \ \ =\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Dialogue}\\
+\mbox{\tt type\ StrCont\ \ \ \ \ =\ \ String\ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt type\ StrListCont\ =\ \ [String]\ \ \ ->\ Dialogue}\\
+\mbox{\tt type\ BinCont\ \ \ \ \ =\ \ Bin\ \ \ \ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt type\ FailCont\ \ \ \ =\ \ IOError\ \ \ \ ->\ Dialogue}
+\index{Dialogue@{\ptt Dialogue} (type synonym)}%
+\index{SuccCont@{\ptt SuccCont} (type synonym)}%
+\index{StrCont@{\ptt StrCont} (type synonym)}%
+\index{StrListCont@{\ptt StrListCont} (type synonym)}%
+\index{BinCont@{\ptt BinCont} (type synonym)}%
+\index{FailCont@{\ptt FailCont} (type synonym)}%
+\eprogB\noindent\bprogB
+\mbox{\tt done\ \ \ \ \ \ \ \ \ \ ::\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Dialogue}\\
+\mbox{\tt readFile\ \ \ \ \ \ ::\ String\ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ StrCont\ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt writeFile\ \ \ \ \ ::\ String\ ->\ String\ ->\ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt appendFile\ \ \ \ ::\ String\ ->\ String\ ->\ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt readBinFile\ \ \ ::\ String\ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ BinCont\ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt writeBinFile\ \ ::\ String\ ->\ Bin\ \ \ \ ->\ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt appendBinFile\ ::\ String\ ->\ Bin\ \ \ \ ->\ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt deleteFile\ \ \ \ ::\ String\ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt statusFile\ \ \ \ ::\ String\ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ StrCont\ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt readChan\ \ \ \ \ \ ::\ String\ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ StrCont\ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt appendChan\ \ \ \ ::\ String\ ->\ String\ ->\ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt readBinChan\ \ \ ::\ String\ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ BinCont\ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt appendBinChan\ ::\ String\ ->\ Bin\ \ \ \ ->\ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt statusChan\ \ \ \ ::\ String\ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ StrCont\ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt echo\ \ \ \ \ \ \ \ \ \ ::\ Bool\ ->\ \ \ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt getArgs\ \ \ \ \ \ \ ::\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ StrListCont\ ->\ Dialogue}\\
+\mbox{\tt getEnv\ \ \ \ \ \ \ \ ::\ String\ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ StrCont\ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt setEnv\ \ \ \ \ \ \ \ ::\ String\ ->\ String\ ->\ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}
+\indextt{done}%
+\indextt{readFile}%
+\indextt{writeFile}%
+\indextt{appendFile}%
+\indextt{readBinFile}%
+\indextt{writeBinFile}%
+\indextt{appendBinFile}%
+\indextt{deleteFile}%
+\indextt{statusFile}%
+\indextt{readChan}%
+\indextt{appendChan}%
+\indextt{readBinChan}%
+\indextt{appendBinChan}%
+\indextt{statusChan}%
+\indextt{echo}%
+\indextt{getArgs}%
+\indextt{getEnv}%
+\indextt{setEnv}%
+\eprogB\noindent\bprogB
+\mbox{\tt done\ resps\ \ \ \ =\ \ []}
+\eprogB\noindent\bprogB
+\mbox{\tt readFile\ name\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ \ (ReadFile\ name)\ :\ strDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt writeFile\ name\ contents\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ (WriteFile\ name\ contents)\ :\ succDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt appendFile\ name\ contents\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ (AppendFile\ name\ contents)\ :\ succDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt readBinFile\ name\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ (ReadBinFile\ name)\ :\ binDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt writeBinFile\ name\ contents\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ (WriteBinFile\ name\ contents)\ :\ succDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt appendBinFile\ name\ contents\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ (AppendBinFile\ name\ contents)\ :\ succDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt deleteFile\ name\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ (DeleteFile\ name)\ :\ succDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt statusFile\ name\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ (StatusFile\ name)\ :\ strDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt readChan\ name\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ (ReadChan\ name)\ :\ strDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt appendChan\ name\ contents\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ (AppendChan\ name\ contents)\ :\ succDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt readBinChan\ name\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ (ReadBinChan\ name)\ :\ binDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt appendBinChan\ name\ contents\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ (AppendBinChan\ name\ contents)\ :\ succDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt statusChan\ name\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ (StatusChan\ name)\ :\ strDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt echo\ bool\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ (Echo\ bool)\ :\ succDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt getArgs\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ \ \ \ \ GetArgs\ :\ strListDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt getEnv\ name\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ \ \ \ \ (GetEnv\ name)\ :\ strDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt setEnv\ name\ val\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ \ \ \ \ \ (SetEnv\ name\ val)\ :\ succDispatch\ fail\ succ\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt strDispatch\ fail\ succ\ (resp:resps)\ =\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ case\ resp\ of\ Str\ val\ \ \ \ \ ->\ succ\ val\ resps}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Failure\ msg\ ->\ fail\ msg\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt strListDispatch\ fail\ succ\ (resp:resps)\ =\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ case\ resp\ of\ StrList\ val\ ->\ succ\ val\ resps}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Failure\ msg\ ->\ fail\ msg\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt binDispatch\ fail\ succ\ (resp:resps)\ =\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ case\ resp\ of\ Bn\ val\ \ \ \ \ \ ->\ succ\ val\ resps}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Failure\ msg\ ->\ fail\ msg\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt succDispatch\ fail\ succ\ (resp:resps)\ =\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ case\ resp\ of\ Success\ \ \ \ \ ->\ succ\ resps}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Failure\ msg\ ->\ fail\ msg\ resps}
+\eprogB\noindent\bprogB
+\mbox{\tt abort\ \ \ \ \ \ \ \ \ \ \ ::\ FailCont}\\
+\mbox{\tt abort\ err\ \ \ \ \ \ \ =\ \ done}
+\indextt{abort}%
+\eprogB\noindent\bprogB
+\mbox{\tt exit\ \ \ \ \ \ \ \ \ \ \ \ ::\ FailCont}\\
+\mbox{\tt exit\ err\ \ \ \ \ \ \ \ =\ appendChan\ stdout\ msg\ abort\ done}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ msg\ =\ case\ err\ of\ ReadError\ s\ \ \ ->\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WriteError\ s\ \ ->\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SearchError\ s\ ->\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FormatError\ s\ ->\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ OtherError\ s\ \ ->\ s}
+\indextt{exit}%
+\eprogB\noindent\bprogB
+\mbox{\tt print\ \ \ \ \ \ \ \ \ \ \ ::\ (Text\ a)\ =>\ a\ ->\ Dialogue}\\
+\mbox{\tt print\ x\ \ \ \ \ \ \ \ \ =\ \ appendChan\ stdout\ (show\ x)\ abort\ done}\\
+\mbox{\tt prints\ \ \ \ \ \ \ \ \ \ ::\ (Text\ a)\ =>\ a\ ->\ String\ ->\ Dialogue}\\
+\mbox{\tt prints\ x\ s\ \ \ \ \ \ =\ \ appendChan\ stdout\ (shows\ x\ s)\ abort\ done}
+\indextt{print}%
+\indextt{prints}%
+\eprogB\noindent\bprogB
+\mbox{\tt interact\ \ \ \ \ \ \ \ ::\ (String\ ->\ String)\ ->\ Dialogue}\\
+\mbox{\tt interact\ f\ \ \ \ \ \ =\ \ readChan\ stdin\ abort}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ({\char'134}x\ ->\ appendChan\ stdout\ (f\ x)\ abort\ done)}
+\indextt{interact}%
+\eprogB

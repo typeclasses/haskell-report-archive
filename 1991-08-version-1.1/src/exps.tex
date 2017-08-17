@@ -1,0 +1,897 @@
+%
+% $Header$
+%
+\section{Expressions}\index{expression}
+\label{expressions}
+
+In this section, we describe the syntax and informal semantics of \Haskell{}
+{\em expressions}, including their translations into the
+\Haskell{} kernel, where appropriate.
+% (see Appendix~\ref{formal-semantics} for a formal syntax and
+% semantics of the kernel).
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it exp$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt {\char'134}}\ apat_1\ \ldots \ apat_n\ \makebox{\tt ->}\ exp$\>\makebox[3em]{}$\it (\tr{lambda\ abstraction},\ n\geq 1)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt let}\ \makebox{\tt {\char'173}}\ decls\ [\makebox{\tt ;}]\ \makebox{\tt {\char'175}}\ \makebox{\tt in}\ exp$\>\makebox[3em]{}$\it ({\tr{let\ expression}})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt if}\ exp\ \makebox{\tt then}\ exp\ \makebox{\tt else}\ exp$\>\makebox[3em]{}$\it (\tr{conditional})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt case}\ exp\ \makebox{\tt of}\ \makebox{\tt {\char'173}}\ alts\ [\makebox{\tt ;}]\ \makebox{\tt {\char'175}}$\>\makebox[3em]{}$\it (\tr{case\ expression})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it exp^0\ \makebox{\tt ::}\ [context\ \makebox{\tt =>}]\ atype$\>\makebox[3em]{}$\it (\tr{expression\ type\ signature})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it exp^0$\\ 
+$\it exp^i$\>\makebox[3.5em]{$\rightarrow$}$\it exp^{i+1}\ [op^{({\rm\ n},i)}\ exp^{i+1}]$\>\makebox[3em]{}$\it (0\leq i\leq 9)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it lexp^i\ op^{({\rm\ l},i)}\ exp^{i+1}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it exp^{i+1}\ op^{({\rm\ r},i)}\ rexp^i$\\ 
+$\it lexp^i$\>\makebox[3.5em]{$\rightarrow$}$\it [lexp^i\ op^{({\rm\ l},i)}]\ exp^{i+1}$\>\makebox[3em]{}$\it (0\leq i\leq 9)$\\ 
+$\it lexp^6$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt -}\ exp^7$\\ 
+$\it rexp^i$\>\makebox[3.5em]{$\rightarrow$}$\it exp^{i+1}\ [op^{({\rm\ r},i)}\ rexp^i]$\>\makebox[3em]{}$\it (0\leq i\leq 9)$\\ 
+$\it exp^{10}$\>\makebox[3.5em]{$\rightarrow$}$\it exp^{10}\ aexp$\>\makebox[3em]{}$\it (\tr{function\ application})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it aexp$\\ 
+$\it $\\ 
+$\it aexp$\>\makebox[3.5em]{$\rightarrow$}$\it var$\>\makebox[3em]{}$\it (\tr{variable})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it con$\>\makebox[3em]{}$\it (\tr{constructor})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it literal$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt ()}$\>\makebox[3em]{}$\it (\tr{unit})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ exp\ \makebox{\tt )}$\>\makebox[3em]{}$\it (\tr{parenthesised\ expression})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ exp_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ exp_k\ \makebox{\tt )}$\>\makebox[3em]{}$\it (\tr{tuple},\ k\geq 2)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt [}\ exp_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ exp_k\ \makebox{\tt ]}$\>\makebox[3em]{}$\it (\tr{list},\ k\geq 0)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt [}\ exp_1\ [\makebox{\tt ,}\ exp_2]\ \makebox{\tt ..}\ [exp_3]\ \makebox{\tt ]}$\>\makebox[3em]{}$\it (\tr{arithmetic\ sequence})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt [}\ exp\ \makebox{\tt |}\ qual_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ qual_n\ \makebox{\tt ]}$\>\makebox[3em]{}$\it (\tr{list\ comprehension},\ n\geq 1)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ exp^{i+1}\ op^{(a,i)}\ \makebox{\tt )}$\>\makebox[3em]{}$\it (0\ \leq i\leq \ 9,\ a\in\{l,r,n\})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ op^{(a,i)}\ exp^{i+1}\ \makebox{\tt )}$\>\makebox[3em]{}$\it (0\ \leq i\leq \ 9,\ a\in\{l,r,n\})$\\ 
+$\it %\ |\ \makebox{\tt (}\ lexp^i\ op^{({\rm\ l},i)}\ \makebox{\tt )}$\>\makebox[3em]{}$\it (0\ \leq \ i\ \leq \ 9)$\\ 
+$\it %\ |\ \makebox{\tt (}\ op^{({\rm\ r},i)}\ rexp^i\ \makebox{\tt )}$\>\makebox[3em]{}$\it (0\ \leq \ i\ \leq \ 9)$\\ 
+$\it $\\ 
+$\it op$\>\makebox[3.5em]{$\rightarrow$}$\it varop\ |\ conop$
+\end{tabbing}\end{flushleft}
+\indexsyn{exp}%
+\index{exp@\mbox{$\it exp^i$}}%
+\index{lexp@\mbox{$\it lexp^i$}}%
+\index{rexp@\mbox{$\it rexp^i$}}%
+\indexsyn{aexp}%
+\indexsyn{op}%
+
+The grammar above embodies the following precedence hierarchy for
+expressions, using productions with superscripts as described in
+Section~\ref{notational-conventions}:
+\begin{itemize}
+\item
+Function application binds most tightly of all.
+\item
+Expressions involving infix operators are disambiguated by the
+operator's fixity (see Section~\ref{fixity}).
+Consecutive unparenthesised operators with the same
+precedence must both be either left or right associative
+to avoid a syntax error.
+Given an unparenthesised expression ``\mbox{$\it x\ op^{(a,i)}\ y\ op^{(b,j)}\ z$}'', parentheses
+must be added around either ``\mbox{$\it x\ op^{(a,i)}\ y$}'' or ``\mbox{$\it y\ op^{(b,j)}\\
+\it z$}'' when \mbox{$\it i=j$} unless \mbox{$\it a=b={\rm\ l}$} or \mbox{$\it a=b={\rm\ r}$}.
+\item
+Negation\index{negation} is the only prefix operator in
+\Haskell{}; it has the same precedence as the infix \mbox{\tt -} operator
+defined in the standard prelude (see Figure~\ref{prelude-fixities}).
+\item
+Expression type signatures are parsed as if \mbox{\tt ::} were a
+left-associative infix operator with precedence lower than any other
+operator.
+\end{itemize}
+Sample parses using this grammar are shown below.
+\[\bt{|l|l|}\hline
+This                                & Parses as                             \\
+\hline
+\mbox{\tt f\ x\ +\ g\ y}                         & \mbox{\tt (f\ x)\ +\ (g\ y)}                       \\
+\mbox{\tt -\ f\ x\ +\ y}                         & \mbox{\tt (-\ (f\ x))\ +\ y}                       \\
+\mbox{\tt let\ {\char'173}\ ...\ {\char'175}\ in\ x\ +\ y}              & \mbox{\tt let\ {\char'173}\ ...\ {\char'175}\ in\ (x\ +\ y)}              \\
+\mbox{\tt f\ x\ y\ ::\ Int}                      & \mbox{\tt (f\ x\ y)\ ::\ Int}                      \\
+\mbox{\tt {\char'134}\ x\ ->\ a+b\ ::\ Int}                 & \mbox{\tt {\char'134}\ x\ ->\ ((a+b)\ ::\ Int})               \\
+\hline\et\]
+
+For the sake of clarity, the rest of this section shows the syntax of
+expressions without their precedences.
+
+\subsection{Curried Applications and Lambda Abstractions}
+\label{applications}
+\label{lambda-abstractions}
+\index{lambda abstraction}
+\index{\ pats -> expr@\mbox{$\it \makebox{\tt {\char'134}}\ pats\ \makebox{\tt ->}\ expr$}}
+\index{application}
+%\index{function application|see{application}}
+%
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it exp$\>\makebox[3.5em]{$\rightarrow$}$\it exp\ aexp$\\ 
+$\it exp$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt {\char'134}}\ apat_1\ \ldots \ apat_n\ \makebox{\tt ->}\ exp$
+\end{tabbing}\end{flushleft}
+\indexsyn{exp}%
+%
+\noindent
+{\em Function application}\index{application} is written 
+\mbox{$\it e_1\ e_2$}.  Application associates to the left, so the
+parentheses may be omitted in \mbox{\tt (f\ x)\ y}, for example.  Because \mbox{$\it e_1$} could
+be a constructor, partial applications of constructors are allowed.
+
+{\em Lambda abstractions} are written 
+\mbox{$\it \makebox{\tt {\char'134}}\ p_1\ \ldots \ p_n\ \makebox{\tt ->}\ e$}, where the \mbox{$\it p_i$} are {\em patterns}.
+An expression such as \mbox{\tt {\char'134}x:xs->x} is syntactically incorrect,
+and must be rewritten as \mbox{\tt {\char'134}(x:xs)->x}.
+
+The set of patterns must be {\em linear}\index{linearity}
+\index{linear pattern}---no variable may appear more than once in the set.
+
+\outline{
+\paragraph*{Translation:}
+The lambda abstraction \mbox{$\it \makebox{\tt {\char'134}}\ p_1\ \ldots \ p_n\ \makebox{\tt ->}\ e$} is equivalent to
+\[
+\mbox{$\it \makebox{\tt {\char'134}}\ x_1\ \ldots \ x_n\ \makebox{\tt ->\ case\ (}x_1\makebox{\tt ,}\ \ldots \makebox{\tt ,}\ x_n\makebox{\tt )\ of\ (}p_1\makebox{\tt ,}\ \ldots \makebox{\tt ,}\ p_n\makebox{\tt )\ ->}\ e$}
+\]
+where the \mbox{$\it x_i$} are new identifiers.
+Given this translation combined with the semantics of case
+expressions and pattern-matching described in
+Section~\ref{case-semantics}, if the
+pattern fails to match, then the result is \mbox{$\it \bot$}.
+}
+             
+The type of a variable bound by a lambda abstraction is monomorphic,
+\index{monomorphic type variable}
+as is always the case in the Hindley-Milner type system.
+
+\subsection{Operator Applications}
+\index{operator application}
+%\index{operator application|seealso{application}}
+\label{operators}
+%
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it exp$\>\makebox[3.5em]{$\rightarrow$}$\it exp_1\ op\ exp_2$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt -}\ exp$\>\makebox[3em]{}$\it (prefix\ negation)$
+\end{tabbing}\end{flushleft}
+\indexsyn{exp}%
+\noindent
+The form \mbox{$\it e_1\ op\ e_2$} is the infix application of binary
+operator\index{operator} \mbox{$\it op$} to expressions \mbox{$\it e_1$} and \mbox{$\it e_2$}.  
+
+The special
+form \mbox{$\it \makebox{\tt -}e$} denotes prefix negation\index{negation}, the one and only
+prefix operator in \Haskell{}, and is simply
+syntax for \mbox{$\it \makebox{\tt negate\ }(e)$},\indextt{negate} where \mbox{\tt negate} is as
+defined in the standard prelude (see
+Figure~\ref{basic-numeric-1},
+page~\pageref{basic-numeric-1}).
+Because \mbox{\tt e1-e2} parses as an
+infix application of the binary operator \mbox{\tt -}, one must write \mbox{\tt e1(-e2)} for
+the alternative parsing.  Similarly, \mbox{\tt (-)} is syntax for 
+\mbox{\tt ({\char'134}\ x\ y\ ->\ x-y)}, as with any infix operator, and does not denote 
+\mbox{\tt ({\char'134}\ x\ ->\ -x)}---one must use \mbox{\tt negate} for that.
+
+\outline{
+\paragraph*{Translation:}
+\mbox{$\it e_1\ op\ e_2$} is equivalent to \mbox{$\it \makebox{\tt (}op\makebox{\tt )}\ e_1\ e_2$}.  \mbox{$\it \makebox{\tt -}e$} is
+equivalent to \mbox{$\it \makebox{\tt \ negate}\ (e)$} where \mbox{\tt negate}, an operator in the class
+\mbox{\tt Num}, is as defined in the standard prelude.
+}
+
+\subsection{Sections}
+\index{section}
+%\index{section|seealso{operator application}}
+\label{sections}
+%
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it aexp$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt (}\ exp\ op\ \makebox{\tt )}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ op\ exp\ \makebox{\tt )}$
+\end{tabbing}\end{flushleft}
+\indexsyn{aexp}%
+\noindent
+{\em Sections} are written as \mbox{$\it \makebox{\tt (}\ op\ e\ \makebox{\tt )}$} or \mbox{$\it \makebox{\tt (}\ e\ op\ \makebox{\tt )}$}, where
+\mbox{$\it op$} is a binary operator and \mbox{$\it e$} is an expression.  Sections are a
+convenient syntax for partial application of binary operators.
+
+The normal rules of syntactic precedence apply to sections; for
+example, \mbox{\tt (*a+b)} is syntactically invalid, but \mbox{\tt (+a*b)} and
+\mbox{\tt (*(a+b))} are valid.  Syntactic associativity, however, is not
+taken into account in sections; thus, \mbox{\tt (a+b+)} must be written
+\mbox{\tt ((a+b)+)}.
+
+Because \mbox{\tt -} is treated specially in the grammar,
+\mbox{$\it \makebox{\tt (-}\ exp\makebox{\tt )}$} is not a section, but an application of prefix
+negation,\index{negation} as
+described in the preceding section.  However, there is a \mbox{\tt subtract}
+function defined in the standard prelude such that
+\mbox{$\it \makebox{\tt (subtract}\ exp\makebox{\tt )}$} is equivalent to the disallowed section.
+The expression \mbox{$\it \makebox{\tt (+\ (-}\ exp\makebox{\tt ))}$} can serve the same purpose.
+
+\outline{
+\paragraph*{Translation:}
+For binary operator \mbox{$\it op$} and expression \mbox{$\it e$}, if \mbox{$\it x$} is a variable
+that does not occur free in \mbox{$\it e$}, the section
+\mbox{$\it \makebox{\tt (}op\ e\makebox{\tt )}$} is equivalent to \mbox{$\it \makebox{\tt {\char'134}}\ x\ \makebox{\tt ->}\ x\ op\ e$}, and the section 
+\mbox{$\it \makebox{\tt (}e\ op\makebox{\tt )}$} is equivalent to \mbox{$\it \makebox{\tt {\char'134}}\ x\ \makebox{\tt ->}\ e\ op\ x$}.
+}
+
+\subsection{Conditionals}
+\label{conditionals}\index{conditional expression}
+%
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it exp$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt if}\ exp_1\ \makebox{\tt then}\ exp_2\ \makebox{\tt else}\ exp_3$
+\end{tabbing}\end{flushleft}
+\indexsyn{exp}%
+%\indextt{if ... then ... else ...}
+A {\em conditional expression}
+\index{conditional expression}
+has the form 
+\mbox{$\it \makebox{\tt if}\ e_1\ \makebox{\tt then}\ e_2\ \makebox{\tt else}\ e_3$} and returns the value of \mbox{$\it e_2$} if the
+value of \mbox{$\it e_1$} is \mbox{\tt True}, \mbox{$\it e_3$} if \mbox{$\it e_1$} is \mbox{\tt False}, and \mbox{$\it \bot$}
+otherwise.
+
+\outline{
+\paragraph*{Translation:}
+\mbox{$\it \makebox{\tt if}\ e_1\ \makebox{\tt then}\ e_2\ \makebox{\tt else}\ e_3$} is equivalent to:
+\[
+\mbox{$\it \makebox{\tt case}\ e_1\ \makebox{\tt of\ {\char'173}\ True\ ->}\ e_2\ \makebox{\tt ;\ False\ ->}\ e_3\ \makebox{\tt {\char'175}}$}
+\]
+where \mbox{\tt True} and \mbox{\tt False} are the two nullary constructors from the
+type \mbox{\tt Bool}, as defined in the standard prelude.
+}
+
+\subsection{Lists}
+\label{lists}
+%
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it aexp$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt [}\ exp_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ exp_k\ \makebox{\tt ]}$\>\makebox[3em]{}$\it (k\geq 0)$
+\end{tabbing}\end{flushleft}
+\indexsyn{aexp}%
+\index{[e1,...en]@\mbox{$\it \makebox{\tt [}e_1,\ldots ,e_n\makebox{\tt ]}$} (list)}
+%
+{\em Lists}\index{list} are written \mbox{$\it \makebox{\tt [}e_1\makebox{\tt ,}\ \ldots \makebox{\tt ,}\ e_k\makebox{\tt ]}$}, where
+\mbox{$\it k\geq 0$}; the empty list is written \mbox{\tt []}.  Standard operations on
+lists are given in the standard prelude (see
+Appendix~\ref{stdprelude}, notably Section~\ref{preludelist}).
+
+\outline{
+\paragraph*{Translation:}  
+\mbox{$\it \makebox{\tt [}e_1\makebox{\tt ,}\ \ldots \makebox{\tt ,}\ e_k\makebox{\tt ]}$} is equivalent to
+\[
+\mbox{$\it e_1\ \makebox{\tt :\ (}e_2\ \makebox{\tt :\ (}\ \ldots \ \makebox{\tt (}e_k\ \makebox{\tt :\ [])))}$}
+\]
+where \mbox{\tt :} and \mbox{\tt []} are constructors for lists, as defined in
+the standard prelude (see Section~\ref{basic-lists}).  The types
+of \mbox{$\it e_1$} through \mbox{$\it e_k$} must all be the same (call it \mbox{$\it t\/$}), and the
+type of the overall expression is \mbox{\tt [}\mbox{$\it t$}\mbox{\tt ]} (see Section~\ref{type-syntax}).
+}
+
+\subsection{Tuples}
+\label{tuples}
+%
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it aexp$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt (}\ exp_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ exp_k\ \makebox{\tt )}$\>\makebox[3em]{}$\it (k\geq 2)$
+\end{tabbing}\end{flushleft}
+\indexsyn{aexp}%
+\index{(e1,...,en)@\mbox{$\it \makebox{\tt (}e_1,\ldots ,e_n\makebox{\tt )}$} (tuple)}
+%
+{\em Tuples}\index{tuple} are written \mbox{$\it \makebox{\tt (}e_1\makebox{\tt ,}\ \ldots \makebox{\tt ,}\ e_k\makebox{\tt )}$}, and may be
+of arbitrary length \mbox{$\it k\geq 2$}.  Standard operations on tuples are given
+in the standard prelude (see Appendix~\ref{stdprelude}).
+
+\outline{
+\paragraph*{Translation:}  
+\mbox{$\it \makebox{\tt (}e_1\makebox{\tt ,}\ \ldots \makebox{\tt ,}\ e_k\makebox{\tt )}$} for \mbox{$\it k\geq2$} is an instance of a \mbox{$\it k$}-tuple as
+defined in the standard prelude, and requires no translation.  If
+\mbox{$\it t_1$} through \mbox{$\it t_k$} are the types of \mbox{$\it e_1$} through \mbox{$\it e_k$},
+respectively, then the type of the resulting tuple is 
+\mbox{$\it \makebox{\tt (}t_1\makebox{\tt ,}\ \ldots \makebox{\tt ,}\ t_k\makebox{\tt )}$} (see Section~\ref{type-syntax}).
+}
+
+\subsection{Unit Expressions and Parenthesised Expressions}
+\label{unit-expression}
+\index{unit expression}
+%
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it aexp$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt ()}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ exp\ \makebox{\tt )}$
+\end{tabbing}\end{flushleft}
+\indexsyn{aexp}%
+%
+\noindent
+The form \mbox{$\it \makebox{\tt (}e\makebox{\tt )}$} is simply a {\em parenthesised expression}, and is
+equivalent to \mbox{$\it e$}.  The {\em unit expression} \mbox{\tt ()} has type
+\mbox{\tt ()}\index{trivial type} (see
+Section~\ref{type-syntax}); it is the only member of that type (it can
+be thought of as the ``nullary tuple'')---see Section~\ref{basic-trivial}.
+\nopagebreak[4]
+\outline{
+\paragraph{Translation:}  
+\mbox{$\it \makebox{\tt (}e\makebox{\tt )}$} is equivalent to \mbox{$\it e$}.
+}
+
+\subsection{Arithmetic Sequences}
+\label{arithmetic-sequences}
+%
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it aexp$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt [}\ exp_1\ [\makebox{\tt ,}\ exp_2]\ \makebox{\tt ..}\ [exp_3]\ \makebox{\tt ]}$
+\end{tabbing}\end{flushleft}
+\indexsyn{aexp}%
+\noindent
+The form \mbox{$\it \makebox{\tt [}e_1\makebox{\tt ,}\ e_2\ \makebox{\tt ..}\ e_3\makebox{\tt ]}$} denotes an {\em arithmetic
+sequence}\index{arithmetic sequence} from \mbox{$\it e_1$} in increments of
+\mbox{$\it e_2-e_1$} up to \mbox{$\it e_3$} (if the increment is positive) or down to \mbox{$\it e_3$}
+(if the increment is negative).  An infinite list of \mbox{$\it e_1$}'s results
+if the increment is zero, and the empty list results if \mbox{$\it e_3$} is less
+than \mbox{$\it e_1$} and the increment is positive, or if \mbox{$\it e_3$} is greater than
+\mbox{$\it e_1$} and the increment is negative.  If the comma and \mbox{$\it e_2$} are
+omitted, then the increment is 1; if \mbox{$\it e_3$} is omitted, then
+the sequence is includes all elements of the enumeration, and is thus
+infinite for infinite enumerations.
+
+Arithmetic sequences may be defined over any type in class \mbox{\tt Enum},
+including \mbox{\tt Char}, \mbox{\tt Int}, and \mbox{\tt Integer} (see
+Figure~\ref{standard-classes} and Section~\ref{derived-decls}).
+For example, \mbox{\tt ['a'..'z']} denotes
+the list of lower-case letters in alphabetical order.
+
+\outline{
+\paragraph{Translation:}
+Arithmetic sequences satisfy these identities:
+\begin{center}
+\begin{tabular}{lcl}%
+\struthack{17pt}%
+\mbox{\tt [\ }$e_1$\mbox{\tt ..\ ]}         & $=$ 
+                        & \mbox{\tt enumFrom} $e_1$ \\
+\mbox{\tt [\ }$e_1$\mbox{\tt ,}$e_2$\mbox{\tt ..\ ]} & $=$ 
+                        & \mbox{\tt enumFromThen} $e_1$ $e_2$ \\
+\mbox{\tt [\ }$e_1$\mbox{\tt ..}$e_3$\mbox{\tt \ ]}  & $=$ 
+                        & \mbox{\tt enumFromTo} $e_1$ $e_3$ \\
+\mbox{\tt [\ }$e_1$\mbox{\tt ,}$e_2$\mbox{\tt ..}$e_3$\mbox{\tt \ ]} 
+                        & $=$ 
+                        & \mbox{\tt enumFromThenTo} $e_1$ $e_2$ $e_3$
+\end{tabular}
+\end{center}
+where \mbox{\tt enumFrom}, \mbox{\tt enumFromThen}, \mbox{\tt enumFromTo}, and \mbox{\tt enumFromThenTo}
+are operations in the class \mbox{\tt Enum} as defined in the standard prelude
+(see Figure~\ref{standard-classes}).
+}
+
+\subsection{List Comprehensions}
+\index{list comprehension}
+\label{list-comprehensions}
+%
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it aexp$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt [}\ exp\ \makebox{\tt |}\ qual_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ qual_n\ \makebox{\tt ]}$\>\makebox[3em]{}$\it (\tr{list\ comprehension},\ n\geq 1)$\\ 
+$\it qual$\>\makebox[3.5em]{$\rightarrow$}$\it pat\ \makebox{\tt <-}\ exp$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it exp$
+\end{tabbing}\end{flushleft}
+\indexsyn{aexp}
+\indexsyn{qual}
+
+\noindent
+A {\em list comprehension} has the form \mbox{$\it \makebox{\tt [}\ e\ \makebox{\tt |}\ q_1\makebox{\tt ,}\ \ldots \makebox{\tt ,}\ q_n\ \makebox{\tt ]},\\
+\it n\geq 1,$} where the \mbox{$\it q_i$} qualifiers\index{qualifier} are either {\em
+generators}\index{generator} of the form \mbox{$\it p\ \makebox{\tt <-}\ e$}, where \mbox{$\it p$} is a
+pattern (see Section~\ref{pattern-matching}) of type \mbox{$\it t$} and \mbox{$\it e$} is an
+expression of type \mbox{$\it \makebox{\tt [}t\makebox{\tt ]}$}; or {\em guards},\index{guard} which are
+arbitrary expressions of type \mbox{\tt Bool}.
+
+Such a list comprehension returns the list of elements
+produced by evaluating \mbox{$\it e$} in the successive environments
+created by the nested, depth-first evaluation of the generators in the
+qualifier list.  Binding of variables occurs according to the normal
+pattern-matching rules (see Section~\ref{pattern-matching}), and if a
+match fails then that element of the list is simply skipped over.  Thus:\nopagebreak[4]
+\bprog
+\mbox{\tt [\ x\ |\ \ xs\ \ \ <-\ [\ [(1,2),(3,4)],\ [(5,4),(3,2)]\ ],\ }\\
+\mbox{\tt \ \ \ \ \ \ (3,x)\ <-\ xs\ ]}
+\eprog
+yields the list \mbox{\tt [4,2]}.  If a qualifier is a guard, it must evaluate
+to \mbox{\tt True} for the previous pattern-match to succeed.  
+As usual, bindings in list comprehensions can shadow those in outer
+scopes; for example:
+\[\ba{lll}
+\mbox{\tt [\ x\ |\ x\ <-\ x,\ x\ <-\ x\ ]} & = & \mbox{\tt [\ z\ |\ y\ <-\ x,\ z\ <-\ y]} \\
+\ea\]
+\outline{
+\paragraph{Translation:}
+List comprehensions satisfy these identities, which may be
+used as a translation into the kernel:
+\begin{center}
+\bt{lcl}%
+\struthack{17pt}%
+\mbox{\tt [\ }$e$\mbox{\tt \ |\ }$b$\mbox{\tt \ ]}            &=& \mbox{\tt if\ }$b$\mbox{\tt \ then\ [}$e$\mbox{\tt ]\ else\ []} \\
+\mbox{\tt [\ }$e$\mbox{\tt \ |\ }$q_1$\mbox{\tt ,\ }$q_2$\mbox{\tt \ ]} &=& \mbox{\tt concat\ [\ [\ }$e$\mbox{\tt \ |\ }$q_2$\mbox{\tt \ ]\ |\ }$q_1$\mbox{\tt \ ]} \\
+\mbox{\tt [\ }$e$\mbox{\tt \ |\ }$p$\mbox{\tt \ <-\ }$l$\mbox{\tt \ ]}   &=& \mbox{\tt let\ ok\ }$p$\mbox{\tt \ \ =\ \ True} \\
+                               & & \mbox{\tt \ \ \ \ ok\ {\char'137}\ \ =\ \ False} \\
+                               & & \mbox{\tt in} \\
+                               & & \mbox{\tt \ map\ ({\char'134}}$p$\mbox{\tt \ ->\ }$e$\mbox{\tt )\ (filter\ ok\ }$l$\mbox{\tt )} \\
+\et
+\end{center}
+where \mbox{$\it e$} ranges over expressions, \mbox{$\it p$} ranges over
+patterns, \mbox{$\it l$} ranges over list-valued expressions, \mbox{$\it b$} ranges over
+boolean expressions, \mbox{$\it q_1$} and \mbox{$\it q_2$} range over non-empty lists of
+qualifiers, and \mbox{\tt ok} is a new identifier not appearing in \mbox{$\it e$}, \mbox{$\it p$}, or
+\mbox{$\it l$}.  These three equations uniquely define list comprehensions.
+\mbox{\tt True}, \mbox{\tt False}, \mbox{\tt map}, \mbox{\tt concat} and \mbox{\tt filter} are all as defined in the
+standard prelude.
+}
+
+\subsection{Let Expressions}
+\index{let expression}
+\label{let-expressions}
+%
+% Including this syntax blurb does REALLY bad things to page breaking
+% in the 1.1 report (sigh); ToDo: hope it goes away.
+%@@
+%exp    ->  \mbox{\tt let\ {\char'173}} decls \mbox{\tt {\char'175}\ in} exp
+%@@
+\indexsyn{exp}
+\index{declaration!within a {\ptt let} expression}
+\noindent
+{\em Let expressions} have the general form
+\mbox{$\it \makebox{\tt let\ {\char'173}}\ d_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ d_n\ \makebox{\tt {\char'175}\ in}\ e$},
+and introduce a
+nested, lexically-scoped, {\em
+mutually-recursive} list of declarations (\mbox{\tt let} is often called \mbox{\tt letrec} in
+other languages).  The scope of the declarations is the expression \mbox{$\it e$}
+and the right hand side of the declarations.  Declarations are
+described in Section~\ref{declarations}.  Pattern bindings are matched
+lazily as irrefutable patterns.\index{irrefutable pattern}
+
+\outline{
+\paragraph*{Translation:} The dynamic semantics of the expression 
+\mbox{$\it \makebox{\tt let\ {\char'173}}\ d_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ d_n\ \makebox{\tt {\char'175}\ in}\ e_0$} is captured by this
+translation: After removing all type signatures, each
+declaration \mbox{$\it d_i$} is translated into an equation of the form 
+\mbox{$\it p_i\ \makebox{\tt =}\ e_i$}, where \mbox{$\it p_i$} and \mbox{$\it e_i$} are patterns and expressions
+respectively, using the translation in
+Section~\ref{function-bindings}.  Once done, these identities
+hold, which may be used as a translation into the kernel:
+\begin{center}
+\bt{lcl}%
+\struthack{17pt}%
+\mbox{\tt let\ {\char'173}}$p_1$\mbox{\tt \ =\ }$e_1$\mbox{\tt ;\ }...\mbox{\tt ;\ }$p_n$\mbox{\tt \ =\ }$e_n$\mbox{\tt {\char'175}\ in} $e_0$
+      &=& \mbox{\tt let\ ({\char'176}}$p_1$\mbox{\tt ,}...\mbox{\tt ,{\char'176}}$p_n$\mbox{\tt )\ =\ (}$e_1$\mbox{\tt ,}...\mbox{\tt ,}$e_n$\mbox{\tt )\ in} $e_0$ \\
+\mbox{\tt let\ }$p$\mbox{\tt \ =\ }$e_1$ \mbox{\tt \ in\ } $e_0$
+        &=& \mbox{\tt case\ }$e_1$\mbox{\tt \ of\ {\char'176}}$p$\mbox{\tt \ ->\ }$e_0$   \\
+        & & {\rm where no variable in $p$ appears free in $e_1$} \\
+\mbox{\tt let\ }$p$\mbox{\tt \ =\ }$e_1$ \mbox{\tt \ in\ } $e_0$
+      &=& \mbox{\tt let\ }$p$\mbox{\tt \ =\ fix\ (\ {\char'134}\ {\char'176}}$p$\mbox{\tt \ ->\ }$e_1$\mbox{\tt )\ in} $e_0$
+\et
+\end{center}
+where \mbox{\tt fix} is the least fixpoint operator.  Note the use of the
+irrefutable patterns in the second and third rules.  
+% This same semantics applies to the top-level of
+%a program that has been translated into a \mbox{\tt let} expression,
+% as described at the beginning of Section~\ref{modules}.
+The static semantics of the bindings in a \mbox{\tt let} expression
+is described in 
+Section~\ref{pattern-bindings}.
+}
+
+\subsection{Case Expressions}
+\label{case}
+%
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it exp$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt case}\ exp\ \makebox{\tt of}\ \makebox{\tt {\char'173}}\ alts\ [\makebox{\tt ;}]\ \makebox{\tt {\char'175}}$\\ 
+$\it alts$\>\makebox[3.5em]{$\rightarrow$}$\it alt_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ alt_n$\>\makebox[3em]{}$\it (n\geq 0)$\\ 
+$\it alt$\>\makebox[3.5em]{$\rightarrow$}$\it pat\ \makebox{\tt ->}\ exp\ [\makebox{\tt where}\ \makebox{\tt {\char'173}}\ decls\ [\makebox{\tt ;}]\ \makebox{\tt {\char'175}}]$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it pat\ gdpat\ [\makebox{\tt where}\ \makebox{\tt {\char'173}}\ decls\ [\makebox{\tt ;}]\ \makebox{\tt {\char'175}}]$\\ 
+$\it $\\ 
+$\it gdpat$\>\makebox[3.5em]{$\rightarrow$}$\it gd\ \makebox{\tt ->}\ exp\ [\ gdpat\ ]$\\ 
+$\it gd$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt |}\ exp$
+\end{tabbing}\end{flushleft}
+\indexsyn{exp}%
+\indexsyn{alts}%
+\indexsyn{alt}%
+\indexsyn{gdpat}%
+\indexsyn{gd}%
+%\indextt{case ... of ...}
+A {\em case expression}\index{case expression} has the general form
+\[
+\mbox{$\it \makebox{\tt case}\ e\ \makebox{\tt of\ {\char'173}\ }p_1\ match_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ p_n\ match_n\ \makebox{\tt {\char'175}}$}
+\]
+where each \mbox{$\it match_i$} is of the general form
+\[\ba{lll}
+ & \mbox{$\it \makebox{\tt |}\ g_{i1}$}   & \mbox{$\it \makebox{\tt ->}\ e_{i1}\ \makebox{\tt ;}$} \\
+ & \mbox{$\it \ldots $} \\
+ & \mbox{$\it \makebox{\tt |}\ g_{im_i}$} & \mbox{$\it \makebox{\tt ->}\ e_{im_i}$} \\
+ & \multicolumn{2}{l}{\mbox{$\it \makebox{\tt where\ {\char'173}}\ decls_i\ \makebox{\tt {\char'175}}$}}
+\ea\]
+where each clause \mbox{$\it p_i\ matches_i$} consists of a a {\em
+pattern}\index{pattern} \mbox{$\it p_i$} and its \mbox{$\it matches_i$}, which
+consists of pairs of optional {\em guards}\index{guard}
+\mbox{$\it g_{ij}$} and {\em bodies} \mbox{$\it e_{ij}$} (expressions), as well as
+optional bindings (\mbox{$\it decls_i$}) that scope over all of the guards and
+expressions of the clause.  An alternative of the form
+\[
+\mbox{$\it pat\ \makebox{\tt ->}\ expr\ \makebox{\tt where\ {\char'173}}\ decls\ \makebox{\tt {\char'175}}$}
+\]
+is treated as shorthand for:
+\[\ba{lll}
+ & \mbox{$\it pat\ \makebox{\tt |\ True}$}   & \mbox{$\it \makebox{\tt ->}\ expr$} \\
+ & \multicolumn{2}{l}{\mbox{$\it \makebox{\tt where\ {\char'173}}\ decls\ \makebox{\tt {\char'175}}$}}
+\ea\]
+
+A case expression must have at least one clause and each clause must
+have at least one body.  Each body must have the same type, and the
+type of the whole expression is that type.
+
+A case expression is evaluated by pattern-matching the expression \mbox{$\it e$}
+against the individual clauses.  The matches are tried sequentially,
+from top to bottom.  The first successful match causes evaluation of
+the corresponding clause body, in the environment of the case
+expression extended by the bindings created during the matching of
+that clause and by the \mbox{$\it decls_i$} associated with that clause.  If no
+match succeeds, the result is \mbox{$\it \bot$}.  Pattern matching is described
+in Section~\ref{pattern-matching}, with the formal semantics of case
+expressions in Section~\ref{case-semantics}.
+
+\subsection{Expression Type-Signatures}
+\index{expression type-signature}
+\label{expression-type-sigs}
+%
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it exp$\>\makebox[3.5em]{$\rightarrow$}$\it exp\ \makebox{\tt ::}\ [context\ \makebox{\tt =>}]\ atype$
+\end{tabbing}\end{flushleft}
+\indexsyn{exp}
+\indextt{::}
+\nopagebreak[4]
+{\em Expression type-signatures} have the form \mbox{$\it e\ \makebox{\tt ::}\ t$}, where \mbox{$\it e$}
+is an expression and \mbox{$\it t$} is a type (Section~\ref{type-syntax}); they
+are used to type an expression explicitly
+and may be used to resolve ambiguous typings due to overloading (see
+Section~\ref{default-decls}).  The value of the expression is just that of
+\mbox{$\it exp$}.  As with normal type signatures (see
+Section~\ref{type-signatures}), the declared type may be more specific than 
+the principal type derivable from \mbox{$\it exp$}, but it is an error to give
+a type that is more general than, or not comparable to, the
+principal type.
+
+
+\subsection{Pattern-Matching}
+\index{pattern-matching}
+\label{pattern-matching}
+\label{patterns}
+
+{\em Patterns} appear in lambda abstractions, function definitions, pattern
+bindings, list comprehensions, and case expressions.  However, the
+first four of these ultimately translate into case expressions, so
+defining the semantics of pattern-matching for case expressions is sufficient.
+%it suffices to restrict the definition of the semantics of
+%pattern-matching to case expressions.
+
+\subsubsection{Patterns}
+
+Patterns\index{pattern} have this syntax:
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it pat$\>\makebox[3.5em]{$\rightarrow$}$\it pat^0$\\ 
+$\it pat^i$\>\makebox[3.5em]{$\rightarrow$}$\it pat^{i+1}_1\ [conop^{({\rm\ n},i)}\ pat^{i+1}_2]$\>\makebox[3em]{}$\it (0\leq i\leq 9)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it lpat^i\ conop^{({\rm\ l},i)}\ pat^{i+1}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it pat^{i+1}\ conop^{({\rm\ r},i)}\ rpat^i$\\ 
+$\it lpat^i$\>\makebox[3.5em]{$\rightarrow$}$\it [lpat^i\ conop^{({\rm\ l},i)}]\ pat^{i+1}$\>\makebox[3em]{}$\it (0\leq i\leq 9)$\\ 
+$\it lpat^6$\>\makebox[3.5em]{$\rightarrow$}$\it lpat^6\ \makebox{\tt +}\ integer$\>\makebox[3em]{}$\it (\tr{successor\ pattern})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt -}\ \{integer\ |\ float\}$\>\makebox[3em]{}$\it (\tr{negative\ literal})$\\ 
+$\it rpat^i$\>\makebox[3.5em]{$\rightarrow$}$\it pat^{i+1}\ [conop^{({\rm\ r},i)}\ rpat^i]$\>\makebox[3em]{}$\it (0\leq i\leq 9)$\\ 
+$\it pat^{10}$\>\makebox[3.5em]{$\rightarrow$}$\it apat$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it con\ apat_1\ \ldots \ apat_k$\>\makebox[3em]{}$\it (\arity{con}=k\geq 1)$\\ 
+$\it $\\ 
+$\it apat$\>\makebox[3.5em]{$\rightarrow$}$\it var\ [{\tt\ @}\ apat]$\>\makebox[3em]{}$\it (\tr{as\ pattern})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it con$\>\makebox[3em]{}$\it (\arity{con}=0)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it literal$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt {\char'137}}$\>\makebox[3em]{}$\it (\tr{wildcard})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt ()}$\>\makebox[3em]{}$\it (\tr{unit\ pattern})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ pat\ \makebox{\tt )}$\>\makebox[3em]{}$\it (\tr{parenthesised\ pattern})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ pat_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ pat_k\ \makebox{\tt )}$\>\makebox[3em]{}$\it (\tr{tuple\ pattern},\ k\geq 2)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt [}\ pat_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ pat_k\ \makebox{\tt ]}$\>\makebox[3em]{}$\it (\tr{list\ pattern},\ k\geq 0)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt {\char'176}}\ apat$\>\makebox[3em]{}$\it (\tr{irrefutable\ pattern})$
+\end{tabbing}\end{flushleft}
+\indexsyn{pat}%
+\index{pat@\mbox{$\it pat^i$}}%
+\index{lpat@\mbox{$\it lpat^i$}}%
+\index{rpat@\mbox{$\it rpat^i$}}%
+\indexsyn{apat}%
+The arity of a constructor must match the number of
+sub-patterns associated with it; one cannot match against a
+partially-applied constructor.
+
+All patterns must be {\em linear}\index{linearity}\index{linear
+pattern}---no variable may appear more than once.
+
+Patterns of the form \mbox{$\it var$}{\tt @}\mbox{$\it pat$} are called {\em as-patterns},
+\index{as-pattern ({\ptt {\char'100}})}
+and allow one to use \mbox{$\it var$}
+as a name for the value being matched by \mbox{$\it pat$}.  For example,\nopagebreak[4]
+\bprog
+\mbox{\tt case\ e\ of\ {\char'173}\ xs@(x:rest)\ ->\ if\ x==0\ then\ rest\ else\ xs\ {\char'175}}
+\eprog
+is equivalent to:
+\bprog
+\mbox{\tt let\ {\char'173}\ xs\ =\ e\ {\char'175}\ in}\\
+\mbox{\tt \ \ case\ xs\ of\ {\char'173}\ (x:rest)\ ->\ if\ x\ ==\ 0\ then\ rest\ else\ xs\ {\char'175}}
+\eprog
+%This transformation of a case expression is always valid, and
+%is assumed done prior to the pattern-matching semantics given below.
+
+Patterns of the form \mbox{\tt {\char'137}} are {\em
+wildcards}\index{wildcard pattern ({\ptt {\char'137}})} and are useful when some part of a pattern
+is not referenced on the right-hand-side.  It is as if an
+identifier not used elsewhere were put in its place.  For example,
+\bprog
+\mbox{\tt case\ e\ of\ {\char'173}\ [x,{\char'137},{\char'137}]\ \ ->\ \ if\ x==0\ then\ True\ else\ False\ {\char'175}}
+\eprog
+is equivalent to:
+\bprog
+\mbox{\tt case\ e\ of\ {\char'173}\ [x,y,z]\ \ ->\ \ if\ x==0\ then\ True\ else\ False\ {\char'175}}
+\eprog
+% where \mbox{\tt y} and \mbox{\tt z} are identifiers not used elsewhere.
+
+%old:
+%This translation is also 
+%assumed prior to the semantics given below.
+
+In the pattern-matching rules given below we distinguish two kinds of
+patterns: an {\em irrefutable pattern}
+\index{irrefutable pattern}
+is either of the form \mbox{$\it \makebox{\tt {\char'176}}apat$}, a variable, or a wildcard; all
+other patterns are {\em refutable}.
+\index{refutable pattern}
+
+\subsubsection{Informal semantics of pattern-matching}
+
+Patterns are matched against values.  Attempting to match a pattern
+can have one of three results: it may {\em fail\/}; it may {\em
+succeed}, returning a binding for each variable in the pattern; or it
+may {\em diverge} (i.e.~return \mbox{$\it \bot$}).  Pattern-matching proceeds
+from left to right, and outside in, according to these rules:
+\begin{enumerate}
+\item Matching a value \mbox{$\it v$} against the irrefutable pattern
+\index{irrefutable pattern}
+\mbox{$\it var$} always succeeds and binds \mbox{$\it var$} to \mbox{$\it v$}.  Similarly, matching \mbox{$\it v$}
+against the irrefutable pattern \mbox{$\it \makebox{\tt {\char'176}}apat$} always succeeds.  The free
+variables in \mbox{$\it apat$} are bound to the appropriate values if matching
+\mbox{$\it v$} against \mbox{$\it apat$} would otherwise succeed, and to \mbox{$\it \bot$} if matching
+\mbox{$\it v$} against \mbox{$\it apat$} fails or diverges.  (Binding does {\em
+not} imply evaluation.)
+
+Operationally, this means that no matching is done on an
+irrefutable pattern until one of the variables in the pattern is used.
+At that point the entire pattern is matched against the value, and if
+the match fails or diverges, so does the overall computation.
+
+\item Matching \mbox{$\it \bot$} against a refutable pattern always diverges.
+\index{refutable pattern}
+
+\item Matching a non-\mbox{$\it \bot$} value can occur against two kinds of
+refutable patterns:
+\begin{enumerate}
+\item Matching a non-\mbox{$\it \bot$} value against a constructed pattern
+\index{constructed pattern}
+fails if the outermost constructors are different.  If the constructors are
+the same, the result of the match is the result of matching the
+sub-patterns left-to-right: if all matches succeed, the overall match
+succeeds; the first to fail or diverge causes the overall match to
+fail or diverge, respectively.  
+
+Constructed values consist of those created by prefix or infix
+constructors, tuple or list patterns, and strings (which are
+lists of characters).  Characters and \mbox{\tt ()} are treated as
+nullary constructors.  Numeric literals are matched using the
+overloaded \mbox{\tt ==} function.
+
+%Also, literals (characters, positive and
+%negative integers, and the unit value \mbox{\tt ()}) are treated as nullary
+%constructors.
+
+\item Matching a non-\mbox{$\it \bot$} value \mbox{$\it n$} against a pattern of the form
+\mbox{$\it x\makebox{\tt +}k$}
+\index{n+k pattern@\mbox{$\it n\makebox{\tt +}k$} pattern}
+(where \mbox{$\it x$} is a variable and \mbox{$\it k$} is a positive integer
+literal) succeeds if \mbox{$\it n\geq k$}, resulting in the binding of \mbox{$\it x$} to \mbox{$\it n-k$},
+and fails if \mbox{$\it n<k$}.  For example, the Fibonacci function may be
+defined as follows:
+
+\bprog
+\mbox{\tt fib\ n\ =\ case\ n\ of\ {\char'173}}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ 0\ \ \ ->\ 1\ ;}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ 1\ \ \ ->\ 1\ ;}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ n+2\ ->\ fib\ n\ +\ fib\ (n+1)\ {\char'175}}
+\eprog
+Since \mbox{\tt n} must be bound to a positive value, \mbox{\tt fib} diverges for a
+negative argument, and exactly one of the equations matches any
+non-negative argument.
+\end{enumerate}
+
+\item
+The result of matching a value \mbox{$\it v$} against an as-pattern \mbox{$\it var$}{\tt @}\mbox{$\it pat$} is
+\index{as-pattern ({\ptt {\char'100}})}
+the result of matching \mbox{$\it v$} against \mbox{$\it pat$} augmented with the binding of
+\mbox{$\it var$} to \mbox{$\it v$}.  If the match of \mbox{$\it v$} against \mbox{$\it pat$} fails or diverges,
+then so does the overall match.
+\end{enumerate}
+
+Aside from the obvious static type constraints (for
+example, it is a static error to match a character against a
+boolean), these static class constraints hold: an integer
+literal pattern
+\index{integer literal pattern}
+can only be matched against a value in the class
+\mbox{\tt Num}; a floating literal pattern
+\index{floating literal pattern}
+can only be matched against a value
+in the class \mbox{\tt Fractional}; and a \mbox{$\it n\makebox{\tt +}k$} pattern
+\index{n+k pattern@\mbox{$\it n\makebox{\tt +}k$} pattern}
+can only be matched
+against a value in the class \mbox{\tt Integral}.
+
+Here are some examples:
+\begin{enumerate}
+\item If the pattern \mbox{\tt [1,2]} is matched against \mbox{$\it \makebox{\tt [0,}\bot\makebox{\tt ]}$}, then \mbox{\tt 1}
+\mbox{$\it fails$} to match against \mbox{\tt 0}, and the result is a failed match.  But
+if \mbox{\tt [1,2]} is matched against \mbox{$\it \makebox{\tt [}\bot\makebox{\tt ,0]}$}, then attempting to match
+\mbox{\tt 1} against \mbox{$\it \bot$} causes the match to \mbox{$\it diverge$}.
+
+\item These examples demonstrate refutable vs.~irrefutable
+matching:
+\nopagebreak[4]
+\bprog
+\mbox{\tt ({\char'134}\ {\char'176}(x,y)\ ->\ 0)\ }\mbox{$\it \bot$}\mbox{\tt \ \ \ \ }\mbox{$\it \Rightarrow$}\mbox{\tt \ \ \ \ 0}\\
+\mbox{\tt ({\char'134}\ \ (x,y)\ ->\ 0)\ }\mbox{$\it \bot$}\mbox{\tt \ \ \ \ }\mbox{$\it \Rightarrow$}\mbox{\tt \ \ \ \ }\mbox{$\it \bot$}\mbox{\tt }
+\eprog
+\bprog
+\mbox{\tt ({\char'134}\ {\char'176}[x]\ ->\ 0)\ []\ \ \ \ }\mbox{$\it \Rightarrow$}\mbox{\tt \ \ \ \ 0}\\
+\mbox{\tt ({\char'134}\ {\char'176}[x]\ ->\ x)\ []\ \ \ \ }\mbox{$\it \Rightarrow$}\mbox{\tt \ \ \ \ }\mbox{$\it \bot$}\mbox{\tt }
+\eprog
+\bprog
+\mbox{\tt ({\char'134}\ {\char'176}[x,{\char'176}(a,b)]\ ->\ x)\ [(0,1),}\mbox{$\it \bot$}\mbox{\tt ]\ \ \ \ }\mbox{$\it \Rightarrow$}\mbox{\tt \ \ \ \ (0,1)}\\
+\mbox{\tt ({\char'134}\ {\char'176}[x,\ (a,b)]\ ->\ x)\ [(0,1),}\mbox{$\it \bot$}\mbox{\tt ]\ \ \ \ }\mbox{$\it \Rightarrow$}\mbox{\tt \ \ \ \ }\mbox{$\it \bot$}\mbox{\tt }
+\eprog
+\bprog
+\mbox{\tt ({\char'134}\ \ (x:xs)\ ->\ x:x:xs)\ }\mbox{$\it \bot$}\mbox{\tt \ \ \ }\mbox{$\it \Rightarrow$}\mbox{\tt \ \ \ }\mbox{$\it \bot$}\mbox{\tt }\\
+\mbox{\tt ({\char'134}\ {\char'176}(x:xs)\ ->\ x:x:xs)\ }\mbox{$\it \bot$}\mbox{\tt \ \ \ }\mbox{$\it \Rightarrow$}\mbox{\tt \ \ \ }\mbox{$\it \bot$}\mbox{\tt :}\mbox{$\it \bot$}\mbox{\tt :}\mbox{$\it \bot$}\mbox{\tt }
+\eprogNoSkip
+\end{enumerate}
+
+Top level patterns in case
+expressions, and the set of top level patterns in function or pattern
+bindings, may have zero or more associated {\em guards}\index{guard}.  A guard is
+a boolean expression that is evaluated only after all of the
+arguments have been successfully matched, and it must be true for the
+overall pattern-match to succeed.  The environment of the guard is the same
+as the right-hand-side of the case expression
+clause, function definition, or pattern binding to which it is attached.
+
+The guard semantics has an obvious influence on the
+strictness characteristics of a function or case expression.  In
+particular, an otherwise irrefutable pattern
+\index{irrefutable pattern}
+may be evaluated because of a guard.  For example, in
+\bprog
+\mbox{\tt f\ {\char'176}(x,y,z)\ [a]\ |\ a==y\ =\ 1}
+\eprog
+both \mbox{\tt a} and \mbox{\tt y} will be evaluated.
+
+
+\subsubsection{Formal semantics of pattern-matching}
+\label{case-semantics}
+
+The semantics of all other constructs that use
+pattern-matching is defined by giving identities that relate those constructs to
+\mbox{\tt case} expressions.
+
+The semantics of \mbox{\tt case} expressions are given as a series of
+identities. Figure~\ref{simple-case-expr} shows the
+identities:
+$e$, $e'$ and $e_i$ are arbitrary expressions; 
+$g$ and $g_i$ are boolean-valued expressions; 
+$p$ and $p_i$ are patterns; 
+$x$ and $x_i$ are variables; 
+$K$ and $K'$ are constructors (including tuple constructors); 
+a $match_i$ is a form as shown in rule~(a);
+and $k$ is a character, string, or numeric literal.
+
+For clarity, several rules are expressed using
+\mbox{\tt let} (used only in a non-recursive way); their usual purpose is to
+prevent name capture
+(e.g., in rule~(b)).  The rules may be re-expressed entirely with
+\mbox{\tt cases} by applying this identity:
+\[
+\mbox{$\it \makebox{\tt let\ }x\makebox{\tt \ =\ }y\makebox{\tt \ in\ }e\makebox{\tt \ }\ =\makebox{\tt \ \ case\ }y\makebox{\tt \ of\ {\char'173}\ }x\makebox{\tt \ ->\ }e\makebox{\tt \ {\char'175}}$}
+\]
+
+\begin{figure}
+\outline{
+\begin{tabular}{@{}cl}
+(a)&\mbox{\tt case\ }$e_0$\mbox{\tt \ of\ {\char'173}\ }$p_1\ \ match_1$\mbox{\tt ;\ \ }$\ldots{}$\mbox{\tt \ ;\ }$p_n\ \ match_n$\mbox{\tt \ {\char'175}}\\
+   &$=$\mbox{\tt \ \ case\ }$e_0$\mbox{\tt \ of\ {\char'173}\ }$p_1\ \ match_1$\mbox{\tt \ ;}\\
+   &\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\char'137}\ \ ->\ }$\ldots{}$\mbox{\tt \ case\ }$e_0$\mbox{\tt \ of\ {\char'173}}\\
+   &\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }$p_n\ \ match_n$\\
+   &\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\char'137}\ \ ->\ error\ "No\ match"\ {\char'175}}$\ldots$\mbox{\tt {\char'175}}\\
+   &\mbox{\tt \ }{\rm where each $match_i$ has the form:}\\
+   &\mbox{\tt \ \ |\ }$g_{i,1}$  \mbox{\tt \ ->\ }$e_{i,1}$\mbox{\tt \ ;\ }$\ldots{}$\mbox{\tt \ ;\ |\ }$g_{i,m_i}$\mbox{\tt \ ->\ }$e_{i,m_i}$\mbox{\tt \ where\ {\char'173}\ }$decls_i$\mbox{\tt \ {\char'175}}\\[4pt]
+%\\
+(b)&\mbox{\tt case\ }$e_0$\mbox{\tt \ of\ {\char'173}\ }$p$\mbox{\tt \ |\ }$g_1$\mbox{\tt \ ->\ }$e_1$\mbox{\tt \ ;\ }$\ldots{}$\\
+   &\hspace*{4pt}\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ }$g_n$\mbox{\tt \ ->\ }$e_n$\mbox{\tt \ where\ {\char'173}\ }$decls$\mbox{\tt \ {\char'175}}\\
+   &\hspace*{2pt}\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ {\char'137}\ \ \ \ \ \ ->\ }$e'$\mbox{\tt \ {\char'175}}\\
+   &$=$\mbox{\tt \ let\ {\char'173}\ }$y$\mbox{\tt \ =\ }$e'$\mbox{\tt \ {\char'175}\ \ \ }(where $y$ is a completely new variable)\\
+   &\mbox{\tt \ \ \ in\ \ case\ }$e_0$\mbox{\tt \ of\ {\char'173}}\\
+   &\mbox{\tt \ \ \ \ \ \ \ \ \ }$p$\mbox{\tt \ ->\ let\ {\char'173}\ }$decls$\mbox{\tt \ {\char'175}\ in}\\
+   &\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ if\ }$g_1$\mbox{\tt \ then\ }$e_1$\mbox{\tt \ }$\ldots{}$\mbox{\tt \ else\ if\ }$g_n$\mbox{\tt \ then\ }$e_n$\mbox{\tt \ else\ }$y$\\
+   &\mbox{\tt \ \ \ \ \ \ \ \ \ {\char'137}\ ->\ }$y$\mbox{\tt \ {\char'175}}\\[4pt]
+%\\
+(c)&\mbox{\tt case\ }$e_0$\mbox{\tt \ of\ {\char'173}\ {\char'176}}$p$\mbox{\tt \ ->\ }$e$\mbox{\tt ;\ {\char'137}\ ->\ }$e'$\mbox{\tt \ {\char'175}}\\
+&$=$\mbox{\tt \ let\ {\char'173}\ }$y$\mbox{\tt \ =\ }$e_0$\mbox{\tt \ {\char'175}\ in}\\
+&\mbox{\tt \ \ \ let\ {\char'173}\ }$x'_1$\mbox{\tt \ =\ case\ }$y$\mbox{\tt \ of\ {\char'173}\ }$p$\mbox{\tt \ ->\ }$x_1$\mbox{\tt \ {\char'175}{\char'175}\ in\ }$\ldots$\\
+&\mbox{\tt \ \ \ let\ {\char'173}\ }$x'_n$\mbox{\tt \ =\ case\ }$y$\mbox{\tt \ of\ {\char'173}\ }$p$\mbox{\tt \ ->\ }$x_n$\mbox{\tt \ {\char'175}{\char'175}\ in\ }$e\,[x'_1/x_1, \ldots, x'_n/x_n]$\\[2pt]
+&{\rm $x_1, \ldots, x_n$ are all the variables in $p\/$; $y, x'_1, \ldots, x'_n$ are completely new variables}\\[4pt]
+%\\
+(d)&\mbox{\tt case\ }$e_0$\mbox{\tt \ of\ {\char'173}\ }$x${\tt @}$p$\mbox{\tt \ ->\ }$e$\mbox{\tt ;\ {\char'137}\ ->\ }$e'$\mbox{\tt \ {\char'175}}\\
+&$=$\mbox{\tt \ let\ {\char'173}\ }$y$\mbox{\tt \ =\ }$e_0$\mbox{\tt \ {\char'175}\ \ \ }(where $y$ is a completely new variable)\\
+&\mbox{\tt \ \ \ in\ \ case\ }$y$\mbox{\tt \ of\ {\char'173}\ }$p$\mbox{\tt \ ->\ (\ {\char'134}\ }$x$\mbox{\tt \ ->\ }$e$\mbox{\tt \ )\ }$y$\mbox{\tt \ ;\ {\char'137}\ ->\ }$e'$\mbox{\tt \ {\char'175}}\\[4pt]
+%\\
+(e)&\mbox{\tt case\ }$e_0$\mbox{\tt \ of\ {\char'173}\ {\char'137}\ ->\ }$e$\mbox{\tt ;\ {\char'137}\ ->\ }$e'$\mbox{\tt \ {\char'175}\ }$=$\mbox{\tt \ }$e$\\[4pt]
+%\\
+(f)&\mbox{\tt case\ }$e_0$\mbox{\tt \ of\ {\char'173}\ }$K\ p_1 \ldots p_n$\mbox{\tt \ ->\ }$e$\mbox{\tt ;\ {\char'137}\ ->\ }$e'$\mbox{\tt \ {\char'175}}\\
+&$=$\mbox{\tt \ let\ {\char'173}\ }$y$\mbox{\tt \ =\ }$e'$\mbox{\tt \ {\char'175}}\\
+&\mbox{\tt \ \ \ in\ \ case\ }$e_0$\mbox{\tt \ of\ {\char'173}}\\
+&\mbox{\tt \ \ \ \ \ }$K\ x_1 \ldots x_n$\mbox{\tt \ ->\ case\ }$x_1$\mbox{\tt \ of\ {\char'173}}\\
+&\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }$p_1$\mbox{\tt \ ->\ }$\ldots$\mbox{\tt \ case\ }$x_n$\mbox{\tt \ of\ {\char'173}\ }$p_n$\mbox{\tt \ ->\ }$e$\mbox{\tt \ ;\ {\char'137}\ ->\ }$y$\mbox{\tt \ {\char'175}\ }$\ldots$\\
+&\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\char'137}\ \ ->\ }$y$\mbox{\tt \ {\char'175}}\\
+&\mbox{\tt \ \ \ \ \ {\char'137}\ ->\ }$y$\mbox{\tt \ {\char'175}\ }{\rm (where $y, x_1, \ldots, x_n$ are completely new variables)}\\[4pt]
+%\\
+(g)&\mbox{\tt case\ }$e_0$\mbox{\tt \ of\ {\char'173}\ }$k$\mbox{\tt \ ->\ }$e$\mbox{\tt ;\ {\char'137}\ ->\ }$e'$\mbox{\tt \ {\char'175}\ }$=$\mbox{\tt \ if\ (}$k$\mbox{\tt \ ==\ }$e_0$\mbox{\tt )\ then\ }$e$\mbox{\tt \ else\ }$e'$\\[4pt]
+%\\
+(h)&\mbox{\tt case\ }$e_0$\mbox{\tt \ of\ {\char'173}\ }$x$\mbox{\tt +}$k$\mbox{\tt \ ->\ }$e$\mbox{\tt ;\ {\char'137}\ ->\ }$e'$\mbox{\tt \ {\char'175}}\\
+&$=$\mbox{\tt \ \ if\ (}$e_0$\mbox{\tt \ >=\ }$k$\mbox{\tt )\ then\ let\ {\char'173}\ }$x$\mbox{\tt \ =\ (}$e_0$\mbox{\tt -}$k$\mbox{\tt )\ {\char'175}\ in\ }$e$\mbox{\tt \ else\ }$e'$\\[4pt]
+%\\
+(i)&\mbox{\tt case\ }$e_0$\mbox{\tt \ of\ {\char'173}\ }$x$\mbox{\tt \ ->\ }$e$\mbox{\tt ;\ {\char'137}\ ->\ }$e'$\mbox{\tt \ {\char'175}\ }$=$\mbox{\tt \ case\ }$e_0$\mbox{\tt \ of\ {\char'173}\ }$x$\mbox{\tt \ ->\ }$e$\mbox{\tt \ {\char'175}}\\[4pt]
+%\\
+(j)&\mbox{\tt case\ }$e_0$\mbox{\tt \ of\ {\char'173}\ }$x$\mbox{\tt \ ->\ }$e$\mbox{\tt \ {\char'175}\ }$=$\mbox{\tt \ (\ {\char'134}\ }$x$\mbox{\tt \ ->\ }$e$\mbox{\tt \ )\ }$e_0$\\[4pt]
+%\\
+(k)&\mbox{\tt case\ (}$K'$\mbox{\tt \ }$e_1$\mbox{\tt \ }$\ldots$\mbox{\tt \ }$e_m$\mbox{\tt )\ of\ {\char'173}\ }$K$\mbox{\tt \ }$x_1$\mbox{\tt \ }$\ldots$\mbox{\tt \ }$x_n$\mbox{\tt \ ->\ }$e$\mbox{\tt ;\ {\char'137}\ ->\ }$e'$\mbox{\tt \ {\char'175}\ }$=$\mbox{\tt \ }$e'$\\
+&{\rm where $K$ and $K'$ are distinct constructors of arity $n$ and $m$, respectively}\\[4pt]
+%\\
+(l)&\mbox{\tt case\ (}$K$\mbox{\tt \ }$e_1$\mbox{\tt \ }$\ldots$\mbox{\tt \ }$e_n$\mbox{\tt )\ of\ {\char'173}\ }$K$\mbox{\tt \ }$x_1$\mbox{\tt \ }$\ldots$\mbox{\tt \ }$x_n$\mbox{\tt \ ->\ }$e$\mbox{\tt ;\ {\char'137}\ ->\ }$e'$\mbox{\tt \ {\char'175}}\\
+&$=$\mbox{\tt \ \ case\ }$e_1$\mbox{\tt \ of\ {\char'173}\ }$x_1$\mbox{\tt \ ->\ }$\ldots$\mbox{\tt \ \ case\ }$e_n$\mbox{\tt \ of\ {\char'173}\ }$x_n$\mbox{\tt \ ->\ }$e$\mbox{\tt \ {\char'175}}$\ldots$\mbox{\tt {\char'175}}\\
+&{\rm where $K$ is a constructor of arity $n$}
+\end{tabular}
+}
+\ecaption{Semantics of Case Expressions}
+\label{simple-case-expr}
+\end{figure}
+
+Using all but the last two identities (rules~(k) and~(l)) in Figure~\ref{simple-case-expr}
+in a left-to-right manner yields a translation into a
+subset of general \mbox{\tt case} expressions called {\em simple case expressions}.%
+\index{simple case expression}
+Rule~(a) matches a general source-language
+\mbox{\tt case} expression, regardless of whether it actually includes
+guards---if no guards are written, then \mbox{\tt True} is substituted for the guards $g_{i,j}$
+in the $match_i$ forms.
+Subsequent identities manipulate the resulting \mbox{\tt case} expression into simpler
+and simpler forms.
+The semantics of simple \mbox{\tt case} expressions is 
+given by the last two identities ((k) and~(l)).
+
+Rules~(g) and~(h) in Figure~\ref{simple-case-expr} involve the
+overloaded operators \mbox{\tt ==} and \mbox{\tt <=}; it is these rules that define the
+meaning of pattern-matching against overloaded constants.
+\index{pattern-matching!overloaded constant}
+
+When used as a translation, the identities in
+Figure~\ref{simple-case-expr} will generate a very inefficient
+program.  This can be fixed by using further \mbox{\tt case} or \mbox{\tt let} 
+expressions, but doing so 
+would clutter the identities, which are intended only to convey the semantics.
+
+These identities all preserve the static semantics.  Rules~(d) and~(j)
+use a lambda rather than a \mbox{\tt let}; this indicates that variables bound
+by \mbox{\tt case} are monomorphically typed (Section~\ref{type-semantics}).
+\index{monomorphic type variable}
+
+% Local Variables: 
+% mode: latex
+% End:

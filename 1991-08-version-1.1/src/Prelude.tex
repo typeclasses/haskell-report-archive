@@ -1,0 +1,241 @@
+\noindent\bprogB
+\mbox{\tt --\ Standard\ value\ bindings}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt module\ Prelude\ (}\\
+\mbox{\tt \ \ \ \ PreludeCore..,\ PreludeRatio..,\ PreludeComplex..,\ PreludeList..,}\\
+\mbox{\tt \ \ \ \ PreludeArray..,\ PreludeText..,\ PreludeIO..,\ }\\
+\mbox{\tt \ \ \ \ nullBin,\ isNullBin,\ appendBin,}\\
+\mbox{\tt \ \ \ \ ({\char'46}{\char'46}),\ (||),\ not,\ otherwise}\\
+\mbox{\tt \ \ \ \ ord,\ chr,\ }\\
+\mbox{\tt \ \ \ \ isAscii,\ isControl,\ isPrint,\ isSpace,\ }\\
+\mbox{\tt \ \ \ \ isUpper,\ isLower,\ isAlpha,\ isDigit,\ isAlphanum,}\\
+\mbox{\tt \ \ \ \ toUpper,\ toLower,}\\
+\mbox{\tt \ \ \ \ minInt,\ maxInt,\ subtract,\ gcd,\ lcm,\ ({\char'136}),\ ({\char'136}{\char'136}),\ }\\
+\mbox{\tt \ \ \ \ truncate,\ round,\ ceiling,\ floor,\ fromIntegral,\ fromRealFrac,\ atan2,}\\
+\mbox{\tt \ \ \ \ fst,\ snd,\ (.),\ flip,\ until,\ error,\ asTypeOf\ )\ where}
+\index{Prelude@{\ptt Prelude} (module)}%
+\eprogB\noindent\bprogB
+\mbox{\tt import\ PreludeBuiltin}\\
+\mbox{\tt import\ PreludeCore}\\
+\mbox{\tt import\ PreludeList}\\
+\mbox{\tt import\ PreludeArray}\\
+\mbox{\tt import\ PreludeRatio}\\
+\mbox{\tt import\ PreludeComplex}\\
+\mbox{\tt import\ PreludeText}\\
+\mbox{\tt import\ PreludeIO}
+\index{PreludeBuiltin@{\ptt PreludeBuiltin} (module)}%
+\index{PreludeCore@{\ptt PreludeCore} (module)}%
+\index{PreludeList@{\ptt PreludeList} (module)}%
+\index{PreludeArray@{\ptt PreludeArray} (module)}%
+\index{PreludeRatio@{\ptt PreludeRatio} (module)}%
+\index{PreludeComplex@{\ptt PreludeComplex} (module)}%
+\index{PreludeText@{\ptt PreludeText} (module)}%
+\index{PreludeIO@{\ptt PreludeIO} (module)}%
+\eprogB\noindent\bprogB
+\mbox{\tt infixr\ 9\ \ .}\\
+\mbox{\tt infixr\ 8\ \ {\char'136},\ {\char'136}{\char'136}}\\
+\mbox{\tt infixr\ 3\ \ {\char'46}{\char'46}}\\
+\mbox{\tt infixr\ 2\ \ ||}
+\index{.@{\ptt .}}%
+\index{^@{\ptt {\char'136}}}%
+\index{^^@{\ptt {\char'136}{\char'136}}}%
+\index{&&@{\ptt \&\&}}%
+\index{||@{\ptt {\char'174}{\char'174}}}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Binary\ functions}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt nullBin\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Bin}\\
+\mbox{\tt nullBin\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primNullBin}
+\indextt{nullBin}%
+\eprogB\noindent\bprogB
+\mbox{\tt isNullBin\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Bin\ ->\ Bool}\\
+\mbox{\tt isNullBin\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primIsNullBin}
+\indextt{isNullBin}%
+\eprogB\noindent\bprogB
+\mbox{\tt appendBin\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Bin\ ->\ Bin\ ->\ Bin}\\
+\mbox{\tt appendBin\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primAppendBin}
+\indextt{appendBin}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Boolean\ functions}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt ({\char'46}{\char'46}),\ (||)\ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Bool\ ->\ Bool\ ->\ Bool}\\
+\mbox{\tt True\ \ {\char'46}{\char'46}\ x\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ x}\\
+\mbox{\tt False\ {\char'46}{\char'46}\ {\char'137}\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ False}\\
+\mbox{\tt True\ \ ||\ {\char'137}\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ True}\\
+\mbox{\tt False\ ||\ x\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ x}
+\index{&&@{\ptt \&\&}}%
+\index{||@{\ptt {\char'174}{\char'174}}}%
+\eprogB\noindent\bprogB
+\mbox{\tt not\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Bool\ ->\ Bool}\\
+\mbox{\tt not\ True\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ False}\\
+\mbox{\tt not\ False\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ True}
+\indextt{not}%
+\eprogB\noindent\bprogB
+\mbox{\tt otherwise\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Bool}\\
+\mbox{\tt otherwise\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ True}
+\indextt{otherwise}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Character\ functions}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt ord\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Char\ ->\ Int}\\
+\mbox{\tt ord\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primCharToInt}
+\indextt{ord}%
+\eprogB\noindent\bprogB
+\mbox{\tt chr\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Int\ ->\ Char}\\
+\mbox{\tt chr\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primIntToChar}
+\indextt{chr}%
+\eprogB\noindent\bprogB
+\mbox{\tt isAscii,\ isControl,\ isPrint,\ isSpace\ \ \ \ \ \ \ \ \ \ \ \ ::\ Char\ ->\ Bool}\\
+\mbox{\tt isUpper,\ isLower,\ isAlpha,\ isDigit,\ isAlphanum\ \ ::\ Char\ ->\ Bool}
+\indextt{isAscii}%
+\indextt{isControl}%
+\indextt{isPrint}%
+\indextt{isSpace}%
+\indextt{isUpper}%
+\indextt{isLower}%
+\indextt{isAlpha}%
+\indextt{isDigit}%
+\indextt{isAlphanum}%
+\eprogB\noindent\bprogB
+\mbox{\tt isAscii\ c\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ ord\ c\ <\ 128}\\
+\mbox{\tt isControl\ c\ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ c\ <\ '\ '\ ||\ c\ ==\ '{\char'134}DEL'}\\
+\mbox{\tt isPrint\ c\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ c\ >=\ '\ '\ {\char'46}{\char'46}\ c\ <=\ '{\char'176}'}\\
+\mbox{\tt isSpace\ c\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ c\ ==\ '\ '\ ||\ c\ ==\ '{\char'134}t'\ ||\ c\ ==\ '{\char'134}n'\ ||\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ c\ ==\ '{\char'134}r'\ ||\ c\ ==\ '{\char'134}f'\ ||\ c\ ==\ '{\char'134}v'}\\
+\mbox{\tt isUpper\ c\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ c\ >=\ 'A'\ {\char'46}{\char'46}\ c\ <=\ 'Z'}\\
+\mbox{\tt isLower\ c\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ c\ >=\ 'a'\ {\char'46}{\char'46}\ c\ <=\ 'z'}\\
+\mbox{\tt isAlpha\ c\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ isUpper\ c\ ||\ isLower\ c}\\
+\mbox{\tt isDigit\ c\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ c\ >=\ '0'\ {\char'46}{\char'46}\ c\ <=\ '9'}\\
+\mbox{\tt isAlphanum\ c\ \ \ \ \ \ \ \ \ \ \ \ =\ \ isAlpha\ c\ ||\ isDigit\ c}
+\eprogB\noindent\bprogB
+\mbox{\tt toUpper,\ toLower\ \ \ \ \ \ \ \ ::\ Char\ ->\ Char}\\
+\mbox{\tt toUpper\ c\ |\ isLower\ c\ \ \ =\ \ chr\ (ord\ c\ -\ (ord\ 'a'\ +\ ord\ 'A'))}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ |\ otherwise\ \ \ =\ \ c}
+\indextt{toUpper}%
+\indextt{toLower}%
+\eprogB\noindent\bprogB
+\mbox{\tt toLower\ c\ |\ isUpper\ c\ \ \ =\ \ chr\ (ord\ c\ -\ (ord\ 'A'\ +\ ord\ 'a'))}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ |\ otherwise\ \ \ =\ \ c}
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Numeric\ functions}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt minInt,\ maxInt\ \ ::\ Int}\\
+\mbox{\tt minInt\ \ \ \ \ \ \ \ \ \ =\ \ primMinInt}\\
+\mbox{\tt maxInt\ \ \ \ \ \ \ \ \ \ =\ \ primMaxInt}
+\indextt{minInt}%
+\indextt{maxInt}%
+\eprogB\noindent\bprogB
+\mbox{\tt subtract\ \ \ \ \ \ \ \ ::\ (Num\ a)\ =>\ a\ ->\ a\ ->\ a}\\
+\mbox{\tt subtract\ \ \ \ \ \ \ \ =\ \ flip\ (-)}
+\indextt{subtract}%
+\eprogB\noindent\bprogB
+\mbox{\tt gcd\ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (Integral\ a)\ =>\ a\ ->\ a->\ a}\\
+\mbox{\tt gcd\ x\ y\ \ \ \ \ \ \ \ \ =\ \ gcd'\ (abs\ x)\ (abs\ y)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ gcd'\ x\ 0\ \ =\ \ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ gcd'\ x\ y\ \ =\ \ gcd'\ y\ (x\ `rem`\ y)}
+\indextt{gcd}%
+\eprogB\noindent\bprogB
+\mbox{\tt lcm\ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (Integral\ a)\ =>\ a\ ->\ a->\ a}\\
+\mbox{\tt lcm\ {\char'137}\ 0\ \ \ \ \ \ \ \ \ =\ \ 0}\\
+\mbox{\tt lcm\ 0\ {\char'137}\ \ \ \ \ \ \ \ \ =\ \ 0}\\
+\mbox{\tt lcm\ x\ y\ \ \ \ \ \ \ \ \ =\ \ abs\ ((x\ `div`\ (gcd\ x\ y))\ *\ y)}
+\indextt{lcm}%
+\eprogB\noindent\bprogB
+\mbox{\tt ({\char'136})\ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (Num\ a,\ Integral\ b)\ =>\ a\ ->\ b\ ->\ a}\\
+\mbox{\tt x\ {\char'136}\ 0\ \ \ \ \ \ \ \ \ \ \ =\ \ 1}\\
+\mbox{\tt x\ {\char'136}\ (n+1)\ \ \ \ \ \ \ =\ \ f\ x\ n\ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ f\ {\char'137}\ 0\ y\ =\ y}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ f\ x\ n\ y\ =\ g\ x\ n\ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ g\ x\ n\ |\ even\ n\ \ =\ g\ (x*x)\ (n`div`2)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ otherwise\ =\ f\ x\ (n-1)\ (x*y)}\\
+\mbox{\tt {\char'137}\ {\char'136}\ {\char'137}\ \ \ \ \ \ \ \ \ \ \ =\ error\ "({\char'136}){\char'173}Prelude{\char'175}:\ negative\ exponent"}
+\index{^@{\ptt {\char'136}}}%
+\eprogB\noindent\bprogB
+\mbox{\tt ({\char'136}{\char'136})\ \ \ \ \ \ \ \ \ \ \ \ ::\ (Fractional\ a,\ Integral\ b)\ =>\ a\ ->\ b\ ->\ a}\\
+\mbox{\tt x\ {\char'136}{\char'136}\ n\ \ \ \ \ \ \ \ \ \ =\ \ if\ n\ >=\ 0\ then\ x{\char'136}n\ else\ 1/x{\char'136}(-n)}
+\index{^^@{\ptt {\char'136}{\char'136}}}%
+\eprogB\noindent\bprogB
+\mbox{\tt truncate\ \ \ \ \ \ \ \ ::\ (RealFrac\ a,\ Integral\ b)\ =>\ a\ ->\ b}\\
+\mbox{\tt truncate\ x\ \ \ \ \ \ =\ \ m\ \ where\ (m,{\char'137})\ =\ properFraction\ x}
+\indextt{truncate}%
+\eprogB\noindent\bprogB
+\mbox{\tt round\ \ \ \ \ \ \ \ \ \ \ ::\ (RealFrac\ a,\ Integral\ b)\ =>\ a\ ->\ b}\\
+\mbox{\tt round\ x\ \ \ \ \ \ \ \ \ =\ \ let\ (n,r)\ =\ properFraction\ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ m\ \ \ \ \ =\ if\ r\ <\ 0\ then\ n\ -\ 1\ else\ n\ +\ 1}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ in\ case\ signum\ (abs\ r\ -\ 0.5)\ of}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ -1\ ->\ n}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 0\ \ ->\ if\ even\ n\ then\ n\ else\ m}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ 1\ \ ->\ m}
+\indextt{round}%
+\eprogB\noindent\bprogB
+\mbox{\tt ceiling\ \ \ \ \ \ \ \ \ ::\ (RealFrac\ a,\ Integral\ b)\ =>\ a\ ->\ b}\\
+\mbox{\tt ceiling\ x\ \ \ \ \ \ \ =\ \ if\ r\ >\ 0\ then\ n\ +\ 1\ else\ n}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (n,r)\ =\ properFraction\ x}
+\indextt{ceiling}%
+\eprogB\noindent\bprogB
+\mbox{\tt floor\ \ \ \ \ \ \ \ \ \ \ ::\ (RealFrac\ a,\ Integral\ b)\ =>\ a\ ->\ b}\\
+\mbox{\tt floor\ x\ \ \ \ \ \ \ \ \ =\ \ if\ r\ <\ 0\ then\ n\ -\ 1\ else\ n}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (n,r)\ =\ properFraction\ x}
+\indextt{floor}%
+\eprogB\noindent\bprogB
+\mbox{\tt fromIntegral\ \ \ \ ::\ (Integral\ a,\ Num\ b)\ =>\ a\ ->\ b}\\
+\mbox{\tt fromIntegral\ \ \ \ =\ \ fromInteger\ .\ toInteger}
+\indextt{fromIntegral}%
+\eprogB\noindent\bprogB
+\mbox{\tt fromRealFrac\ \ \ \ ::\ (RealFrac\ a,\ Fractional\ b)\ =>\ a\ ->\ b}\\
+\mbox{\tt fromRealFrac\ \ \ \ =\ \ fromRational\ .\ toRational}
+\indextt{fromRealFrac}%
+\eprogB\noindent\bprogB
+\mbox{\tt atan2\ \ \ \ \ \ \ \ \ \ \ ::\ (RealFloat\ a)\ =>\ a\ ->\ a\ ->\ a}\\
+\mbox{\tt atan2\ y\ x\ \ \ \ \ \ \ =\ \ case\ (signum\ y,\ signum\ x)\ of}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (\ 0,\ 1)\ ->\ \ 0}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (\ 1,\ 0)\ ->\ \ pi/2}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (\ 0,-1)\ ->\ \ pi}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (-1,\ 0)\ ->\ -pi/2}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (\ {\char'137},\ 1)\ ->\ \ atan\ (y/x)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (\ {\char'137},-1)\ ->\ \ atan\ (y/x)\ +\ pi}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (\ 0,\ 0)\ ->\ \ error\ "atan2{\char'173}Prelude{\char'175}:\ atan2\ of\ origin"}
+\indextt{atan2}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Some\ standard\ functions:}\\
+\mbox{\tt --\ component\ projections\ for\ pairs:}\\
+\mbox{\tt fst\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a,b)\ ->\ a}\\
+\mbox{\tt fst\ (x,y)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ x}
+\indextt{fst}%
+\eprogB\noindent\bprogB
+\mbox{\tt snd\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a,b)\ ->\ b}\\
+\mbox{\tt snd\ (x,y)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ y}
+\indextt{snd}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ function\ composition:}\\
+\mbox{\tt (.)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (b\ ->\ c)\ ->\ (a\ ->\ b)\ ->\ a\ ->\ c}\\
+\mbox{\tt (f\ .\ g)\ x\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ f\ (g\ x)}
+\index{.@{\ptt .}}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ flip\ f\ \ takes\ its\ (first)\ two\ arguments\ in\ the\ reverse\ order\ of\ f.}\\
+\mbox{\tt flip\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ b\ ->\ c)\ ->\ b\ ->\ a\ ->\ c}\\
+\mbox{\tt flip\ f\ x\ y\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ f\ y\ x}
+\indextt{flip}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ until\ p\ f\ \ yields\ the\ result\ of\ applying\ f\ until\ p\ holds.}\\
+\mbox{\tt until\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ Bool)\ ->\ (a\ ->\ a)\ ->\ a\ ->\ a}\\
+\mbox{\tt until\ p\ f\ x\ |\ p\ x\ \ \ \ \ \ \ =\ \ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ |\ otherwise\ =\ \ until\ p\ f\ (f\ x)}
+\indextt{until}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ error\ is\ applied\ to\ a\ string,\ returns\ any\ type,\ and\ is\ everywhere\ undefined.}\\
+\mbox{\tt --\ Operationally,\ the\ intent\ is\ that\ its\ application\ terminate\ execution\ of}\\
+\mbox{\tt --\ the\ program\ and\ display\ the\ argument\ string\ in\ some\ appropriate\ way.}\\
+\mbox{\tt --\ The\ following\ defines\ the\ semantics\ of\ error,\ but\ may\ or\ may\ not\ have}\\
+\mbox{\tt --\ the\ intended\ operational\ effect,\ depending\ on\ the\ implementation.}\\
+\mbox{\tt error\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ String\ ->\ a}\\
+\mbox{\tt error\ msg\ |\ False\ \ \ \ \ \ \ =\ \ error\ msg}
+\indextt{error}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ asTypeOf\ returns\ its\ first\ argument,\ ignoring\ the\ value\ of\ the\ second.}\\
+\mbox{\tt --\ Its\ typing,\ however,\ forces\ the\ first\ argument\ (which\ is\ usually}\\
+\mbox{\tt --\ overloaded)\ to\ have\ the\ same\ type\ as\ the\ second.}\\
+\mbox{\tt asTypeOf\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ a\ ->\ a\ ->\ a}\\
+\mbox{\tt x\ `asTypeOf`\ {\char'137}\ \ \ \ \ \ \ \ \ \ =\ \ x}
+\indextt{asTypeOf}%
+\eprogB

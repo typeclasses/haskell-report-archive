@@ -1,0 +1,841 @@
+\begin{theindex}
+
+  \item {\ptt {\char'041}}, 63, 107
+  \item {\ptt {\char'041}{\char'041}}, 99, 100
+  \item {\ptt {\char'045}}, 58, 59, 94
+  \item {\ptt \&\&}, 53, 79, 80
+  \item {\ptt ()}, \see{trivial type and unit expression}{143}
+  \item \mbox{$\it \makebox{\tt (}e_1,\ldots ,e_n\makebox{\tt )}$} (tuple), 
+		14
+  \item \mbox{$\it \makebox{\tt (}t_1,\ldots ,t_n\makebox{\tt )}$} (tuple type), 
+		85
+  \item {\ptt *}, 57, 59, 85, 86
+  \item {\ptt **}, 57, 60, 85, 87
+  \item {\ptt +}, 57, 59, 85, 86
+  \item {\ptt ++}, 99
+  \item {\ptt -}, 57, 59, 85, 86, \seealso{negation}{143}
+  \item {\ptt .}, 54, 79, 82
+  \item {\ptt /}, 57, 60, 85, 87
+  \item {\ptt //}, 64, 107
+  \item {\ptt /=}, 30, 85, 86, 135
+  \item {\ptt :}, 54, 83
+  \item {\ptt :{\char'045}}, 94
+  \item {\ptt :+}, 59, 96
+  \item {\ptt ::}, 18
+  \item {\ptt :=}, 62, 107
+  \item {\ptt <}, 30, 85, 86, 135
+  \item {\ptt <=}, 30, 85, 86, 135
+  \item {\ptt ==}, 30, 85, 86, 135
+  \item {\ptt >}, 30, 85, 86, 135
+  \item {\ptt >=}, 30, 85, 86, 135
+  \item {\ptt {\char'100}}, \see{as-pattern}{143}
+  \item {\ptt []} (nil), 54, 85
+  \item \mbox{$\it \makebox{\tt [}e_1,\ldots ,e_n\makebox{\tt ]}$} (list), 
+		14
+  \item \mbox{$\it \makebox{\tt [}t\makebox{\tt ]}$} (list type), 85
+  \item \mbox{$\it \makebox{\tt {\char'134}}\ pats\ \makebox{\tt ->}\ expr$}, 
+		12
+  \item {\ptt {\char'134}{\char'134}}, 99, 100
+  \item {\ptt {\char'136}}, 58, 60, 79, 81
+  \item {\ptt {\char'136}{\char'136}}, 58, 60, 79, 81
+  \item {\ptt {\char'137}}, \see{wildcard pattern}{143}
+  \item {\ptt {\char'174}{\char'174}}, 53, 79, 80
+
+  \indexspace
+
+  \item {\ptt abort}, 75, 120
+  \item {\ptt abs}, 57, 60, 86
+  \item abstract datatype, 1, 50
+  \item {\ptt accum}, 64, 107
+  \item {\ptt accumArray}, 64, 107
+  \item {\pit aconid}, 8, 122
+  \item {\pit aconop}, 8, 123
+  \item {\ptt acos}, 57, 87
+  \item {\ptt acosh}, 57, 87
+  \item {\pit aexp}, 11, 13--15, 127
+  \item {\pit afunlhs}, 34, 126
+  \item agent, 67
+  \item algebraic datatype, 27, 43, 46, 49, 59, 135
+  \item {\ptt all}, 104
+  \item {\pit alt}, 17, 127
+  \item {\pit alts}, 17, 127
+  \item {\ptt amap}, 64, 107
+  \item ambiguous type, 32
+  \item {\ptt and}, 104
+  \item {\pit ANY}, 7, 122
+  \item {\pit any}, 7, 122
+  \item {\ptt any}, 104
+  \item {\pit ANYseq}, 7, 122
+  \item {\pit apat}, 18, 128
+  \item {\ptt appendBin}, 54, 79
+  \item {\ptt AppendBinChan}, 67, 73
+  \item {\ptt appendBinChan}, 76, 118
+  \item {\ptt AppendBinFile}, 67, 72
+  \item {\ptt appendBinFile}, 76, 118
+  \item {\ptt AppendChan}, 67, 73
+  \item {\ptt appendChan}, 76, 118
+  \item {\ptt AppendFile}, 67, 72
+  \item {\ptt appendFile}, 76, 118
+  \item application, 12
+    \subitem function, \see{function application}{143}
+    \subitem operator, \see{operator application}{143}
+  \item {\ptt approximants}, 94
+  \item {\ptt approxRational}, 57, 61, 87
+  \item arctangent, 61
+  \item arithmetic, 59
+  \item arithmetic sequence, 15, 54
+  \item {\ptt Array} (datatype), 62
+  \item array, 1, 62
+    \subitem accumulated, 64
+    \subitem derived, 64
+  \item {\ptt array}, 62, 107
+  \item as-pattern ({\ptt {\char'100}}), 18, 20
+  \item {\pit ascii}, 9, 123
+  \item ASCII character set, 6, 9, 53
+  \item {\ptt asin}, 57, 87
+  \item {\ptt asinh}, 57, 87
+  \item {\ptt Assoc} (datatype), 62, 107
+  \item {\ptt assocs}, 63, 107
+  \item {\ptt asTypeOf}, 82
+  \item {\ptt atan}, 57, 61, 87
+  \item {\ptt atan2}, 58, 61, 82
+  \item {\ptt atanh}, 57, 87
+  \item {\pit atype}, 24, 125
+  \item {\pit avarid}, 8, 122
+  \item {\pit avarop}, 8, 123
+
+  \indexspace
+
+  \item {\ptt Bin} (datatype), 54, 83
+  \item {\ptt Binary}, 30, 88
+    \subitem derived instance, 31, 55, 136
+    \subitem instance for {\ptt Array}, 108
+  \item {\ptt BinCont} (type synonym), 74, 118
+  \item binding, 23
+    \subitem function, \see{function binding}{143}
+    \subitem pattern, \see{pattern binding}{143}
+    \subitem simple pattern, \see{simple pattern binding}{143}
+  \item {\ptt binDispatch}, 75
+  \item {\ptt Bn}, 67
+  \item {\pit body}, 23, 42, 124
+  \item {\ptt Bool} (datatype), 53, 88
+  \item boolean, 53
+  \item {\ptt bounds}, 63, 107
+  \item {\ptt break}, 70, 103
+
+  \indexspace
+
+  \item $C$-$T$ instance declaration, 31
+  \item case expression, 17
+  \item {\pit cbody}, 28, 126
+  \item {\ptt ceiling}, 58, 61, 81
+  \item channel, 67
+  \item channel system request, 72
+  \item {\ptt Char} (datatype), 53, 83
+  \item {\pit char}, 9, 123
+  \item character, 53
+    \subitem literal syntax, 9
+  \item character set
+    \subitem ASCII, \see{ASCII character set}{143}
+    \subitem transparent, \see{transparent character set}{143}
+  \item {\pit charesc}, 9, 123
+  \item {\ptt chr}, 53, 80
+  \item {\ptt cis}, 59, 98
+  \item class, 23, 28
+  \item {\pit class}, 25, 126
+  \item class assertion, 25
+  \item class declaration, 28, 43, 49
+    \subitem with an empty \mbox{\tt where} part, 29
+  \item class environment, 26
+  \item class method, iii, 24, 28, 31
+  \item {\pit cntrl}, 9, 123
+  \item coercion, 61
+  \item comment, 7
+    \subitem end-of-line, 7
+    \subitem nested, 7
+  \item {\pit comment}, 7, 122
+  \item compilation system, 41
+  \item {\ptt Complex} (datatype), 56, 59
+  \item {\pit con}, 9, 123
+  \item {\ptt concat}, 104
+  \item conditional expression, 13
+  \item {\pit conid}, 8, 122
+  \item {\ptt conjugate}, 59, 97
+  \item {\pit conop}, 8, 123
+  \item {\pit constr}, 27, 126
+  \item {\pit constrs}, 27, 126
+  \item constructed pattern, 19
+  \item constructed type, 25
+  \item context, 25
+    \subitem in {\ptt data} declaration, iii, 27
+  \item {\pit context}, 25, 126
+  \item {\ptt cos}, 57, 87
+  \item {\ptt cosh}, 57, 87
+  \item cosine, 61
+  \item {\pit csign}, 28, 126
+  \item {\pit csigns}, 28, 126
+  \item Curry, Haskell B., v
+  \item {\ptt cycle}, 102
+
+  \indexspace
+
+  \item data abstraction, 1
+  \item {\ptt data} declaration, 27
+  \item datatype, 26
+    \subitem abstract, \see{abstract datatype}{143}
+    \subitem algebraic, \see{algebraic datatype}{143}
+    \subitem declaration, \see{{\ptt data} declaration}{143}
+    \subitem recursive, \see{recursive datatype}{143}
+  \item {\pit decl}, 23, 33, 34, 125
+  \item declaration, 23
+    \subitem $C$-$T$ instance, \see{$C$-$T$ instance declaration}{143}
+    \subitem class, \see{class declaration}{143}
+    \subitem datatype, \see{{\ptt data} declaration}{143}
+    \subitem default, \see{{\ptt default} declaration}{143}
+    \subitem fixity, \see{fixity declaration}{143}
+    \subitem import, \see{import declaration}{143}
+    \subitem instance, \see{instance declaration}{143}
+    \subitem within a {\ptt class} declaration, 28
+    \subitem within a {\ptt let} expression, 16
+    \subitem within an {\ptt instance} declaration, 29
+  \item declaration group, 36
+  \item {\pit decls}, 23, 125
+  \item {\ptt decodeFloat}, 58, 61, 87
+  \item {\ptt default} declaration, 32
+  \item default method, vii, 29, 31, 46, 136, 140, 
+		\seealso{class method}{143}
+  \item {\ptt DeleteFile}, 67, 72
+  \item {\ptt deleteFile}, 76, 118
+  \item {\ptt denominator}, 58, 59, 94
+  \item dependency analysis, 36
+  \item derived instance, iii, 31, \seealso{instance declaration}{143}
+  \item {\ptt Dialogue} (type synonym), 66, 74, 118
+  \item {\pit digit}, 7, 122
+  \item {\ptt div}, 57, 59, 85, 86
+  \item {\ptt divRem}, 57, 86
+  \item {\ptt done}, 76, 118
+  \item {\ptt Double} (datatype), 56, 58, 83
+  \item {\ptt drop}, 102
+  \item {\ptt dropWhile}, 103
+
+  \indexspace
+
+  \item {\ptt Echo}, 73
+  \item {\ptt echo}, 76, 118
+  \item {\ptt elem}, 99, 104
+  \item {\ptt elems}, 63, 107
+  \item {\ptt encodeFloat}, 58, 62, 87
+  \item entity, 40
+  \item {\pit entity}, 43, 125
+  \item {\ptt Enum}, 30, 32, 88
+    \subitem derived instance, 31, 136
+    \subitem instance for {\ptt Char}, 88
+    \subitem instance for {\ptt Double}, 93
+    \subitem instance for {\ptt Float}, 93
+    \subitem instance for {\ptt Integer}, 90
+    \subitem instance for {\ptt Int}, 90
+    \subitem instance for {\ptt Ratio}, 95
+  \item enumeration, 136
+  \item {\ptt enumFrom}, 30, 88, 136
+  \item {\ptt enumFromThen}, 30, 88, 136
+  \item {\ptt enumFromThenTo}, 30, 88, 136
+  \item {\ptt enumFromTo}, 30, 88, 136
+  \item environment
+    \subitem class, \see{class environment}{143}
+    \subitem type, \see{type environment}{143}
+  \item environment request, 73
+  \item {\ptt Eq}, 30, 55, 86
+    \subitem derived instance, 31, 135
+    \subitem instance for {\ptt Array}, 108
+    \subitem instance for {\ptt Char}, 88
+    \subitem instance for {\ptt Double}, 90
+    \subitem instance for {\ptt Float}, 90
+    \subitem instance for {\ptt Integer}, 88
+    \subitem instance for {\ptt Int}, 88
+    \subitem superclass of {\ptt Num}, 86
+    \subitem superclass of {\ptt Ord}, 86
+  \item error, 2, 65
+  \item {\ptt error}, 65, 82
+  \item {\pit escape}, 9, 123
+  \item {\ptt even}, 57, 60, 86
+  \item {\ptt exit}, 75, 120
+  \item \mbox{$\it exp^i$}, 11, 127
+  \item {\pit exp}, 11--13, 16--18, 127
+  \item {\ptt exp}, 57, 60, 87
+  \item {\ptt exponent}, 58, 62, 87
+  \item exponentiation, 60
+  \item {\pit export}, 43, 124
+  \item export list, iii, 43
+  \item {\pit exports}, 43, 124
+  \item expression, 2, 11
+    \subitem case, \see{case expression}{143}
+    \subitem conditional, \see{conditional expression}{143}
+    \subitem let, \see{let expression}{143}
+    \subitem simple case, \see{simple case expression}{143}
+    \subitem type, \see{type expression}{143}
+    \subitem unit, \see{unit expression}{143}
+  \item expression type-signature, 17, 32
+
+  \indexspace
+
+  \item {\ptt FailCont} (type synonym), 74, 118
+  \item {\ptt Failure}, 67
+  \item {\ptt False}, 53
+  \item file, 67
+  \item file system request, 71
+  \item {\ptt filter}, 100
+  \item {\pit fix}, 51, 125
+  \item {\pit fixdecls}, 51, 125
+  \item fixity, 8
+  \item fixity declaration, 51
+  \item {\ptt flip}, 54, 82
+  \item {\ptt Float} (datatype), 55, 58, 83
+  \item {\pit float}, 9, 123
+  \item {\ptt floatDigits}, 58, 61, 87
+  \item {\ptt Floating}, 55, 57, 59, 87
+    \subitem instance for {\ptt Complex}, 97
+    \subitem instance for {\ptt Double}, 92
+    \subitem instance for {\ptt Float}, 91
+    \subitem superclass of {\ptt RealFloat}, 87
+  \item {\ptt Floating} (datatype), 59
+  \item floating literal pattern, 20
+  \item {\ptt floatRadix}, 58, 61, 87
+  \item {\ptt floatRange}, 58, 61, 87
+  \item {\ptt floor}, 58, 61, 81
+  \item {\ptt foldl}, 101
+  \item {\ptt foldl1}, 101
+  \item {\ptt foldr}, 101
+  \item {\ptt foldr1}, 101
+  \item formal semantics, iv, 1
+  \item {\ptt FormatError}, 67
+  \item {\pit formfeed}, 7, 122
+  \item {\ptt Fractional}, 55, 57, 87
+    \subitem instance for {\ptt Complex}, 96
+    \subitem instance for {\ptt Double}, 91
+    \subitem instance for {\ptt Float}, 91
+    \subitem instance for {\ptt Ratio}, 95
+    \subitem superclass of {\ptt Floating}, 87
+    \subitem superclass of {\ptt RealFrac}, 87
+  \item {\ptt fromInteger}, 56, 57, 86
+  \item {\ptt fromIntegral}, 58, 62, 81
+  \item {\ptt fromRational}, 56, 57, 87
+  \item {\ptt fromRealFrac}, 58, 62, 82
+  \item {\ptt fst}, 82
+  \item function, 54
+  \item function binding, 34
+  \item function type, 24
+  \item functional language, v
+  \item {\pit funlhs}, 34, 126
+
+  \indexspace
+
+  \item {\pit gap}, 9, 123
+  \item {\ptt gcd}, 58, 60, 81
+  \item {\pit gd}, 17, 34, 126
+  \item {\pit gdpat}, 17, 127
+  \item {\pit gdrhs}, 34, 126
+  \item generalisation, 37
+  \item generalisation order, 26
+  \item generator, 15
+  \item {\ptt genericLength}, 100
+  \item {\ptt GetArgs}, 67, 74
+  \item {\ptt getArgs}, 76, 118
+  \item {\ptt GetEnv}, 67, 74
+  \item {\ptt getEnv}, 76, 118
+  \item {\pit graphic}, 7, 122
+  \item guard, 15, 17, 20
+
+  \indexspace
+
+  \item \Haskell{}, v, 1
+  \item \Haskell{} kernel, 2
+  \item \Haskell{} mailing list, iii, iv, vi
+  \item {\ptt head}, 99
+  \item {\pit hexit}, 9, 123
+  \item Hindley-Milner type system, 2, 23, 36
+
+  \indexspace
+
+  \item {\pit ibody}, 45, 128
+  \item {\pit icdecl}, 45, 128
+  \item {\pit icdecls}, 45, 128
+  \item identifier, 7
+  \item if-then-else expression, \see{conditional expression}{143}
+  \item {\pit iimpdecl}, 45, 128
+  \item {\pit iimpdecls}, 45, 128
+  \item {\ptt imagPart}, 59, 97
+  \item {\pit impdecl}, 44, 125
+  \item {\pit impdecls}, 42, 124
+  \item implementation, 40, 42
+  \item {\pit import}, 44, 125
+  \item import declaration, 44
+  \item {\pit impspec}, 44, 125
+  \item {\ptt index}, 30, 87, 136, 137
+  \item {\ptt indices}, 63, 107
+  \item information hiding, 1
+  \item {\ptt init}, 99
+  \item input/output, 66
+    \subitem acceptance, 69
+    \subitem echoing, 71
+    \subitem mode, 68
+    \subitem optional request, 133
+    \subitem presentation, 69
+    \subitem semantics, 129
+    \subitem transparency, 68
+  \item {\ptt inRange}, 30, 87, 136, 137
+  \item {\pit inst}, 29, 126
+  \item instance declaration, 29, 49, \seealso{derived instance}{143}
+    \subitem with an empty \mbox{\tt where} part, 29
+    \subitem with respect to modules, 31
+  \item {\ptt Int}, 58
+  \item {\ptt Int} (datatype), 55, 83
+  \item {\ptt Integer}, 58
+  \item {\ptt Integer} (datatype), 83
+  \item {\pit integer}, 9, 123
+  \item integer literal pattern, 20
+  \item {\ptt Integral}, 55, 57, 86
+    \subitem instance for {\ptt Integer}, 89
+    \subitem instance for {\ptt Int}, 89
+  \item {\ptt interact}, 75, 120
+  \item interface, 40, 45
+  \item {\pit interface}, 45, 128
+  \item {\ptt IOError}, 67
+  \item {\ptt IOError} (datatype), 118
+  \item irrefutable pattern, 16, 19, 21, 35
+  \item {\ptt isAlpha}, 80
+  \item {\ptt isAlphanum}, 80
+  \item {\ptt isAscii}, 80
+  \item {\ptt isControl}, 80
+  \item {\ptt isDigit}, 80
+  \item {\ptt isLower}, 80
+  \item {\ptt isNullBin}, 54, 79
+  \item {\ptt isPrint}, 80
+  \item {\ptt isSpace}, 80
+  \item {\ptt isUpper}, 80
+  \item {\ptt iterate}, 102
+  \item {\pit itopdecl}, 45, 128
+  \item {\pit itopdecls}, 45, 128
+  \item {\ptt Ix}, 30, 62, 87, 137
+    \subitem derived instance, 31, 136
+    \subitem instance for {\ptt Char}, 88
+    \subitem instance for {\ptt Integer}, 90
+    \subitem instance for {\ptt Int}, 89
+  \item {\ptt ixmap}, 64, 107
+
+  \indexspace
+
+  \item lambda abstraction, 12
+  \item {\pit large}, 7, 122
+  \item {\ptt last}, 99
+  \item layout, 3, 123, \seealso{off-side rule}{143}
+  \item {\ptt lcm}, 58, 60, 81
+  \item {\ptt length}, 100
+  \item let expression, iii, 16
+  \item {\ptt lex}, 110
+  \item {\ptt lexDigits}, 111
+  \item {\pit lexeme}, 7, 122
+  \item lexical structure, 6
+  \item {\ptt lexLitChar}, 111
+  \item \mbox{$\it lexp^i$}, 11, 127
+  \item {\pit lhs}, 34, 126
+  \item linear pattern, 12, 18, 35
+  \item linearity, 12, 18, 35
+  \item {\ptt lines}, 70, 103
+  \item list, 14, 54
+  \item list comprehension, 15, 54
+  \item list type, 25
+  \item {\ptt listArray}, 107
+  \item {\pit literal}, 7, 122
+  \item {\ptt log}, 57, 60, 87
+  \item logarithm, 60
+  \item {\ptt logBase}, 57, 60, 87
+  \item longest lexeme rule, 8, 10
+  \item \mbox{$\it lpat^i$}, 18, 128
+
+  \indexspace
+
+  \item magnitude, 60
+  \item {\ptt magnitude}, 59, 98
+  \item {\ptt Main} (module), 40
+  \item {\ptt main}, 40
+  \item {\ptt map}, 100
+  \item {\ptt match}, 112
+  \item {\ptt max}, 30, 86, 135
+  \item {\ptt maximum}, 104
+  \item {\ptt maxInt}, 55, 58, 80
+  \item method, \see{class method}{143}
+  \item {\ptt min}, 30, 86, 135
+  \item {\ptt minimum}, 104
+  \item {\ptt minInt}, 55, 58, 80
+  \item {\ptt mkPolar}, 59, 98
+  \item {\ptt mod}, 57, 60, 85, 86
+  \item {\pit modid}, 9, 42, 123, 124
+  \item module, 40
+    \subitem closure, 41
+    \subitem implementation, 42
+    \subitem interface, 45
+  \item {\pit module}, 23, 42, 124
+  \item monomorphic type variable, viii, 12, 21, 37, 38
+  \item monomorphism restriction, iii, vii, 38
+
+  \indexspace
+
+  \item \mbox{$\it n\makebox{\tt +}k$} pattern, 20, 34
+  \item namespaces, 3, 8
+  \item {\pit ncomment}, 7, 122
+  \item {\ptt negate}, 13, 57, 59, 86
+  \item negation, 12, 13
+  \item {\pit newline}, 7, 122
+  \item {\ptt nonnull}, 111
+  \item {\ptt not}, 53, 80
+  \item {\ptt notElem}, 99, 104
+  \item {\ptt nub}, 103
+  \item {\ptt null}, 99
+  \item {\ptt nullBin}, 54, 79
+  \item {\ptt Num}, 32, 55, 57, 86
+    \subitem instance for {\ptt Complex}, 96
+    \subitem instance for {\ptt Double}, 90
+    \subitem instance for {\ptt Float}, 90
+    \subitem instance for {\ptt Integer}, 89
+    \subitem instance for {\ptt Int}, 89
+    \subitem instance for {\ptt Ratio}, 95
+    \subitem superclass of {\ptt Fractional}, 87
+    \subitem superclass of {\ptt Real}, 86
+  \item number, 55
+    \subitem literal syntax, 9
+  \item {\ptt numerator}, 58, 59, 94
+  \item numeric type, 56
+  \item {\ptt numericEnumFrom}, 90
+  \item {\ptt numericEnumFromThen}, 90
+
+  \indexspace
+
+  \item {\pit octit}, 9, 123
+  \item {\ptt odd}, 57, 60, 86
+  \item off-side rule, 3, 124, \seealso{layout}{143}
+  \item {\pit op}, 11, 51, 125
+  \item operator, 7, 13
+  \item operator application, 13
+  \item {\pit ops}, 51, 125
+  \item {\ptt or}, 104
+  \item {\ptt Ord}, 30, 55, 86
+    \subitem derived instance, 31, 135
+    \subitem instance for {\ptt Array}, 108
+    \subitem instance for {\ptt Char}, 88
+    \subitem instance for {\ptt Double}, 90
+    \subitem instance for {\ptt Float}, 90
+    \subitem instance for {\ptt Integer}, 89
+    \subitem instance for {\ptt Int}, 88
+    \subitem instance for {\ptt Ratio}, 94
+    \subitem superclass of {\ptt Enum}, 88
+    \subitem superclass of {\ptt Ix}, 87
+    \subitem superclass of {\ptt Real}, 86
+  \item {\ptt ord}, 53, 80
+  \item original name, 40
+    \subitem in an interface, 47
+  \item {\ptt OtherError}, 67
+  \item {\ptt otherwise}, 53, 80
+  \item overloaded pattern, \see{pattern-matching}{143}
+  \item overloading, 1, 28
+    \subitem ambiguous, 32
+    \subitem defaults, 32
+
+  \indexspace
+
+  \item {\ptt partialQuotients}, 94
+  \item {\ptt partition}, 100
+  \item \mbox{$\it pat^i$}, 18, 128
+  \item {\pit pat}, 18, 128
+  \item pattern, 17, 18
+    \subitem {\ptt {\char'100}}, \see{as-pattern}{143}
+    \subitem {\ptt {\char'137}}, \see{wildcard pattern}{143}
+    \subitem constructed, \see{constructed pattern}{143}
+    \subitem floating, \see{floating literal pattern}{143}
+    \subitem integer, \see{integer literal pattern}{143}
+    \subitem irrefutable, \see{irrefutable pattern}{143}
+    \subitem linear, \see{linear pattern}{143}
+    \subitem \mbox{$\it n\makebox{\tt +}k$}, 
+		\see{\mbox{$\it n\makebox{\tt +}k$} pattern}{143}
+    \subitem refutable, \see{refutable pattern}{143}
+  \item pattern binding, 34, 35
+  \item pattern-matching, 18
+    \subitem overloaded constant, 21
+  \item {\ptt phase}, 59, 98
+  \item {\ptt pi}, 57, 87
+  \item {\ptt polar}, 59, 98
+  \item polymorphism, 2
+  \item precedence, 27, \seealso{fixity}{143}
+  \item {\ptt Prelude} (module), 48, 49, 79, 85
+  \item {\ptt PreludeArray} (module), 79, 85, 107
+  \item {\ptt PreludeBuiltin} (module), 49, 79, 83, 85
+  \item {\ptt PreludeComplex} (module), 79, 85, 96
+  \item {\ptt PreludeCore} (module), 48, 49, 79, 85
+  \item {\ptt PreludeIO} (module), 79, 85, 117
+  \item {\ptt PreludeList} (module), 79, 99
+  \item {\ptt PreludeRatio} (module), 79, 85, 94
+  \item {\ptt PreludeText} (module), 79, 85, 109
+  \item {\pit presymbol}, 8, 123
+  \item principal type, 26, 33
+  \item {\ptt print}, 75, 120
+  \item {\ptt prints}, 75, 120
+  \item {\ptt product}, 104
+  \item {\ptt products}, 104
+  \item {\pit program}, 7, 122
+  \item program structure, 1
+  \item {\ptt properFraction}, 57, 61, 87
+
+  \indexspace
+
+  \item {\pit qual}, 15, 127
+  \item qualifier, 15
+
+  \indexspace
+
+  \item {\ptt range}, 30, 87, 136, 137
+  \item {\ptt rangeSize}, 137
+  \item {\ptt Ratio} (datatype), 56, 58
+  \item {\ptt Rational} (type synonym), 56, 58, 94
+  \item {\ptt read}, 109
+  \item {\ptt readBin}, 30, 88, 136
+  \item {\ptt ReadBinChan}, 67, 73
+  \item {\ptt readBinChan}, 76, 118
+  \item {\ptt ReadBinFile}, 67, 71
+  \item {\ptt readBinFile}, 76, 118
+  \item {\ptt ReadChan}, 67, 73
+  \item {\ptt readChan}, 76, 118
+  \item {\ptt readDec}, 114
+  \item {\ptt ReadError}, 67
+  \item {\ptt ReadFile}, 67, 71
+  \item {\ptt readFile}, 76, 118
+  \item {\ptt readHex}, 114
+  \item {\ptt readInt}, 114
+  \item {\ptt readList}, 30, 109, 138
+  \item {\ptt readLitChar}, 113
+  \item {\ptt readOct}, 114
+  \item {\ptt readParen}, 110
+  \item {\ptt ReadS} (type synonym), 109
+  \item {\ptt reads}, 109
+  \item {\ptt readSigned}, 114
+  \item {\ptt readsPrec}, 30, 109, 138, 139
+  \item {\ptt Real}, 55, 57, 86
+    \subitem instance for {\ptt Double}, 91
+    \subitem instance for {\ptt Float}, 91
+    \subitem instance for {\ptt Integer}, 89
+    \subitem instance for {\ptt Int}, 89
+    \subitem instance for {\ptt Ratio}, 95
+    \subitem superclass of {\ptt Integral}, 86
+    \subitem superclass of {\ptt RealFrac}, 87
+  \item {\ptt RealFloat}, 58, 61, 87
+    \subitem instance for {\ptt Double}, 93
+    \subitem instance for {\ptt Float}, 93
+  \item {\ptt RealFrac}, 57, 58, 87
+    \subitem instance for {\ptt Double}, 92
+    \subitem instance for {\ptt Float}, 92
+    \subitem instance for {\ptt Ratio}, 95
+    \subitem superclass of {\ptt RealFloat}, 87
+  \item {\ptt realPart}, 59, 97
+  \item recursive datatype, 28
+  \item refutable pattern, 19
+  \item {\ptt rem}, 57, 59, 85, 86
+  \item renaming, 40, 45
+    \subitem with respect to original name, 41
+  \item {\pit renaming}, 44, 125
+  \item {\pit renamings}, 44, 125
+  \item {\ptt repeat}, 102
+  \item {\ptt Request} (datatype), 66, 67, 117
+  \item {\pit reservedid}, 8, 122
+  \item {\pit reservedop}, 8, 123
+  \item {\ptt Response} (datatype), 66, 67, 117
+  \item {\ptt reverse}, 103
+  \item \mbox{$\it rexp^i$}, 11, 127
+  \item {\ptt round}, 58, 61, 81
+  \item \mbox{$\it rpat^i$}, 18, 128
+
+  \indexspace
+
+  \item {\ptt scaleFloat}, 58, 87
+  \item {\ptt scanl}, 101
+  \item {\ptt scanl1}, 101
+  \item {\ptt scanr}, 101
+  \item {\ptt scanr1}, 101
+  \item {\ptt SearchError}, 67
+  \item section, iii, 8, 13, \seealso{operator application}{143}
+  \item semantics
+    \subitem formal, \see{formal semantics}{143}
+    \subitem input/output, \see{input/output semantics}{143}
+  \item {\ptt SetEnv}, 67, 74
+  \item {\ptt setEnv}, 76, 118
+  \item {\ptt show}, 109
+  \item {\ptt showBin}, 30, 88, 136
+  \item {\ptt showChar}, 109
+  \item {\ptt showInt}, 114
+  \item {\ptt showList}, 30, 109, 138
+  \item {\ptt showLitChar}, 113
+  \item {\ptt showParen}, 110
+  \item {\ptt ShowS} (type synonym), 109
+  \item {\ptt shows}, 109
+  \item {\ptt showSigned}, 114
+  \item {\ptt showsPrec}, 30, 109, 138, 139
+  \item {\ptt showString}, 110
+  \item sign, 60
+  \item signature, \see{type signature}{143}
+  \item {\ptt significand}, 58, 62, 87
+  \item {\ptt signum}, 57, 60, 86
+  \item {\pit simple}, 27, 28, 126
+  \item simple case expression, 21
+  \item simple pattern binding, 35
+  \item {\ptt sin}, 57, 87
+  \item sine, 61
+  \item {\ptt sinh}, 57, 87
+  \item {\pit small}, 7, 122
+  \item {\ptt snd}, 82
+  \item {\pit space}, 7, 122
+  \item {\ptt span}, 70, 103
+  \item {\pit special}, 7, 122
+  \item {\ptt splitAt}, 102
+  \item {\ptt sqrt}, 57, 60, 87
+  \item standard prelude, 48, \seealso{{\ptt Prelude}}{143}
+  \item {\ptt StatusChan}, 67, 73
+  \item {\ptt statusChan}, 76, 118
+  \item {\ptt StatusFile}, 67, 72
+  \item {\ptt statusFile}, 76, 118
+  \item {\ptt stdecho}, 67
+  \item {\ptt stderr}, 67
+  \item {\ptt stdin}, 67
+  \item {\ptt stdout}, 67
+  \item {\ptt Str}, 67
+  \item {\ptt StrCont} (type synonym), 74, 118
+  \item {\ptt strDispatch}, 75
+  \item {\ptt String} (type synonym), 53, 88
+  \item string, 53
+    \subitem literal syntax, 9
+    \subitem transparent, \see{transparent string}{143}
+  \item {\pit string}, 9, 123
+  \item {\ptt StrListCont} (type synonym), 74, 118
+  \item {\ptt strListDispatch}, 75
+  \item {\ptt subtract}, 81
+  \item {\ptt SuccCont} (type synonym), 74, 118
+  \item {\ptt succDispatch}, 75
+  \item {\ptt Success}, 67
+  \item {\ptt sum}, 104
+  \item {\ptt sums}, 104
+  \item superclass, 28, 29, 31
+  \item {\pit symbol}, 8, 123
+  \item synonym, \see{type synonym}{143}
+  \item syntax, 121
+
+  \indexspace
+
+  \item {\pit tab}, 7, 122
+  \item {\ptt tail}, 99
+  \item {\ptt take}, 102
+  \item {\ptt takeWhile}, 102
+  \item {\ptt tan}, 57, 87
+  \item tangent, 61
+  \item {\ptt tanh}, 57, 87
+  \item {\ptt Text}, 30, 109
+    \subitem derived instance, 31, 138
+    \subitem instance for {\ptt Array}, 108
+    \subitem instance for {\ptt Bin}, 112
+    \subitem instance for {\ptt Char}, 112
+    \subitem instance for {\ptt Double}, 114
+    \subitem instance for {\ptt Float}, 114
+    \subitem instance for {\ptt Integer}, 114
+    \subitem instance for {\ptt Int}, 114
+    \subitem instance for {\ptt Ratio}, 95
+    \subitem superclass of {\ptt Num}, 86
+  \item {\ptt toInteger}, 86
+  \item {\ptt toLower}, 80
+  \item {\em topdecl} (\mbox{\tt class}), 28
+  \item {\em topdecl} (\mbox{\tt data}), 27
+  \item {\em topdecl} (\mbox{\tt default}), 32
+  \item {\em topdecl} (\mbox{\tt instance}), 29
+  \item {\em topdecl} (\mbox{\tt type}), 28
+  \item {\pit topdecl}, 23, 125
+  \item {\pit topdecls}, 23, 42, 125
+  \item {\ptt toRational}, 57, 61, 86
+  \item {\ptt toUpper}, 80
+  \item transaction, 74
+  \item transparent character set, 68
+  \item transparent line, 68
+  \item transparent string, 68
+  \item {\ptt transpose}, 105
+  \item trigonometric function, 61
+  \item trivial type, 14, 25, 54
+  \item {\ptt True}, 53
+  \item {\ptt truncate}, 58, 61, 81
+  \item tuple, 14, 54
+  \item tuple type, 25
+  \item {\pit tycls}, 9, 25, 123, 128
+  \item {\pit tyclses}, 27, 126
+  \item {\pit tycon}, 9, 123, 128
+  \item type, 2, 24, 26
+    \subitem ambiguous, \see{ambiguous type}{143}
+    \subitem constructed, \see{constructed type}{143}
+    \subitem function, \see{function type}{143}
+    \subitem list, \see{list type}{143}
+    \subitem monomorphic, \see{monomorphic type}{143}
+    \subitem numeric, \see{numeric type}{143}
+    \subitem principal, \see{principal type}{143}
+    \subitem trivial, \see{trivial type}{143}
+    \subitem tuple, \see{tuple type}{143}
+  \item {\pit type}, 24, 125
+  \item type class, \see{class}{143}
+  \item type environment, 26
+  \item type expression, 24
+  \item type signature, 26, 31, 33
+    \subitem for an expression, \see{expression type-signature}{143}
+  \item type synonym, iii, 28, 31, 43, 46, 49, 135, 
+		\seealso{datatype}{143}
+    \subitem recursive, 28
+  \item type system, 1
+  \item {\pit tyvar}, 9, 25, 123, 128
+
+  \indexspace
+
+  \item unit datatype, \see{trivial type}{143}
+  \item unit expression, 14
+  \item {\ptt unlines}, 70, 103
+  \item {\ptt until}, 54, 82
+  \item {\ptt unwords}, 70, 103
+
+  \indexspace
+
+  \item {\pit valdef}, 34, 126
+  \item {\pit valdefs}, 29, 126
+  \item value, 2
+  \item {\pit var}, 9, 123
+  \item {\pit varid}, 8, 122
+  \item {\pit varop}, 8, 123
+  \item {\pit vars}, 28, 33, 126
+  \item {\pit vertab}, 7, 122
+
+  \indexspace
+
+  \item {\pit whitechar}, 7, 122
+  \item {\pit whitespace}, 7, 122
+  \item {\pit whitestuff}, 7, 122
+  \item wildcard pattern ({\ptt {\char'137}}), 19
+  \item {\ptt words}, 70, 103
+  \item {\ptt WriteBinFile}, 67, 71
+  \item {\ptt writeBinFile}, 76, 118
+  \item {\ptt WriteError}, 67
+  \item {\ptt WriteFile}, 67, 71
+  \item {\ptt writeFile}, 76, 118
+
+  \indexspace
+
+  \item {\ptt zip}, 54, 105
+  \item {\ptt zip3}, 54, 105
+  \item {\ptt zip4}, 54, 105
+  \item {\ptt zip5}, 54, 105
+  \item {\ptt zip6}, 54, 105
+  \item {\ptt zip7}, 54, 105
+  \item {\ptt zipWith}, 105
+  \item {\ptt zipWith3}, 106
+  \item {\ptt zipWith4}, 106
+  \item {\ptt zipWith5}, 106
+  \item {\ptt zipWith6}, 106
+  \item {\ptt zipWith7}, 106
+
+\end{theindex}

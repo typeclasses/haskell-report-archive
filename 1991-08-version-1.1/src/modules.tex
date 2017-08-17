@@ -1,0 +1,1014 @@
+%
+% $Header$
+%
+\section{Modules} 
+\label{modules} 
+\index{module}
+
+A module defines a collection of values, datatypes, type synonyms,
+classes, etc.~(see Section~\ref{declarations}),
+and {\em exports} some of these resources, making them available to
+other modules.  We use the term {\em entity}\index{entity} to refer to
+the values, types, and classes defined in and perhaps exported from a
+module.
+
+A \Haskell{} {\em program} is a collection of modules, one of
+which, by convention, must be called \mbox{\tt Main}\indexmodule{Main} and must
+export the value \mbox{\tt main}\indextt{main}.  The {\em value} of the program
+is the value of the identifier \mbox{\tt main} in module \mbox{\tt Main}, and \mbox{\tt main}
+must have type \mbox{\tt Dialogue} (see Section~\ref{io}).
+
+% More precisely, if all
+% importations, renamings, etc. as described in this section are
+% eliminated, and the original declarations (with suitable renamings 
+% to prevent name clashes) are collected together into one set of
+% declarations called \mbox{$\it decls$}, then the value of the program is 
+% \mbox{$\it \makebox{\tt main\ where\ }decls$}.  The semantics of a \mbox{\tt where} clause is defined
+% in Section~\ref{let-expressions}.
+
+Modules may reference other modules via explicit
+\mbox{\tt import} declarations, each giving the name of a module to be
+imported, specifying its entities to be imported, and
+optionally renaming some or all of them.  Modules may be mutually
+recursive.
+
+The name-space for modules is flat, with each module being associated
+with a unique module name (which are \Haskell{} identifiers
+beginning with a capital letter; i.e.~$aconid$).  There are two
+distinguished modules, \mbox{\tt PreludeCore} and \mbox{\tt Prelude}, both
+discussed in Section~\ref{standard-prelude}.
+
+\subsection{Overview}
+\label{module-structure}
+
+\subsubsection{Interfaces and Implementations}
+
+A module consists of an {\em interface}\index{interface} and an
+{\em implementation}\index{implementation} of that interface.
+
+The interface of a module provides complete information about the
+static semantics of that module, including type signatures, class
+definitions, and type declarations for the various entities made
+available by the module.  This information is complete in this
+sense:  If a module $M$ imports modules $M_1, \ldots, M_n$,
+then only the interfaces of $M_1, \ldots, M_n$ need be examined in
+order to perform static checking on the implementation of {\it M.}  No
+implementations of $M_1, \ldots, M_n$ need to exist, nor need any
+further interfaces be consulted.  Interfaces are discussed
+in Section~\ref{module-interfaces}.
+
+An implementation ``fills in'' the information about a module missing
+from the interface.  For example, for each value given a type
+signature in the interface the implementation either imports a module
+that defines the value or defines the value itself.  Implementations
+are discussed in Section~\ref{module-implementations}.
+
+\subsubsection{Original Names}
+\label{original-names}
+\index{original name}
+\index{renaming}
+
+It may be that a particular entity is imported into a module by more
+than one route---for example, because it is exported by two modules
+both of which are imported by a third module.  It is important that
+benign name-clashes of this form are allowed, but that accidental
+name-clashes are detected and reported as errors.  This is done as
+follows:
+
+Each entity (class, type constructor, value, etc.) has an {\em
+original name} that is a pair consisting of the name of the module in
+which it was originally declared, and the name it was given in that
+declaration.  The original name is carried with the entity wherever it
+is exported.  Two entities are the same if and only if they have the
+same original name.
+
+\index{renaming!with respect to original name}
+Renaming does {\em not} affect the original name; it is a purely
+syntactic operation that affects only the name by which the entity is
+currently known.  For example, if a class is renamed and a type is
+declared to be an instance of the newly-named class, then it is also
+an instance of the original class---there is just one class, which
+happens to be known by different names in different parts of the
+program.  Also, fixity is a property of the original name of an
+identifier or operator and is not affected by renaming; the new
+name has the same fixity as the old one.
+
+A given entity may be known by at most one name in any scope.
+So, for example, a module may not import an entity twice and rename it
+differently on each occasion.  Either it must be renamed in the same
+way on each import or else not imported twice (for example, by using
+a \mbox{\tt hiding} clause).
+
+As there are several name spaces, a single name may identify 
+more than one entity. In a \mbox{\tt renaming} clause, such as 
+\mbox{$\it \makebox{\tt renaming(}\ldots ,n_1\ \makebox{\tt to}\ n_2,\ldots \makebox{\tt )}$}, {\em all} the entities to
+which $n_1$ refers are renamed to $n_2$.
+
+\subsubsection{Closure}
+\label{closure}
+\index{module!closure}
+
+The implementation together with the interfaces of
+the modules it imports must be {\em statically closed} according to
+this rule: {\em every value, type, or class referred to
+in the text of 
+an implementation together with the
+entities that it imports, must be 
+declared in the implementation or in one of the
+imported interfaces}.
+
+It is an error for a module to export a collection of entities that
+cannot possibly become closed.  For example, if a module \mbox{\tt A} declares
+both the type \mbox{\tt T} and a value \mbox{\tt t} of type \mbox{\tt T}, it may not export \mbox{\tt t}
+without also exporting \mbox{\tt T}.  But if
+%However, the closure condition applies on {\em import},
+%not on {\em export}.  For example, if
+another module \mbox{\tt B} imported \mbox{\tt T}
+from module \mbox{\tt A}, and declared another value \mbox{\tt s} of type \mbox{\tt T}, it may
+export \mbox{\tt s} without exporting \mbox{\tt T}---but any module importing \mbox{\tt B} must
+also import the type \mbox{\tt T} by some other route, for example by also
+importing \mbox{\tt A}.
+
+%There is one important exception to the closure rule: {\em instance
+%declarations in imported interfaces are not subject to it, and are
+%ignored if they refer to a class or type constructor which is not in
+%scope}.  This allows an interface to export a C-T instance declaration
+%(see Section~\ref{instance-decls}) which takes effect when both C and T
+%are in scope, but does no harm if one or the other (or both) is not.
+%
+\subsubsection{The Compilation System}
+
+The task of checking consistency between interfaces and
+implementations must be done by the {\em compilation
+system}\index{compilation system}.
+
+\Haskell{} does not specify any particular association between
+implementations and interfaces on the one hand, and {\em files} on the
+other; nor does it specify how implementations and interfaces are
+produced.  These matters are determined by the compilation system, and
+many variations are possible, depending on the programming
+environment.  For example, a compilation system could insist that each
+implementation and each interface reside alone in a file, and that the
+module name is the same as that of the file, with the implementation
+and interface distinguished by a suffix.
+%Alternatively, if no such
+%restrictions are made, then the compilation system has
+%to map module names onto file names.
+
+Similarly, a compilation system may require the programmer to write
+the interface, or it may derive the interface from examination of the
+implementation, or some hybrid of the two.  \Haskell{} is defined so
+that, given the interfaces of all imported modules, it is always
+possible to perform a complete static check on the implementation,
+and, if it is well-typed, to derive its unique
+interface automatically.  However, given a set of mutually recursive
+implementations, the compilation system may have to examine several
+modules at once to derive the interfaces, which will still be unique
+with one exception: because of the shorthand for exporting all
+entities from an imported module, the set of exports may not be
+unique.  Any set satisfying the consistency constraints is a valid
+solution for a well-typed \Haskell{} program, but if an
+implementation automatically derives the interface it must derive the
+smallest set of exports.
+
+For optimisation across module boundaries, a compilation system may
+need more information (e.g., information about strictness, inlining,
+uncurrying, etc.) than is provided by the standard interface as
+defined in this report.  Draft proposals exist for including such
+information as comments in interfaces; for details, contact the
+implementors listed in the preface (page~\pageref{implementors}).
+
+\subsection{Module Implementations} 
+\label{module-implementations}
+\index{module!implementation}
+
+A module implementation\index{implementation} defines a mutually
+recursive scope containing declarations for value bindings, data
+types, type synonyms, classes, etc. (see Section~\ref{declarations}).
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it module$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt module}\ modid\ [exports]\ \makebox{\tt where}\ body$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it body$\\ 
+$\it body$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt {\char'173}}\ [impdecls\ \makebox{\tt ;}]\ [[fixdecls\ \makebox{\tt ;}]\ topdecls\ [\makebox{\tt ;}]]\ \makebox{\tt {\char'175}}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt {\char'173}}\ impdecls\ [\makebox{\tt ;}]\ \makebox{\tt {\char'175}}$\\ 
+$\it $\\ 
+$\it modid$\>\makebox[3.5em]{$\rightarrow$}$\it aconid$\\ 
+$\it impdecls$\>\makebox[3.5em]{$\rightarrow$}$\it impdecl_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ impdecl_n$\>\makebox[3em]{}$\it \qquad\ (n\geq 1)$\\ 
+$\it topdecls$\>\makebox[3.5em]{$\rightarrow$}$\it topdecl_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ topdecl_n$\>\makebox[3em]{}$\it \qquad\ (n\geq 0)$
+\end{tabbing}\end{flushleft}
+\indexsyn{module}%
+\indexsyn{body}%
+\indexsyn{modid}%
+\indexsyn{impdecls}%
+\indexsyn{topdecls}%
+
+% [:: [context =>] type]                TYPE SIGS NOT ALLOWED NOW
+% EXPOSE IS OUT
+% topdecl        -> expose [modid] entities where {topdecls }
+%         |  \ldots \tr{(see Section~\ref{declarations})}
+
+%\indextt{module}
+A module implementation begins with a header: the keyword
+\mbox{\tt module}, the module name, and a list of entities (enclosed in round
+parentheses) to be exported.  The header is followed by an optional
+list of \mbox{\tt import} declarations that specify modules to be imported,
+optionally restricting and renaming the imported bindings.  This is
+followed by an optional list of fixity declarations and the module
+body.  The module body is simply a list of top-level declarations
+($topdecls$), as described in Section~\ref{declarations}.  
+
+An abbreviated form of module is permitted, which consists only of
+the module body.  If this is used, the header is assumed to be
+\mbox{\tt module\ Main\ where}.
+If the first lexeme in the
+abbreviated module is not a \mbox{\tt {\char'173}}, then the layout rule applies
+for the top level of the module.
+It is inadvisable
+for a compilation system to permit 
+an abbreviated module to appear in the same file as some
+unabbreviated modules.
+
+\subsubsection{Export Lists}
+\label{export}
+\index{export list}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it exports$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt (}\ export_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ export_n\ \makebox{\tt )}$\>\makebox[3em]{}$\it \qquad\ (n\geq 1)$\\ 
+$\it $\\ 
+$\it export$\>\makebox[3.5em]{$\rightarrow$}$\it entity$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it modid\ \makebox{\tt ..}$\\ 
+$\it $\\ 
+$\it entity$\>\makebox[3.5em]{$\rightarrow$}$\it varid$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it tycon$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it tycon\ \makebox{\tt (..)}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it tycon\ \makebox{\tt (}\ conid_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ conid_n\ \makebox{\tt )}$\>\makebox[3em]{}$\it \qquad\ (n\geq 1)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it tycls\ \makebox{\tt (..)}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it tycls\ \makebox{\tt (}\ varid_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ varid_n\ \makebox{\tt )}$\>\makebox[3em]{}$\it \qquad\ (n\geq 0)$
+\end{tabbing}\end{flushleft}
+\indexsyn{exports}%
+\indexsyn{export}%
+\indexsyn{entity}%
+% [\mbox{\tt ::} [context \mbox{\tt =>}] type]            TYPE SIGS NOT ALLOWED NOW
+
+An {\em export list} identifies the entities to be exported by a
+module declaration.  A module implementation may only export an entity
+that it declares, or that it imports from some other module.  If the
+export list is omitted, all values, types and classes defined in the
+module are exported, {\em but not those that are imported}.
+
+Entities in an export list may be named as follows:
+\begin{enumerate}
+\item
+Ordinary values, whether declared in the implementation
+body or imported,
+% (including within a named \mbox{\tt expose} declaration) 
+may be named by giving the name of the value as a $varid$.
+Operators should be enclosed in parentheses to turn them into
+$varid$'s.
+% Such a name may be annotated with a type signature if it designates an
+% ordinary value.
+\item
+A type synonym $T$ declared by a \mbox{\tt type} declaration
+may be named by simply giving the name of the type.
+\index{type synonym}
+\item
+An algebraic datatype $T$ with constructors $K_1,\ldots,K_n$
+\index{algebraic datatype}
+declared by a \mbox{\tt data} declaration may be named in one of three ways:
+\begin{itemize}
+\item
+The form $T$ names the type {\em but not the constructors}.
+The ability to export a type without its constructors allows the
+construction of abstract datatypes (see Section~\ref{abstract-types}).
+\item
+The form $T\mbox{\tt (}K_1\mbox{\tt ,}\ldots\mbox{\tt ,}K_n\mbox{\tt )}$, where
+{\em all} and only the constructors are listed without duplications,
+names the type and {\em all} its constructors.  
+\item
+The abbreviated form $T\mbox{\tt (..)}$ also names the type 
+and all its constructors.
+\end{itemize}
+Data constructors may not be named in export lists in any other way.
+\item
+A class $C$ with operations $f_1,\ldots,f_n$
+declared in a \mbox{\tt class} declaration may be named in one of two ways, both of which
+name the class together with all its operations:
+\index{class declaration}
+\begin{itemize}
+\item
+The form $C\mbox{\tt (}f_1\mbox{\tt ,}\ldots\mbox{\tt ,}f_n\mbox{\tt )}$, where
+all and only the operations in that class are listed without duplications.
+\item
+The abbreviated form $C\mbox{\tt (..)}$.
+\end{itemize}
+Operators in a class may not be named in export lists in any other way.
+\item
+The set of all entities brought into scope (after renaming) from a
+module $m$ by one or more \mbox{\tt import} declarations may be named by the
+form $m\mbox{\tt ..}$, which is equivalent to listing all of the entities
+imported from the module.  For example,
+\bprog
+\mbox{\tt \ \ \ \ \ \ module\ Queue(\ Stack..,\ enqueue,\ dequeue\ )\ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ import\ Stack}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ ...}
+\eprog
+Here the module \mbox{\tt Queue} uses the module name \mbox{\tt Stack} in its export
+list to abbreviate all the entities imported from \mbox{\tt Stack}.
+
+It is a static error to have circular dependencies between
+imports/exports using this naming convention.  For example, the
+following is not allowed:
+\bprog
+\mbox{\tt module\ X(\ Y..\ )\ \ \ \ \ --\ ILLEGAL}\\
+\mbox{\tt import\ Y\ \ \ \ \ \ \ \ \ \ \ \ --}\\
+\mbox{\tt x\ =\ 1\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ --}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt module\ Y(\ X..\ )\ \ \ \ \ --}\\
+\mbox{\tt import\ X\ \ \ \ \ \ \ \ \ \ \ \ --}\\
+\mbox{\tt y\ =\ 1\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ --}
+\eprogNoSkip
+\item
+A module can name its own local definitions in its export
+list using its own name in the \mbox{$\it m\makebox{\tt ..}$} syntax.  For example,
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ module\ Mod1(Mod1..,\ Mod2..)}\\
+\mbox{\tt \ \ \ \ \ \ \ import\ Mod2}\\
+\mbox{\tt \ \ \ \ \ \ \ import\ Mod3}
+\eprog
+Here module \mbox{\tt Mod1} exports all local definitions as well as those
+from \mbox{\tt Mod2} but not \mbox{\tt Mod3}.
+\end{enumerate}
+
+\subsubsection{Import Declarations}
+\label{import}
+\index{import declaration}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it impdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt import}\ modid\ [impspec]\ [\makebox{\tt renaming}\ renamings]$\\ 
+$\it impspec$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt (}\ import_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ import_n\ \makebox{\tt )}$\>\makebox[3em]{}$\it \qquad\ (n\geq 0)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt hiding}\ \makebox{\tt (}\ import_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ import_n\ \makebox{\tt )}$\>\makebox[3em]{}$\it \qquad\ (n\geq 1)$\\ 
+$\it import$\>\makebox[3.5em]{$\rightarrow$}$\it entity$\\ 
+$\it renamings$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt (}\ renaming_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ renaming_n\ \makebox{\tt )}$\>\makebox[3em]{}$\it \qquad\ (n\geq 1)$\\ 
+$\it renaming$\>\makebox[3.5em]{$\rightarrow$}$\it varid_1\ \makebox{\tt to}\ varid_2$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it conid_1\ \makebox{\tt to}\ conid_2$
+\end{tabbing}\end{flushleft}
+\indexsyn{impdecl}%
+\indexsyn{impspec}%
+\indexsyn{import}%
+\indexsyn{renamings}%
+\indexsyn{renaming}%
+% [\mbox{\tt ::} [context \mbox{\tt =>}] type]            TYPE SIGS NOT ALLOWED NOW
+
+The entities exported by a module may be brought into scope in
+another module with
+an \mbox{\tt import}
+declaration at the beginning
+of the module.  
+The \mbox{\tt import} declaration names the module to be
+imported, optionally specifies the entities to be imported,
+and optionally provides renamings for imported entities.
+A single module may be imported by more
+than one \mbox{\tt import} declaration.
+
+Exactly which entities are to be imported can be specified in one
+of three ways:\nopagebreak[4]
+\begin{enumerate}
+\item
+The set of entities to be imported can be specified explicitly
+by listing them in parentheses.
+Items in the list have the same form as those in export lists, except
+that the $modid$ abbreviation is not permitted.
+
+The list must name a subset of the 
+entities exported by the imported module.
+The list may be empty, in which case nothing is imported;
+this is only useful in the case of the module \mbox{\tt Prelude} (see
+Section~\ref{std-prel-shadowing}).
+\item
+Specific entities can be excluded by 
+using the form \mbox{\tt hiding(} $import_1 \mbox{\tt ,} ... \mbox{\tt ,} import_n$ \mbox{\tt )}, which
+specifies that all entities exported by the named module should
+be imported apart from those named in the list.
+\item
+Finally, if $impspec$ is omitted then 
+all the entities exported by the specified module are imported.
+\end{enumerate}
+
+As instance declarations do not have names, their import cannot be
+controlled by the \mbox{$\it impspec$} list.  Instead, the following rule is
+used: {\em A $C$-$T$ instance declaration is imported from an
+interface if and only if $C$ is imported or $T$ is imported
+from that interface.}
+
+Some or all of the imported entities may be renamed,\index{renaming}
+thus allowing them to be known by a new name in the importing scope
+(see Section~\ref{original-names}).  This is done using the
+\mbox{\tt renaming} keyword, with a renaming of the form $oldname\mbox{\tt \ to\ }newname$.
+%All renaming is subject to the constraint that each name in a scope
+%must refer to exactly one entity; however, a single entity may be given
+%more than one name.
+
+\subsection{Module Interfaces}
+\label{module-interfaces}
+\index{module!interface}
+
+Every module has an {\em interface}\index{interface}
+containing all the information needed to do static checks on any
+importing module.  All static checks on a module implementation can be
+done by inspecting its text and the interfaces of the modules
+it imports.
+
+%
+%interface-> \mbox{\tt interface} modid \mbox{\tt where} ibody
+%
+%ibody    -> \mbox{\tt {\char'173}} [ [fixdecls \mbox{\tt ;}] itopdecls] \mbox{\tt {\char'175}}
+%itopdecls -> itopdecl_1 \mbox{\tt ;} ... \mbox{\tt ;} itopdecl_n  & \qquad (n>=1) 
+%itopdecl  -> \mbox{\tt type} simple \mbox{\tt =} type
+%          | \mbox{\tt data} [context \mbox{\tt =>}] simple [\mbox{\tt =} constrs [\mbox{\tt deriving} (tycls | \mbox{\tt (}tyclses\mbox{\tt )})]]
+%          | \mbox{\tt class} [context \mbox{\tt =>}] class [\mbox{\tt where} \mbox{\tt {\char'173}} icdecls [\mbox{\tt ;}] \mbox{\tt {\char'175}}]
+%          | \mbox{\tt instance} [context \mbox{\tt =>}] tycls inst
+%          | vars \mbox{\tt ::} [context \mbox{\tt =>}] type
+%icdecls           -> icdecl_1 \mbox{\tt ;} ... \mbox{\tt ;} icdecl_n  & (n>=1)
+%icdecl    -> vars \mbox{\tt ::} type
+%
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it interface$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt interface}\ modid\ \makebox{\tt where}\ ibody$\\ 
+$\it $\\ 
+$\it ibody$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt {\char'173}}\ [iimpdecls\ \makebox{\tt ;}]\ [fixdecls\ \makebox{\tt ;}]\ itopdecls\ [\makebox{\tt ;}]\ \makebox{\tt {\char'175}}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt {\char'173}}\ iimpdecls\ [\makebox{\tt ;}]\ \makebox{\tt {\char'175}}$\\ 
+$\it iimpdecls$\>\makebox[3.5em]{$\rightarrow$}$\it iimpdecl_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ iimpdecl_n$\>\makebox[3em]{}$\it \qquad\ (n\geq 1)$\\ 
+$\it iimpdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt import}\ modid\ \makebox{\tt (}\ import_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ import_n\ \makebox{\tt )}$\\ 
+$\it $\>\makebox[3em]{}$\it [\makebox{\tt renaming}\ renamings]$\>\makebox[3em]{}$\it \qquad\ (n\geq 1)$\\ 
+$\it itopdecls$\>\makebox[3.5em]{$\rightarrow$}$\it itopdecl_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ itopdecl_n$\>\makebox[3em]{}$\it \qquad\ (n\geq 1)$\\ 
+$\it itopdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt type}\ simple\ \makebox{\tt =}\ type$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt data}\ [context\ \makebox{\tt =>}]\ simple\ [\makebox{\tt =}\ constrs]\ [\makebox{\tt deriving}\ (tycls\ |\ \makebox{\tt (}tyclses\makebox{\tt )})]$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt class}\ [context\ \makebox{\tt =>}]\ class\ [\makebox{\tt where}\ \makebox{\tt {\char'173}}\ icdecls\ [\makebox{\tt ;}]\ \makebox{\tt {\char'175}}]$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt instance}\ [context\ \makebox{\tt =>}]\ tycls\ inst$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it vars\ \makebox{\tt ::}\ [context\ \makebox{\tt =>}]\ type$\\ 
+$\it icdecls$\>\makebox[3.5em]{$\rightarrow$}$\it icdecl_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ icdecl_n$\>\makebox[3em]{}$\it (n\geq 1)$\\ 
+$\it icdecl$\>\makebox[3.5em]{$\rightarrow$}$\it vars\ \makebox{\tt ::}\ type$
+\end{tabbing}\end{flushleft}
+\indexsyn{interface}%
+\indexsyn{ibody}%
+\indexsyn{iimpdecls}%
+\indexsyn{iimpdecl}%
+\indexsyn{itopdecls}%
+\indexsyn{itopdecl}%
+\indexsyn{icdecls}%
+\indexsyn{icdecl}%
+
+The syntax of \mbox{\tt interface} is similar to that of \mbox{\tt module}, except:
+\begin{itemize}
+\item
+There is no export list: everything in the interface is exported.
+\item
+\mbox{\tt import} declarations have a
+slightly different purpose from those
+in implementations (see Section~\ref{interface-imports}).
+The list of entities to be imported is always specified explicitly.
+\item
+\mbox{\tt data} declarations appear without their constructors if these
+are not exported.
+\item
+There is no implementation part to \mbox{\tt instance} declarations.
+\item
+Value declarations do not appear at all; for exported values, type signatures
+take their place.
+\end{itemize}
+
+
+%The syntax of \mbox{\tt interface} is similar to that of \mbox{\tt module}, except:
+%\begin{itemize}
+%\item
+%In interface files, the syntax for \mbox{$\it var$}, \mbox{$\it tycon$}, and \mbox{$\it tycls$} is expanded 
+%to include full names, and thus the productions in Section~\ref{ids} should
+%be replaced by:
+%
+%var    ->  varid [\mbox{\tt {\char'173}}modid [varid]\mbox{\tt {\char'175}}]         & (variables)
+%tycon  ->  aconid [\mbox{\tt {\char'173}}modid [aconid]\mbox{\tt {\char'175}}]       & (type constructors)
+%tycls  ->  aconid [\mbox{\tt {\char'173}}modid [aconid]\mbox{\tt {\char'175}}]       & (type classes)
+%
+%which are BNF rules (i.e.~not part of the lexical syntax) and thus
+%whitespace is allowed between lexemes.
+%\item
+%There is no export list: everything in the interface is exported.
+%\item
+%There are no \mbox{\tt import} declarations.
+%\item
+%\mbox{\tt data} declarations appear without their constructors if these
+%are not exported.
+%\item
+%There is no implementation part to \mbox{\tt instance} declarations.
+%\item
+%Value declarations do not appear at all; for exported values, type signatures
+%take their place.
+%\end{itemize}
+
+\subsubsection{Consistency}
+\label{consistency}
+
+The interface and implementation of a module must obey certain
+constraints.
+(In the following,
+the phrase ``in the implementation'' refers to something
+either declared within the implementation or imported by it.)
+\begin{enumerate}
+%\item
+%The names of entities exported by a module, and types or classes not
+%exported but 
+%referred to in an interface must appear as full names. (See
+%Section~\ref{interface-imports}).
+\item
+Every entity given a declaration in an interface must either have an
+import declaration for the entity in the interface (the import
+specifies the module that defines it) or have a definition of the
+entity in the implementation.  Furthermore, if an interface A imports
+an entity X from module B (perhaps renaming it), then the interface
+for B must define X but not import it.
+
+\item
+A class, type synonym, algebraic datatype, or value appears in the
+\index{algebraic datatype}
+\index{type synonym}
+interface exactly when its name appears in the implementation's export
+list or, if the export list is omitted, when it is {\em declared} in
+the implementation.
+
+\item
+A type signature appears in the interface for every value that the
+implementation exports.  
+%Apart from any required use of full names, 
+This
+type signature must be the same as that 
+in the implementation (see Section~\ref{type-semantics}), where
+the latter is obtained from the explicit type signature in the
+implementation (when present) or is the most general type
+inferred from the declaration of the value.
+
+\item
+%Apart from any required use of full names, 
+A \mbox{\tt type} declaration in an
+interface must be identical to that in the implementation.
+
+\item
+%Apart from any required use of full names,  
+A \mbox{\tt class} declaration in an
+interface must be identical to that in the implementation, except that
+default-method declarations are omitted.
+\index{default method}
+
+\item
+If the constructors of a \mbox{\tt data} declaration are not exported, 
+%then, apart from any required use of full names,
+then the \mbox{\tt data} declaration in the interface differs from that in the
+implementation by omitting everything after (and including) the \mbox{\tt =}
+sign.  If the \mbox{\tt data} declaration in the implementation uses the
+\mbox{\tt deriving} mechanism to derive instance declarations for the type, a
+separate \mbox{\tt instance} declaration must appear in the interface for each
+class of which the type is made an instance of.  Hence, the
+information that certain instances are derived is hidden when the
+constructors are hidden, since in this case the type is abstract (see
+Section~\ref{abstract-types}).
+% The interface 
+% should not change in any way if the implementation were to change an
+% instance from being derived to being explicit, or vice versa.
+
+\item
+If the constructors of a \mbox{\tt data} declaration are to be exported, then
+the \mbox{\tt data} declaration in the interface is identical to that in the
+implementation including the \mbox{\tt deriving} part.\footnote{ It is important
+to retain the information about which instances are derived and which
+are not, because the importing module ``knows'' more about derived
+instances.}
+
+\item
+If a $C$-$T$ instance is declared in a module or imported by it, then the
+instance declaration appears in the interface (omitting the \mbox{\tt where}
+part) if {\em either} $C$ is exported {\em or} $T$ is exported.
+Instance declarations are not named explicitly in export or
+import lists.  This rule ensures that, if $C$ and $T$ are both in
+scope, then the (unique) $C$-$T$ instance declaration will also be in
+scope.\footnote{The reverse also applies.  For example,
+suppose that a new type $T$ is declared and made an instance of an
+imported class $C$.  The instance declaration will be exported along
+with $T$, and so the closure rule (Section~\ref{closure}) will require
+that $C$ is also in scope in every importing scope.}
+
+No explicit instance declaration should appear in the interface for
+instances that are specified by the \mbox{\tt deriving} part of a \mbox{\tt data}
+declaration in the interface.
+
+\item
+A fixity declaration for a value or constructor appears in an
+interface exactly when (a)~the value or constructor is declared by the
+interface, and (b)~the identical fixity declaration appears either in
+the implementation or in an imported interface.
+\end{enumerate}
+
+%\subsubsection{Full Names and Original Names in Interfaces}
+%\label{interface-imports}
+%\index{original name!in an interface}
+%\index{full name!in an interface}
+%
+%An entity defined in module \mbox{\tt A} as \mbox{\tt f} has an {\em original name} which is
+%a pair of \mbox{\tt A} and \mbox{\tt f}, but is never written except as part of a {\em full
+%name}. 
+%
+%Full names, or permitted abbreviations of full names are used in
+%interfaces for the names of type synonyms, datatypes, classes and values.
+%
+%The {\em full name} of an entity defines its original name and its
+%current renaming, if any. The {\em full name} of an entity defined in
+%module \mbox{\tt A} as \mbox{\tt f}, and subsequently renamed as \mbox{\tt g}, is \mbox{\tt g\ {\char'173}A\ f{\char'175}}. The
+%{\em full name} of an entity defined in module \mbox{\tt A} as
+%\mbox{\tt f}, and not subsequently renamed, is \mbox{\tt f\ {\char'173}A\ f{\char'175}}. The {\em local name}
+%\index{local name}
+%of an entity is the first component of its full name, i.e. excluding
+%the part in braces.
+%
+%In the following, a {\em defining occurrence} of a name is an occurence in
+%one of the following positions in an {\em itopdecl}, indicating that the
+%entity associated with the name is exported.
+%\begin{enumerate}
+%\item
+%Immediately following the keyword {\it type}, or {\em data} or {\em class},
+%or immediately following the \mbox{\tt =>} terminating a context immediately
+%following one of these keywords.
+%\item
+%As a {\em var} before the \mbox{\tt ::} in a type signature corresponding to a value
+%declaration in the module implementation.
+%\end{enumerate}
+%
+%Full names may be abbreviated in some circumstances:
+%\begin{enumerate}
+%\item
+%For an entity that has not been renamed, \mbox{\tt f\ {\char'173}A\ f{\char'175}} may be written as \mbox{\tt f\ {\char'173}A{\char'175}}.
+%\item
+%For an entity defined in the current module, no module name need be given,
+%so in the interface for module \mbox{\tt A}, \mbox{\tt f\ {\char'173}A\ f{\char'175}} may be written as \mbox{\tt f}.
+%\item
+%If the full name \mbox{\tt g\ {\char'173}A\ f{\char'175}} or any abbreviation of it appears in a defining
+%occurence in the current interface, all other occurrences of that name in the
+%interface may use the local name \mbox{\tt g}.
+%\item
+%The names of data constructors (in {\em constrs}) and class
+%operations (in {\em icdels}) may be abbreviated to the local name.
+%
+%\item
+%Entities imported from the standard prelude without renaming may always use
+%the local name.
+%\end{enumerate}
+
+\subsubsection{Imports and Original Names}
+\label{interface-imports}
+\index{original name!in an interface}
+
+The original-name information is carried in the interface file using
+\mbox{\tt import} declarations in a special way.
+
+Suppose that a module \mbox{\tt A} exports an entity \mbox{\tt x}; the
+interface for \mbox{\tt A} will contain static information about \mbox{\tt x}.  
+If \mbox{\tt x} was originally defined in \mbox{\tt A}, then this is
+all that appears.
+But, suppose that \mbox{\tt x} was imported by \mbox{\tt A} from some other module \mbox{\tt B}
+and that \mbox{\tt x} was originally defined in module \mbox{\tt C}
+with name \mbox{\tt y}; this declaration must appear in the interface for \mbox{\tt A}:
+\bprog
+\mbox{\tt import\ C(y)\ renaming\ (\ y\ to\ x\ )}
+\eprog
+No reference to \mbox{\tt B} remains in the interface.  {\em The
+\mbox{\tt import} declaration in the interface serves only to convey to the
+importing module the original name of \mbox{\tt x}}, and does {\em not} imply
+that module \mbox{\tt C}'s interface must be consulted when reading module \mbox{\tt A}'s
+interface.  Multiple imports from a single original module may
+optionally be grouped in a single import declaration in the interface.
+
+A module may export a value whose typing involves a type and/or class
+that is not exported.
+(Any importing module would have to import the type or class by some
+other route.)
+{\em Nevertheless, it is still required that the interface contain the
+import declaration required to give the original name of the type or class.}
+
+In summary, for every entity \mbox{\tt e1} mentioned in the interface 
+of a module \mbox{\tt M} whose original name is \mbox{\tt e2} in module \mbox{\tt N},
+\mbox{\tt M}'s interface must
+contain the \mbox{\tt import} declaration
+\bprog
+\mbox{\tt \ \ \ \ \ \ import\ N(e2)\ renaming\ (\ e2\ to\ e1\ )}
+\eprog
+The word ``mentioned'' includes mention in the type signature
+of an exported value, as discussed above.
+
+This example illustrates most of these constraints; first, the
+interface:
+\bprog
+\mbox{\tt interface\ A\ where}\\
+\mbox{\tt infixr\ 4\ }\bkqB\mbox{\tt sameShape}\bkqA\mbox{\tt \ \ \ \ \ \ \ \ }\\
+\mbox{\tt import\ PreludeList(sum)\ renaming\ (\ sum\ to\ oldSum\ )}\\
+\mbox{\tt data\ \ BinTree\ a\ =\ Empty\ |\ Branch\ a\ (BinTree\ a)\ (BinTree\ a)\ \ \ \ \ \ }\\
+\mbox{\tt class\ Tree\ a\ where\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ sameShape\ ::\ a\ ->\ a\ ->\ Bool}\\
+\mbox{\tt instance\ Tree\ (BinTree\ a)}\\
+\mbox{\tt sum\ ::\ Num\ a\ =>\ BinTree\ a\ ->\ a}\\
+\mbox{\tt oldSum\ ::\ Num\ a\ =>\ [a]\ ->\ a}
+\eprog
+Now the implementation:
+\bprog
+\mbox{\tt module\ A(\ BinTree(..),\ Tree(..),\ sum,\ oldSum\ )\ where}\\
+\mbox{\tt import\ Prelude\ renaming\ (\ sum\ to\ oldSum\ )}\\
+\mbox{\tt infixr\ 4\ }\bkqB\mbox{\tt sameShape}\bkqA\mbox{\tt }\\
+\mbox{\tt \ \ \ \ \ \ \ \ --\ }\bkqB\mbox{\tt sameShape}\bkqA\mbox{\tt \ is\ an\ operation\ of\ class\ C\ below}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt data\ BinTree\ a\ =\ Empty\ |\ Branch\ a\ (BinTree\ a)\ (BinTree\ a)}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt class\ Tree\ a\ where\ }\\
+\mbox{\tt \ \ \ \ \ \ sameShape\ ::\ a\ ->\ a\ ->\ Bool}\\
+\mbox{\tt \ \ \ \ \ \ t1\ }\bkqB\mbox{\tt sameShape}\bkqA\mbox{\tt \ t2\ =\ False\ \ \ \ \ --\ Default\ method}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ Tree\ (BinTree\ a)\ where\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ Empty\ }\bkqB\mbox{\tt sameShape}\bkqA\mbox{\tt \ Empty\ \ =\ \ True}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ (Branch\ {\char'137}\ t1\ t2)\ }\bkqB\mbox{\tt sameShape}\bkqA\mbox{\tt \ (Branch\ {\char'137}\ t1'\ t2')\ \ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ =\ \ (t1\ }\bkqB\mbox{\tt sameShape}\bkqA\mbox{\tt \ t1')\ {\char'46}{\char'46}\ (t2\ }\bkqB\mbox{\tt sameShape}\bkqA\mbox{\tt \ t2')}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ t1\ }\bkqB\mbox{\tt sameShape}\bkqA\mbox{\tt \ t2\ =\ False}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt sum\ \ Empty\ \ \ \ \ \ \ \ \ \ \ =\ 0}\\
+\mbox{\tt sum\ (Branch\ n\ t1\ t2)\ =\ n\ +\ sum\ t1\ +\ sum\ t2}
+\eprogNoSkip
+
+\subsection{Standard Prelude}
+\label{standard-prelude}
+\index{standard prelude}
+
+Many of the features of \Haskell{} are defined in \Haskell{}
+itself, as a library of standard datatypes, classes and
+functions, called the ``standard prelude.''  In
+\Haskell{}, the standard prelude is specified as two distinct modules
+(in the technical sense of this chapter), \mbox{\tt PreludeCore} and
+\mbox{\tt Prelude}.\indexmodule{Prelude}
+\indexmodule{PreludeCore}
+
+\mbox{\tt PreludeCore} and \mbox{\tt Prelude} differ from other modules in that
+{\em their interfaces,
+and the semantics of the entities defined by those interfaces, are
+part of the \Haskell{} language definition.} This means, for example, that a
+compiler may optimise calls to functions in the
+standard prelude, because it knows their semantics as well as their
+interface.
+
+Each of these modules is structured into submodules.
+To avoid name-clashes with these sub-modules,
+user-defined module names must not begin with the prefix \mbox{\tt Prelude}.
+
+\subsubsection{The \mbox{\tt PreludeCore} Module}
+\indexmodule{PreludeCore}
+
+The \mbox{\tt PreludeCore} module contains {\em all the algebraic datatypes,
+type synonyms, classes and instance declarations} specified by the
+standard prelude.
+\index{algebraic datatype}
+\index{type synonym}
+\index{class declaration}
+\index{instance declaration}
+
+\mbox{\tt PreludeCore} is {\em always implicitly imported}, so it
+is not possible to import only part of it or to rename any of the
+entities that it defines.
+
+The semantics of the entities defined by \mbox{\tt PreludeCore} is specified by
+an implementation written in \Haskell{}, in
+Appendix~\ref{preludecore}.
+A \Haskell{} system need not implement \mbox{\tt PreludeCore} in this way.
+The interface for \mbox{\tt PreludeCore} may
+be inferred from the implementation in
+Appendix~\ref{preludecore}.
+
+Some datatypes (such as \mbox{\tt Int}) and functions (such as addition of
+\mbox{\tt Int}s) cannot be specified directly in \Haskell{}.  This is
+expressed in the \mbox{\tt PreludeCore} implementation by importing these
+built-in types and values from
+\mbox{\tt PreludeBuiltin}.\indexmodule{PreludeBuiltin}
+The semantics of the built-in datatypes and
+functions is given as English text in
+Appendix~\ref{preludebuiltin}.
+
+The implementation for \mbox{\tt PreludeCore} is incomplete in its
+treatment of tuples: there should be an infinite family of instance
+declarations for tuples, but the implementation only gives a scheme.
+
+The alert reader may notice that the implementation of
+\mbox{\tt PreludeCore} given in Appendix~\ref{preludecore} uses
+some functions defined in \mbox{\tt Prelude} (see next section).  There is no
+conflict; \mbox{\tt PreludeCore} and \mbox{\tt Prelude} are mutually
+recursive.
+
+\subsubsection{The \mbox{\tt Prelude} Module}
+\indexmodule{Prelude}
+
+The \mbox{\tt Prelude} module contains all the {\em value} declarations
+in the standard prelude.
+
+The \mbox{\tt Prelude} module is imported automatically if and only if it is
+not imported with an explicit \mbox{\tt import} declaration.  This provision
+for explicit import allows values defined in the standard prelude to
+be renamed or not imported at all.
+
+The semantics of the entities in \mbox{\tt Prelude} is specified by
+an implementation of \mbox{\tt Prelude} written in \Haskell{}, given in
+Appendix~\ref{stdprelude}.  As for \mbox{\tt PreludeCore},
+a \Haskell{} system may implement the \mbox{\tt Prelude} module
+as it pleases, provided it maintains the semantics in
+Appendix~\ref{stdprelude}.  The interface can be inferred
+from this implementation.
+
+\subsubsection{Shadowing Prelude Names and Non-Standard Preludes}
+\label{std-prel-shadowing}
+
+The rules about the standard prelude have been cast so that it is
+possible to use standard prelude names for nonstandard purposes; however,
+every module that does so will have an \mbox{\tt import} declaration
+that makes this nonstandard usage explicit.  For example:
+\bprog
+\mbox{\tt \ \ \ \ \ module\ A\ where}\\
+\mbox{\tt \ \ \ \ \ import\ Prelude\ hiding\ (map)}\\
+\mbox{\tt \ \ \ \ \ map\ f\ x\ =\ x\ f}
+\eprog
+Module \mbox{\tt A} redefines \mbox{\tt map}, but it must indicate this by
+importing \mbox{\tt Prelude} without \mbox{\tt map}.  Furthermore, \mbox{\tt A} exports \mbox{\tt map},
+but every module that imports \mbox{\tt map} from \mbox{\tt A} must also hide
+\mbox{\tt map} from \mbox{\tt Prelude} just as \mbox{\tt A} does.  Thus there is little danger of accidentally
+shadowing standard prelude names.
+
+It is possible to construct and use a different \mbox{\tt Prelude} module:
+\bprog
+\mbox{\tt \ \ \ \ \ \ module\ B\ where}\\
+\mbox{\tt \ \ \ \ \ \ import\ Prelude()}\\
+\mbox{\tt \ \ \ \ \ \ import\ MyPrelude}\\
+\mbox{\tt \ \ \ \ \ \ ...}
+\eprog
+\mbox{\tt B} imports nothing from \mbox{\tt Prelude}, but the
+explicit \mbox{\tt import\ Prelude} declaration prevents the automatic import of
+\mbox{\tt Prelude}.  \mbox{\tt import\ MyPrelude} brings the
+non-standard prelude into scope.  As before, the
+standard prelude names are hidden explicitly.
+
+%It is not possible to rename or hide the entities imported
+%from \mbox{\tt PreludeCore}.
+
+\subsection{Example}
+
+As an example, here are two small modules:\nopagebreak
+\bprog
+\mbox{\tt module\ A(\ Tree(..),\ depth\ )\ where}\\
+\mbox{\tt data\ Tree\ a\ =\ Leaf\ a\ |\ Branch\ (Tree\ a)\ (Tree\ a)}\\
+\mbox{\tt depth\ (Leaf\ a)\ \ \ \ \ \ \ \ =\ \ 0}\\
+\mbox{\tt depth\ (Branch\ xt\ yt)\ \ =\ \ (depth\ xt\ }\bkqB\mbox{\tt max}\bkqA\mbox{\tt \ depth\ yt)\ +\ 1}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt module\ B(\ leaves\ )\ where}\\
+\mbox{\tt import\ A}\\
+\mbox{\tt leaves\ (Leaf\ a)\ \ \ \ \ \ \ \ =\ \ [a]}\\
+\mbox{\tt leaves\ (Branch\ xt\ yt)\ \ =\ \ leaves\ xt\ ++\ leaves\ yt}
+\eprog
+Module \mbox{\tt A} must export \mbox{\tt Tree} because it exports \mbox{\tt depth}, and \mbox{\tt Tree}
+could not be made visible in any other way.  However, \mbox{\tt B} is not
+required to export \mbox{\tt Tree}, since a module importing \mbox{\tt B} could import
+\mbox{\tt A} in order to satisfy the closure constraints.
+
+Modules may be used to combine the resources of other modules.  For
+example, one might use renaming to make trees available to
+French speakers:
+\bprog
+\mbox{\tt module\ C(\ Arbre(..),\ fond,\ feuilles\ )\ where}\\
+\mbox{\tt import\ A\ renaming\ (\ Tree\ to\ Arbre,\ Leaf\ to\ Feuille,\ Branch\ to\ Branche,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ depth\ to\ fond\ )}\\
+\mbox{\tt import\ B\ renaming\ (\ leaves\ to\ feuilles\ )}
+\eprogNoSkip
+
+\subsection{Abstract Datatypes}
+\label{abstract-types}
+
+\index{abstract datatype}
+The ability to export a datatype without its constructors
+allows the construction of abstract datatypes (ADTs).  For example,
+an ADT for stacks could be defined as:
+\bprog
+\mbox{\tt module\ Stack(\ StkType,\ push,\ pop,\ empty\ )\ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ data\ StkType\ a\ =\ EmptyStk\ |\ Stk\ a\ (StkType\ a)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ push\ x\ s\ =\ Stk\ x\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ pop\ (Stk\ {\char'137}\ s)\ =\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ empty\ =\ EmptyStk}
+\eprog
+Modules importing \mbox{\tt Stack} cannot construct values of type \mbox{\tt StkType}
+because they do not have access to the constructors of the type.
+
+It is also possible to build an ADT on top of an existing type by
+using a \mbox{\tt data} declaration with a single constructor with only one
+field.  For example, stacks can be defined with lists:
+\bprog
+\mbox{\tt module\ Stack(\ StkType,\ push,\ pop,\ empty\ )\ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ data\ StkType\ a\ =\ Stk\ [a]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ push\ x\ (Stk\ s)\ =\ Stk\ (x:s)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ pop\ (Stk\ (x:s))\ =\ Stk\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ empty\ =\ Stk\ []}
+\eprogNoSkip
+
+{\em Note 1.} Every ADT must be a module (but a
+\Haskell{} compilation system may allow multiple modules in a single file).
+
+%Arguably there should be a separate scope-limiting construct to allow
+%constructors to be hidden within modules.  This was considered but
+%finally discarded on grounds of simplicity.  Remember that
+
+{\em Note 2.} Using a single-constructor single-field \mbox{\tt data}
+declaration to create an isomorphic type introduces an unwanted extra
+element to the new type, namely \mbox{\mbox{\tt (Stk\ }$\perp$\mbox{\tt )}}, with the
+risk of an accompanying small inefficiency in the implementation.  
+
+%It would be possible to introduce a variant of \mbox{\tt data} to avoid this
+%problem, but this was omitted on grounds of simplicity.
+
+\subsection{Fixity Declarations}
+\index{fixity declaration}
+\label{fixity}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it fixdecls$\>\makebox[3.5em]{$\rightarrow$}$\it fix_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ fix_n$\>\makebox[3em]{}$\it \qquad\ (n\geq 1)$\\ 
+$\it fix$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt infixl}\ [digit]\ ops$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt infixr}\ [digit]\ ops$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt infix\ }\ [digit]\ ops$\\ 
+$\it ops$\>\makebox[3.5em]{$\rightarrow$}$\it op_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ op_n$\>\makebox[3em]{}$\it \qquad\ (n\geq 1)$\\ 
+$\it op$\>\makebox[3.5em]{$\rightarrow$}$\it varop\ |\ conop$
+\end{tabbing}\end{flushleft}
+\indexsyn{fixdecls}%
+\indexsyn{fix}%
+\indexsyn{ops}%
+\indexsyn{op}%
+%\indextt{infixl}\indextt{infixr}\indextt{infix}
+A fixity declaration gives the fixity and binding
+precedence of a set of operators.  Fixity declarations must appear only
+at the start of a
+module
+%\footnote{This is to avoid parsing problems that arise when
+%fixity declarations appear lexically after the operators to which they
+%refer.}
+and may only be given for identifiers defined in that module.
+Fixity declarations cannot subsequently be overridden, and an
+identifier can only have one fixity definition.
+
+There are three kinds of fixity, non-, left- and right-associativity
+(\mbox{\tt infix}, \mbox{\tt infixl}, and \mbox{\tt infixr}, respectively), and ten precedence
+levels, 0 through 9 (level 0 binds least tightly, and level 9
+binds most tightly).  If the \mbox{$\it digit$} is omitted, level 9 is assumed.
+Any operator lacking a fixity declaration
+is assumed to be \mbox{\tt infixl\ 9} (See Section~\ref{expressions} for more on
+the use of fixities).
+Figure~\ref{prelude-fixities} lists the fixities and precedences of
+the operators defined in the standard prelude.
+\begin{figure}
+\centerline{
+\begin{tabular}{|c|l|l|}\hline
+Precedence & Fixity & Operators \\ \hline
+9 & \mbox{\tt infixl} & \mbox{\tt !}, \mbox{\tt !!}, \mbox{\tt //} \\
+  & \mbox{\tt infixr} & \mbox{\tt .} \\
+8 & \mbox{\tt infixr} & \mbox{\tt **}, \mbox{\tt {\char'136}}, \mbox{\tt {\char'136}{\char'136}} \\
+7 & \mbox{\tt infixl} & \mbox{\tt {\char'45}}, \mbox{\tt *}, \mbox{\tt :{\char'45}} \\
+  & \mbox{\tt infix}  & \mbox{\tt /}, \mbox{\tt `div`}, \mbox{\tt `mod`}, \mbox{\tt `rem`} \\
+6 & \mbox{\tt infixl} & \mbox{\tt +}, \mbox{\tt -} \\
+  & \mbox{\tt infix}  & \mbox{\tt :+} \\
+5 & \mbox{\tt infixr} & \mbox{\tt :}, \mbox{\tt ++} \\
+  & \mbox{\tt infix}  & \mbox{\tt {\char'134}{\char'134}} \\
+4 & \mbox{\tt infix}  & \mbox{\tt /=}, \mbox{\tt <}, \mbox{\tt <=}, \mbox{\tt ==}, \mbox{\tt >}, \mbox{\tt >=}, \mbox{\tt `elem`}, \mbox{\tt `notElem`} \\
+3 & \mbox{\tt infixr} & \mbox{\tt {\char'46}{\char'46}} \\
+2 & \mbox{\tt infixr} & \mbox{\tt ||} \\
+1 & \mbox{\tt infix}  & \mbox{\tt :=} \\ \hline
+\end{tabular}}
+\ecaption{Precedences and fixities of prelude-defined operators}
+\label{prelude-fixities}
+\end{figure}
+
+Fixity is a property of the original name of an identifier or operator
+(see Section~\ref{original-names}).  Fixity is not affected by
+renaming; the new name has the same fixity as the old one.  The same
+fixity attaches to every occurrence of an operator name in a module,
+whether at the top level or rebound at an inner level.  For example:
+\bprog
+\mbox{\tt module\ Foo}\\
+\mbox{\tt import\ Bar}\\
+\mbox{\tt infix\ 3\ `op`}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt f\ x\ =\ ...\ where\ p\ `op`\ q\ =\ ...}
+\eprog
+Here \mbox{\tt `op`} has fixity 3 wherever it is in scope, provided \mbox{\tt Bar} does not
+export the identifier \mbox{\tt op}.  If \mbox{\tt Bar} does export \mbox{\tt op}, then the example
+becomes illegal, because the fixity (or lack thereof) of \mbox{\tt op} is defined 
+in \mbox{\tt Bar} (or wherever \mbox{\tt Bar} imported \mbox{\tt op} from).
+
+% Local Variables: 
+% mode: latex
+% End:

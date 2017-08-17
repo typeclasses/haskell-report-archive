@@ -1,0 +1,577 @@
+%
+% $Header$
+%
+% The paragraph describing the formats of standard representations might
+% be deleted, since the info is already in the Prelude.  
+% Note that there is a difference in the way readsPrec and showsPrec are defined.
+% showsPrec is exact Haskell text, readsPrec uses an auxiliary function which
+% isn't quite Haskell.  
+
+\section{Specification of Derived Instances}
+\label{derived-appendix}
+
+If \mbox{$\it T$} is an algebraic datatype declared by:\index{algebraic datatype}
+\[\begin{array}{lcl}
+\mbox{$\it \makebox{\tt data\ }c\makebox{\tt \ =>}\ T\ u_1\ \ldots \ u_k$}&\mbox{\tt =}&\mbox{$\it K_1\ t_{11}\ \ldots \ t_{1k_1}\ \makebox{\tt |}\ \cdots\ \makebox{\tt |}\ K_n\ t_{n1}\ \ldots \ t_{nk_n}$}\\
+& & \mbox{$\it \makebox{\tt deriving\ (}C_1\makebox{\tt ,}\ \ldots \makebox{\tt ,}\ C_m\makebox{\tt )}$}
+\end{array}\]
+(where \mbox{$\it m\geq0$} and the parentheses may be omitted if \mbox{$\it m=1$}) then
+{\em a derived instance declaration is possible} for a class \mbox{$\it C$} 
+if and only if these conditions hold:
+\begin{enumerate}
+\item
+\mbox{$\it C$} is one of \mbox{\tt Eq}, \mbox{\tt Ord}, \mbox{\tt Enum}, \mbox{\tt Ix}, \mbox{\tt Text}, or \mbox{\tt Binary}.
+
+\item
+There is a context \mbox{$\it c'$} such that \mbox{$\it c'\ \Rightarrow\ C\ t_{ij}$}
+holds for each of the constituent types \mbox{$\it t_{ij}$}.
+
+\item
+If \mbox{$\it C$} is either \mbox{\tt Ix} or \mbox{\tt Enum}, then further constraints must be
+satisfied as described under the paragraphs for \mbox{\tt Ix} and \mbox{\tt Enum}
+later in this section.
+
+\item
+There must be no explicit instance declaration elsewhere in the module which
+makes \mbox{$\it T\ u_1\ \ldots \ u_k$} an instance of \mbox{$\it C$}.
+% or of any of \mbox{$\it C$}'s superclasses.
+\end{enumerate}
+
+If the \mbox{\tt deriving} form is present (as in the above 
+general \mbox{\tt data} declaration),
+an instance declaration is automatically generated for \mbox{$\it T\ u_1\ \ldots \ u_k$}
+over each class \mbox{$\it C_i$} and each of \mbox{$\it C_i$}'s superclasses.
+If the derived instance declaration is impossible for any of the \mbox{$\it C_i$}
+then a static error results.
+If no derived instances are required, the \mbox{\tt deriving} form may be
+omitted or the form \mbox{\tt deriving\ ()} may be used.
+
+% OLD:
+%If the \mbox{\tt deriving} form is omitted then instance
+%declarations are derived for the datatype in as many of the six
+%classes mentioned above as is possible; that is, no static error can occur.
+%Since datatypes may be recursive, the implied inclusion in
+%these classes may also be recursive, and the largest
+%possible set of derived instances is generated.  For example,
+%\bprog
+%@%@
+%data  T1 a = C1 (T2 a) | Nil1
+%data  T2 a = C2 (T1 a) | Nil2
+%@%@
+%\eprog
+%Because the \mbox{\tt deriving} form is omitted, we would expect derived
+%instances for \mbox{\tt Eq} (for example).  But \mbox{\tt T1} is in \mbox{\tt Eq} only if \mbox{\tt T2}
+%is, and \mbox{\tt T2} is in \mbox{\tt Eq} only if \mbox{\tt T1} is.  The largest solution has
+%both types in \mbox{\tt Eq}, and thus both derived instances are generated.
+
+Each derived instance declaration will have the form:
+\[
+\mbox{$\it \makebox{\tt instance\ (}c\makebox{\tt ,}\ C'_1\ u'_1\makebox{\tt ,}\ \ldots \makebox{\tt ,}\ C'_j\ u'_j\ \makebox{\tt )\ =>}\ C_i\ (T\ u_1\ \ldots \ u_k)\ \makebox{\tt where}\ \makebox{\tt {\char'173}}\ d\ \makebox{\tt {\char'175}}$}
+\]
+where \mbox{$\it d$} is derived automatically depending on \mbox{$\it C_i$} and the data
+type declaration for \mbox{$\it T$} (as will be described in the remainder of
+this section), and \mbox{$\it u'_1$} through \mbox{$\it u'_j$} form a subset of \mbox{$\it u_1$}
+through \mbox{$\it u_k$}.
+%% Yale nuked this:
+%% The class assertions \mbox{$\it C'\ u'$} are constraints on \mbox{$\it T$}'s
+%% type variables that are inferred from the instance declarations of the
+%% constituent types \mbox{$\it t_{ij}$}.  For example, consider:
+%% \bprog
+%% @
+%% data  T1 a = C1 (T2 a) deriving Eq
+%% data  T2 a = C2 a      deriving ()
+%% @
+%% \eprog
+%% And consider these three different instances for \mbox{\tt T2} in \mbox{\tt Eq}:\nopagebreak
+%% \bprog
+%% @
+%% instance            Eq (T2 a) where (C2 x) == (C2 y)  =  True
+%% 
+%% instance (Eq  a) => Eq (T2 a) where (C2 x) == (C2 y)  =  x == y
+%% 
+%% instance (Ord a) => Eq (T2 a) where (C2 x) == (C2 y)  =  x > y
+%% @
+%% \eprog
+%% The corresponding derived instances for \mbox{\tt T1} in \mbox{\tt Eq} are:
+%% \bprog
+%% @
+%% instance            Eq (T1 a) where (C1 x) == (C1 y)  =  x == y
+%% 
+%% instance (Eq  a) => Eq (T1 a) where (C1 x) == (C1 y)  =  x == y
+%% 
+%% instance (Ord a) => Eq (T1 a) where (C1 x) == (C1 y)  =  x == y
+%% @
+%% \eprog
+When inferring the context for the derived instances, type synonyms
+must be expanded out first.\index{type synonym}
+The free variables of the declarations $d$ are all functions
+defined in the standard prelude.
+%These prelude functions must 
+%be in scope whenever \mbox{\tt deriving} instances are used that
+%mention them.
+The remaining details of the derived
+instances for each of the six classes are now given.
+
+\paragraph*{Derived instances of \mbox{\tt Eq} and \mbox{\tt Ord}.}
+\index{Eq@{\ptt Eq}!derived instance}
+\index{Ord@{\ptt Ord}!derived instance}
+The operations automatically introduced by derived instances
+of \mbox{\tt Eq} and \mbox{\tt Ord} are \mbox{\tt (==)}\indextt{==}, \mbox{\tt (/=)}\indextt{/=},
+\mbox{\tt (<)}\indextt{<}, \mbox{\tt (<=)}\indextt{<=}, \mbox{\tt (>)}\indextt{>},
+\mbox{\tt (>=)}\indextt{>=}, \mbox{\tt max}\indextt{max}, and 
+\mbox{\tt min}\indextt{min}.  The latter six operators are defined so
+as to compare their arguments lexicographically with respect to
+the constructor set given, with earlier constructors in the datatype
+declaration counting as smaller than later ones.  For example, for the
+\mbox{\tt Bool} datatype, we have that \mbox{\tt True\ >\ False\ ==\ True}.
+
+\paragraph*{Derived instances of \mbox{\tt Ix}.}
+\index{Ix@{\ptt Ix}!derived instance}
+The derived instance declarations for the class \mbox{\tt Ix}
+introduce the overloaded functions
+\mbox{\tt range}\indextt{range}, \mbox{\tt index}\indextt{index}, and
+\mbox{\tt inRange}\indextt{inRange}.  The operation \mbox{\tt range} takes a (lower,
+upper) bound pair, and returns a list of all indices in this range, in
+ascending order.  The operation \mbox{\tt inRange} is a predicate taking a
+(lower, upper) bound pair and an index and returning \mbox{\tt True} if the
+index is contained within the specified range.  The operation \mbox{\tt index}
+takes a (lower, upper) bound pair and an index and returns an integer,
+the position of the index within the range.
+
+Derived instance declarations for the class \mbox{\tt Ix} are only possible
+for enumerations\index{enumeration} (i.e.~datatypes having
+only nullary constructors) and single-constructor datatypes
+(including tuples) whose constituent types are instances of \mbox{\tt Ix}.  
+\begin{itemize}
+\item
+For an {\em enumeration}, the nullary constructors are assumed to be
+numbered left-to-right with the indices 0 through $n-1\/$.  For example,
+given the datatype:
+\bprog
+\mbox{\tt data\ \ Colour\ =\ Red\ |\ Orange\ |\ Yellow\ |\ Green\ |\ Blue\ |\ Indigo\ |\ Violet}
+\eprog
+we would have:
+\bprog
+\mbox{\tt range\ \ \ (Yellow,Blue)\ \ \ \ \ \ \ \ ==\ \ [Yellow,Green,Blue]}\\
+\mbox{\tt index\ \ \ (Yellow,Blue)\ Green\ \ ==\ \ 1}\\
+\mbox{\tt inRange\ (Yellow,Blue)\ Red\ \ \ \ ==\ \ False}
+\eprog
+\item
+For {\em single-constructor datatypes}, the derived instance declarations
+are created as shown for tuples in
+Figure~\ref{prelude-index}.
+\end{itemize}
+
+%Instances of the class \mbox{\tt Ix}\indextt{Ix} are typically used as
+%indices of arrays; a one-dimensional array might have index type
+%\mbox{\tt Int}, a two-dimensional array, \mbox{\tt (Int,Char)}, and so forth.  (See
+%Section~\ref{arrays}.)
+
+\begin{figure}
+\outline{
+\mbox{\tt class\ \ (Ord\ a)\ =>\ Ix\ a\ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ range\ \ \ \ \ \ \ \ \ \ \ ::\ (a,a)\ ->\ [a]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ index\ \ \ \ \ \ \ \ \ \ \ ::\ (a,a)\ ->\ a\ ->\ Int}\\
+\mbox{\tt \ \ \ \ \ \ \ \ inRange\ \ \ \ \ \ \ \ \ ::\ (a,a)\ ->\ a\ ->\ Bool}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt rangeSize\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (Ix\ a)\ =>\ (a,a)\ ->\ Int}\\
+\mbox{\tt rangeSize\ (l,u)\ \ \ \ \ \ \ \ \ =\ \ index\ (l,u)\ u\ +\ 1}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ \ (Ix\ a,\ Ix\ b)\ \ =>\ Ix\ (a,b)\ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ range\ ((l,l'),(u,u'))}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ [(i,i')\ |\ i\ <-\ range\ (l,u),\ i'\ <-\ range\ (l',u')]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ index\ ((l,l'),(u,u'))\ (i,i')}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ index\ (l,u)\ i\ *\ rangeSize\ (l',u')\ +\ index\ (l',u')\ i'}\\
+\mbox{\tt \ \ \ \ \ \ \ \ inRange\ ((l,l'),(u,u'))\ (i,i')}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ inRange\ (l,u)\ i\ {\char'46}{\char'46}\ inRange\ (l',u')\ i'}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt --\ Instances\ for\ other\ tuples\ are\ obtained\ from\ this\ scheme:}\\
+\mbox{\tt --}\\
+\mbox{\tt --\ \ instance\ \ (Ix\ a1,\ Ix\ a2,\ ...\ ,\ Ix\ ak)\ =>\ Ix\ (a1,a2,...,ak)\ \ where}\\
+\mbox{\tt --\ \ \ \ \ \ range\ ((l1,l2,...,lk),(u1,u2,...,uk))\ =}\\
+\mbox{\tt --\ \ \ \ \ \ \ \ \ \ [(i1,i2,...,ik)\ |\ i1\ <-\ range\ (l1,u1),}\\
+\mbox{\tt --\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ i2\ <-\ range\ (l2,u2),}\\
+\mbox{\tt --\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ...}\\
+\mbox{\tt --\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ik\ <-\ range\ (lk,uk)]}\\
+\mbox{\tt --}\\
+\mbox{\tt --\ \ \ \ \ \ index\ ((l1,l2,...,lk),(u1,u2,...,uk))\ (i1,i2,...,ik)\ =}\\
+\mbox{\tt --\ \ \ \ \ \ \ \ index\ (lk,uk)\ ik\ +\ rangeSize\ (lk,uk)\ *\ (}\\
+\mbox{\tt --\ \ \ \ \ \ \ \ \ index\ (lk-1,uk-1)\ ik-1\ +\ rangeSize\ (lk-1,uk-1)\ *\ (}\\
+\mbox{\tt --\ \ \ \ \ \ \ \ \ \ ...}\\
+\mbox{\tt --\ \ \ \ \ \ \ \ \ \ \ index\ (l1,u1)))}\\
+\mbox{\tt --}\\
+\mbox{\tt --\ \ \ \ \ \ inRange\ ((l1,l2,...lk),(u1,u2,...,uk))\ (i1,i2,...,ik)\ =}\\
+\mbox{\tt --\ \ \ \ \ \ \ \ \ \ inRange\ (l1,u1)\ i1\ {\char'46}{\char'46}\ inRange\ (l2,u2)\ i2\ {\char'46}{\char'46}}\\
+\mbox{\tt --\ \ \ \ \ \ \ \ \ \ \ \ \ \ ...\ {\char'46}{\char'46}\ inRange\ (lk,uk)\ ik}
+}
+\ecaption{Index classes and instances}
+\label{prelude-index}
+\indextt{Ix}                                                
+\indextt{range}\indextt{index}\indextt{inRange}   
+\indextt{rangeSize}                                         
+\end{figure}
+
+\paragraph*{Derived instances of \mbox{\tt Enum}.}
+\index{Enum@{\ptt Enum}!derived instance}
+Derived instance declarations for the class \mbox{\tt Enum} are only
+possible for enumerations, using the same ordering assumptions made
+for \mbox{\tt Ix}.  They introduce the operations
+\mbox{\tt enumFrom}\indextt{enumFrom},
+\mbox{\tt enumFromThen}\indextt{enumFromThen}, \mbox{\tt enumFromTo}\indextt{enumFromTo}, and
+\mbox{\tt enumFromThenTo}\indextt{enumFromThenTo},
+which are used to define arithmetic sequences as described
+in Section~\ref{arithmetic-sequences}.
+
+\mbox{\tt enumFrom\ n} returns a list corresponding to the complete enumeration
+of \mbox{\tt n}'s type starting at the value \mbox{\tt n}.
+Similarly, \mbox{\tt enumFromThen\ n\ n'} is the enumeration starting at \mbox{\tt n}, but
+with second element \mbox{\tt n'}, and with subsequent elements generated at a
+spacing equal to the difference between \mbox{\tt n} and \mbox{\tt n'}.
+\mbox{\tt enumFromTo} and \mbox{\tt enumFromThenTo} are as defined by the
+default methods
+\index{default method}
+for \mbox{\tt Enum} (see Figure~\ref{standard-classes},
+page~\pageref{standard-classes}).
+
+\paragraph*{Derived instances of \mbox{\tt Binary}.}
+\index{Binary@{\ptt Binary}!derived instance}
+The \mbox{\tt Binary} class is used primarily for transparent I/O (see
+Section~\ref{io-modes}).  The operations automatically introduced
+by derived instances of \mbox{\tt Binary} are \mbox{\tt readBin}\indextt{readBin} and
+\mbox{\tt showBin}\indextt{showBin}.  They coerce values to and
+from the primitive abstract type \mbox{\tt Bin} (see Section~\ref{bin-type}).
+An implementation must be able to create derived instances of \mbox{\tt Binary}
+for any type \mbox{$\it t$} not containing a function type.
+
+\mbox{\tt showBin} is analogous to \mbox{\tt shows}, taking two arguments: the first
+is the value to be coerced, and the second is a \mbox{\tt Bin} value to which
+the result is to be concatenated.  \mbox{\tt readBin} is analogous to \mbox{\tt reads},
+``parsing'' its argument and returning a pair consisting of the
+coerced value and any remaining \mbox{\tt Bin} value.  
+
+Derived versions of \mbox{\tt showBin} and \mbox{\tt readBin} must obey this
+property:
+\[
+\mbox{$\it \makebox{\tt readBin\ (showBin\ }v\ b\makebox{\tt )\ ==\ (}v\makebox{\tt ,}b\makebox{\tt )}$}
+\]
+for any \mbox{\tt Bin} value \mbox{$\it b$} and value \mbox{$\it v$} whose type is an instance of the
+class \mbox{\tt Binary}.
+
+\paragraph*{Derived instances of \mbox{\tt Text}.}
+\index{Text@{\ptt Text}!derived instance}
+The operations automatically introduced by derived instances
+of \mbox{\tt Text} are \mbox{\tt showsPrec}\indextt{showsPrec}, \mbox{\tt readsPrec}\indextt{readsPrec},
+\mbox{\tt showList}\indextt{showList} and \mbox{\tt readList}\indextt{readList}.
+They are used to coerce values into strings and parse strings into
+values.
+
+The function \mbox{\tt showsPrec\ d\ x\ r} accepts a precedence level \mbox{\tt d}
+(a number from \mbox{\tt 0} to \mbox{\tt 10}), a value \mbox{\tt x}, and a string \mbox{\tt r}.
+It returns a string representing \mbox{\tt x} concatenated to \mbox{\tt r}.
+\mbox{\tt showsPrec} satisfies the law:
+\[
+\mbox{$\it \makebox{\tt showsPrec\ d\ x\ r\ ++\ s\ \ ==\ \ showsPrec\ d\ x\ (r\ ++\ s)}$}
+\]
+The representation will be enclosed in parentheses if the precedence
+of the top-level constructor operator in \mbox{\tt x} is less than \mbox{\tt d}.  Thus,
+if \mbox{\tt d} is \mbox{\tt 0} then the result is never surrounded in parentheses; if
+\mbox{\tt d} is \mbox{\tt 10} it is always surrounded in parentheses, unless it is an
+atomic expression.  The extra parameter \mbox{\tt r} is essential if tree-like
+structures are to be printed in linear time rather than time quadratic
+in the size of the tree.
+
+The function \mbox{\tt readsPrec\ d\ s} accepts a precedence level \mbox{\tt d} (a number
+from \mbox{\tt 0} to \mbox{\tt 10}) and a string \mbox{\tt s}, and returns a list of pairs
+\mbox{\tt (x,r)} such that \mbox{\tt showsPrec\ d\ x\ r\ ==\ s}.  \mbox{\tt readsPrec} is a parse
+function, returning a list of (parsed value, remaining string) pairs.
+If there is no successful parse, the returned list is empty.
+
+\mbox{\tt showList} and \mbox{\tt readList} allow lists of objects to be represented
+using non-standard denotations.  This is especially useful for strings
+(lists of \mbox{\tt Char}).
+
+%Because a string is a list of characters, \mbox{\tt showsPrec} of a string
+%such as \mbox{\tt "abc"} will result in the string 
+%\mbox{\tt "[}\fwq\mbox{\tt a}\fwq \mbox{\tt ,} \fwq\mbox{\tt b}\fwq \mbox{\tt ,} \fwq\mbox{\tt c}\fwq \mbox{\tt ]"}.  Because
+%\mbox{\tt "{\char'134}"abc{\char'134}""} would be a better representation,
+%the operators \mbox{\tt showList}
+%and \mbox{\tt readList} are provided in the class \mbox{\tt Text} for coercing {\em
+%lists} of values to and from strings.  In particular, \mbox{\tt showsPrec} of a
+%string will yield the verbose form above, and \mbox{\tt showList} will yield
+%the compact version.  For most other datatypes, \mbox{\tt showList} and
+%\mbox{\tt readList} will yield the same result as \mbox{\tt showsPrec} and \mbox{\tt readsPrec}.
+
+For convenience, the standard prelude provides the following auxiliary functions:
+\bprog
+\mbox{\tt shows\ \ \ \ =\ \ showsPrec\ 0}\\
+\mbox{\tt reads\ \ \ \ =\ \ readsPrec\ 0}\\
+\mbox{\tt show\ x\ \ \ =\ \ shows\ x\ ""}\\
+\mbox{\tt read\ s\ \ \ =\ \ x\ \ where\ [(x,"")]\ =\ reads\ s}
+\eprog
+\mbox{\tt shows} and \mbox{\tt reads} use a default precedence of 0, and \mbox{\tt show} and \mbox{\tt read}
+assume that the result is not being appended to an initial string.
+
+The instances of \mbox{\tt Text} for the standard types \mbox{\tt Int}, \mbox{\tt Integer}, \mbox{\tt Float},
+\mbox{\tt Double}, \mbox{\tt Char}, lists, tuples, and rational and complex numbers are defined in the 
+standard prelude (see Appendix~\ref{stdprelude}).
+For characters and strings, the control characters that have special
+representations (\mbox{\tt {\char'134}n} etc.) are shown as such by \mbox{\tt showsPrec};
+otherwise, ASCII mnemonics are used.
+Non-ASCII characters are shown by decimal escapes.
+Floating point numbers are represented by decimal numbers
+of sufficient precision to guarantee \mbox{\tt read\ .\ show} is an identity
+function.  If $b$ is the floating-point radix and there are
+$w$ base-$b$ digits in the floating-point significand,
+the number of decimal digits required is
+$d = \lceil w \log_{10} b \rceil + 1$ \cite{matula70}.
+Numbers are shown in non-exponential format if this requires
+only $d$ digits; otherwise, they are shown in exponential format,
+with one digit before the decimal point.  \mbox{\tt readsPrec} allows
+an exponent to be unsigned or signed with \mbox{\tt +} or \mbox{\tt -}; \mbox{\tt showsPrec}
+shows a positive exponent without a sign.
+
+\mbox{\tt readsPrec} will parse any valid representation of the standard types 
+apart from lists, for
+which only the bracketed form \mbox{\tt [}\ldots\mbox{\tt ]} is accepted. See
+Appendix~\ref{stdprelude} for full details.
+
+%Figure~\ref{derived-text} gives the general form of a derived instance
+%of \mbox{\tt Text} for a user-defined datatype:
+%\[
+%\mbox{$\it \makebox{\tt data}\ c\ \makebox{\tt =>}\ T\ u_1\ \ldots \ u_k\ \makebox{\tt =}\ \ldots $}
+%\]
+%\mbox{\tt showsPrec} and \mbox{\tt readsPrec} are as
+%in Appendices~\ref{showsPrec-spec} and \ref{readsPrec-spec}.  The omitted
+%definitions of \mbox{\tt readList} and \mbox{\tt showList} in
+%Figure~\ref{standard-classes} (page~\pageref{standard-classes})
+%are:
+%\bprog
+%@
+%readList:: ReadS [a]
+%readList r = [pr | (\mbox{$\it [$},s) <- lex r,
+%                 pr      <- readl s    ]
+%           where readl s = [([],t) | (\mbox{$\it ]$},t) <- lex s] ++
+%                          [(x:xs,v) |  (x,t) <- reads s,
+%                                       (\mbox{$\it ,$},u) <- lex t,
+%                                       (xs,v) <- readl u       ]
+%
+%showList:: [a] -> ShowS
+%showList xs = showChar '[' . showl xs
+%            where
+%            showl [] = showChar ']'
+%            showl (x:xs) = shows x . showChar ',' . showl xs
+%@
+%\eprog
+%\begin{figure}
+%\outline{
+%@
+%instance (C, Text u1, ..., Text uk) => Text (T u1 ... uk) where
+%       showsPrec = ...
+%       readsPrec = ...
+%@
+%}
+%\caption{General form of a derived instance of \mbox{\tt Text}}
+%\label{derived-text}
+%\end{figure}
+
+\subsection{Specification of \mbox{\tt showsPrec}}
+\label{showsPrec-spec}
+\indextt{showsPrec}
+
+As described in Section~\ref{derived-decls}, \mbox{\tt showsPrec} has the type
+\[
+\mbox{$\it \makebox{\tt (Text\ a)\ =>\ Int\ ->\ a\ ->\ String\ ->\ String}$}
+\]
+The first parameter is a
+precedence in the range 0 to 10, the second is the value to be
+converted into a string, and the third is the string
+to append to the end of the result.
+
+For all constructors \mbox{\tt Con} defined by some \mbox{\tt data} declaration
+such as:
+\[
+\mbox{$\it \makebox{\tt data}\ c\ \makebox{\tt =>}\ T\ u_1\ \ldots \ u_k\ \makebox{\tt =}\ \ldots \ \makebox{\tt |\ Con}\ t_1\ \ldots \ t_n\ \makebox{\tt |}\ \ldots $}
+\]
+the corresponding definition of \mbox{\tt showsPrec} for \mbox{\tt Con} is shown in 
+Figure~\ref{showsPrec-infix} for constructors declared in the infix
+style and
+Figure~\ref{showsPrec-fig} for all other constructors.  
+See Appendix~\ref{stdprelude} for details of \mbox{\tt showParen}, \mbox{\tt showChar}, etc.
+
+\begin{figure}
+\outline{
+\mbox{\tt \ \ \ \ showsPrec\ d\ (e1\ `Con`\ e2)\ =\ showParen\ (d\ >\ p)\ showStr}\\
+\mbox{\tt \ \ \ \ \ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ p\ =\ `the\ precedence\ of\ Con'}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ lp\ =\ if\ `Con\ is\ left\ associative'\ then\ p\ else\ p+1}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ rp\ =\ if\ `Con\ is\ right\ associative'\ then\ p\ else\ p+1}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ cn\ =\ `the\ original\ name\ of\ Con'}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ showStr\ =\ showsPrec\ lp\ e1\ .}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ showChar\ '\ '\ .\ showString\ cn\ .\ showChar\ '\ '\ .}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ showsPrec\ rp\ e2}
+}
+\caption{Specification of \mbox{\tt showsPrec} for Constructors Declared in the Infix Style}
+\label{showsPrec-infix}
+\end{figure}
+
+\begin{figure}
+\outline{
+\mbox{\tt \ \ \ \ showsPrec\ d\ (Con\ e1\ ...\ en)\ =\ showParen\ (d\ >=\ 10)\ showStr}\\
+\mbox{\tt \ \ \ \ \ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ showStr\ =\ showString\ cn\ .\ showChar\ '\ '\ .}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ showsPrec\ 10\ e1\ .\ showChar\ '\ '\ .}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ...}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ showsPrec\ 10\ en}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ cn\ =\ `the\ original\ name\ of\ Con'}
+}
+\caption{General Specification of \mbox{\tt showsPrec} for User-Defined Constructors}
+\label{showsPrec-fig}
+\end{figure}
+
+\subsection{Specification of \mbox{\tt readsPrec}}
+\label{readsPrec-spec}
+\indextt{readsPrec}
+
+A {\em lexeme} is exactly as in Section~\ref{lexical-structure}.
+\mbox{\tt lex\ ::\ String\ ->\ [(String,String)]} reads the first lexeme from a
+string.  If the string begins with a valid lexeme, the lexeme (with
+leading whitespace removed) and the remainder of the string are
+returned in a singleton list.  If no lexeme is present or the lexeme
+is not syntacticly correct, \mbox{\tt []} is returned.  A full definition is
+provided in Appendix~\ref{preludetext}.
+
+% \mbox{\tt lex\ ::\ String\ ->\ [(String,\ String)]} parses a string into two
+% parts: (1)~a string representing the first lexeme or \mbox{\tt ""} if the input
+% is \mbox{\tt ""} or consists entirely of white space, and (2)~the remainder of
+% the input after the first lexeme is extracted.  Whitespace (again
+% refer to Section~\ref{lexical-structure}) is ignored except within
+% strings.  A successful parse results in a singleton list containing
+% a pair of strings; if no proper lexeme can be parsed (such as in the case
+% of an unrecognised control character), an empty list is returned.
+% A full definition is provided in Appendix~\ref{preludetext}.
+
+As described in Section~\ref{derived-decls}, \mbox{\tt readsPrec} has the type
+\[
+\mbox{$\it \makebox{\tt Text\ a\ =>\ Int\ ->\ String\ ->\ [(a,String)]}$}
+\]
+Its first parameter is a
+precedence in the range 0 to 10, its second is the string to be
+parsed.  
+Figure~\ref{readsPrec-fig} shows the specification of \mbox{\tt readsPrec} for user-defined 
+datatypes of the form:
+\[
+\mbox{$\it \makebox{\tt data}\ c\ \makebox{\tt =>}\ T\ u_1\ \ldots \ u_k\ \makebox{\tt =}\ K_1\ t_{11}\ \ldots \ t_{1k_1}\ \makebox{\tt |}\ \ldots \ \makebox{\tt |}\ K_n\ t_{n1}\ \ldots \ t_{nk_n}$}
+\]
+
+\begin{figure}
+\outline{
+\mbox{\tt readsPrec\ d\ r\ =\ readCon\ K1\ k1\ `the\ original\ name\ of\ K1'\ r\ ++}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ ...\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ readCon\ Kn\ kn\ `the\ original\ name\ of\ Kn'\ r}\\
+\mbox{\tt \ \ where}\\
+\mbox{\tt \ \ \ \ readCon\ con\ n\ cn\ =\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ --\ if\ con\ is\ infix}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readParen\ (d\ >\ p)\ readVal\ }\\
+\mbox{\tt \ \ \ \ \ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readVal\ r\ =\ \ [(u\ `con`\ v,\ s2)\ |}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (u,s0)\ \ \ <-\ readsPrec\ lp\ r,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (tok,s1)\ <-\ lex\ s0,\ tok\ ==\ cn,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (v,s2)\ \ \ <-\ readsPrec\ rp\ s1]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ p\ =\ `the\ precedence\ of\ con'}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ lp\ =\ if\ `con\ is\ left\ associative'\ then\ p\ else\ p+1}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ rp\ =\ if\ `con\ is\ right\ associative'\ then\ p\ else\ p+1}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ readCon\ con\ n\ cn\ =\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ --\ if\ con\ is\ not\ infix}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readParen\ (d\ >\ 9)\ readVal}\\
+\mbox{\tt \ \ \ \ \ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ readVal\ r\ =\ [(con\ t1\ ...\ tn,\ sn)\ |}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (t0,s0)\ <-\ lex\ r,\ t0\ ==\ cn,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (t1,s1)\ <-\ readsPrec\ 10\ s0,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ...}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (tn,sn)\ <-\ readsPrec\ 10\ s(n-1)]}
+}
+\caption{Definition of \mbox{\tt readsPrec} for User-Defined Types}
+\label{readsPrec-fig}
+\end{figure}
+
+\subsection{An example}
+
+As a complete example, consider a tree datatype:\nopagebreak
+%\bprog
+%@
+%data Tree a = Leaf a | Tree a :^: Tree a
+%@
+%\eprog\nopagebreak
+%Since there is no \mbox{\tt deriving} clause, this is shorthand for:\nopagebreak
+\bprog
+\mbox{\tt data\ Tree\ a\ =\ Leaf\ a\ |\ Tree\ a\ :{\char'136}:\ Tree\ a}\\
+\mbox{\tt \ \ \ \ \ deriving\ (Eq,\ Ord,\ Text,\ Binary)}\\
+\mbox{\tt instance\ (Eq\ a)\ =>\ Eq\ (Tree\ a)}\\
+\mbox{\tt \ \ where\ ...}\\
+\mbox{\tt instance\ (Ord\ a)\ =>\ Ord\ (Tree\ a)}\\
+\mbox{\tt \ \ where\ ...}\\
+\mbox{\tt instance\ (Text\ a)\ =>\ Text\ (Tree\ a)}\\
+\mbox{\tt \ \ where\ ...}\\
+\mbox{\tt instance\ (Binary\ a)\ =>\ Binary\ (Tree\ a)}\\
+\mbox{\tt \ \ where\ ...}
+\eprog
+Note the recursive context; the components of the datatype must
+themselves be instances of the class.  Automatic derivation of
+instance
+declarations for \mbox{\tt Ix} and \mbox{\tt Enum} are not possible, as \mbox{\tt Tree} is not
+an enumeration or single-constructor datatype.  Except for \mbox{\tt Binary}, the complete
+instance declarations for \mbox{\tt Tree} are shown in Figure~\ref{tree-inst},
+Note the implicit use of default-method
+\index{default method}
+definitions---for
+example, only \mbox{\tt <=} is defined for \mbox{\tt Ord}, with the other
+operations (\mbox{\tt <}, \mbox{\tt >}, \mbox{\tt >=}, \mbox{\tt max}, and \mbox{\tt min}) being defined by the defaults given in
+the class declaration shown in Figure~\ref{standard-classes}
+(page~\pageref{standard-classes}).
+
+\begin{figure}
+\outline{
+\mbox{\tt infix\ 4\ :{\char'136}:}\\
+\mbox{\tt data\ Tree\ a\ =\ \ Leaf\ a\ \ |\ \ Tree\ a\ :{\char'136}:\ Tree\ a}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ (Eq\ a)\ =>\ Eq\ (Tree\ a)\ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ Leaf\ m\ ==\ Leaf\ n\ \ =\ \ m==n}\\
+\mbox{\tt \ \ \ \ \ \ \ \ u:{\char'136}:v\ \ ==\ x:{\char'136}:y\ \ \ =\ \ u==x\ {\char'46}{\char'46}\ v==y}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ {\char'137}\ ==\ {\char'137}\ \ \ \ \ \ \ =\ \ False}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ (Ord\ a)\ =>\ Ord\ (Tree\ a)\ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ Leaf\ m\ <=\ Leaf\ n\ \ =\ \ m<=n}\\
+\mbox{\tt \ \ \ \ \ \ \ \ Leaf\ m\ <=\ x:{\char'136}:y\ \ \ =\ \ True}\\
+\mbox{\tt \ \ \ \ \ \ \ \ u:{\char'136}:v\ \ <=\ Leaf\ n\ \ =\ \ False}\\
+\mbox{\tt \ \ \ \ \ \ \ \ u:{\char'136}:v\ \ <=\ x:{\char'136}:y\ \ \ =\ \ u<x\ ||\ u==x\ {\char'46}{\char'46}\ v<=y}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ (Text\ a)\ =>\ Text\ (Tree\ a)\ where}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ \ \ \ \ showsPrec\ d\ (Leaf\ m)\ =\ showParen\ (d\ >=\ 10)\ showStr}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ showStr\ =\ showString\ "Leaf"\ .\ showChar\ '\ '\ .\ showsPrec\ 10\ m}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ \ \ \ \ showsPrec\ d\ (u\ :{\char'136}:\ v)\ =\ showParen\ (d\ >\ 4)\ showStr}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ showStr\ =\ showsPrec\ 5\ u\ .\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ showChar\ '\ '\ .\ showString\ ":{\char'136}:"\ .\ showChar\ '\ '\ .}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ showsPrec\ 5\ v}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ \ \ \ \ readsPrec\ d\ r\ =\ \ readParen\ (d\ >\ 4)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ({\char'134}r\ ->\ [(u:{\char'136}:v,w)\ |}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (u,s)\ <-\ readsPrec\ 5\ r,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (":{\char'136}:",t)\ <-\ lex\ s,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (v,w)\ <-\ readsPrec\ 5\ t])\ r}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ++\ readParen\ (d\ >\ 9)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ({\char'134}r\ ->\ [(Leaf\ m,t)\ |}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ("Leaf",t)\ <-\ lex\ r,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (m,t)\ <-\ readsPrec\ 10\ t])\ r}
+}
+\ecaption{Example of Derived Instances}
+\label{tree-inst}
+\end{figure}
+
+% Local Variables: 
+% mode: latex
+% End:

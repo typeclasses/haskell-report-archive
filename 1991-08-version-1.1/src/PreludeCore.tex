@@ -1,0 +1,543 @@
+\noindent\bprogB
+\mbox{\tt --\ Standard\ types,\ classes,\ and\ instances}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt module\ PreludeCore\ (}\\
+\mbox{\tt \ \ \ \ Eq((==),\ (/=)),}\\
+\mbox{\tt \ \ \ \ Ord((<),\ (<=),\ (>=),\ (>),\ max,\ min),}\\
+\mbox{\tt \ \ \ \ Num((+),\ (-),\ (*),\ negate,\ abs,\ signum,\ fromInteger),}\\
+\mbox{\tt \ \ \ \ Integral(divRem,\ div,\ rem,\ mod,\ even,\ odd,\ toInteger),}\\
+\mbox{\tt \ \ \ \ Fractional((/),\ fromRational),}\\
+\mbox{\tt \ \ \ \ Floating(pi,\ exp,\ log,\ sqrt,\ (**),\ logBase,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ sin,\ cos,\ tan,\ asin,\ acos,\ atan,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ sinh,\ cosh,\ tanh,\ asinh,\ acosh,\ atanh),}\\
+\mbox{\tt \ \ \ \ Real(toRational),}\\
+\mbox{\tt \ \ \ \ RealFrac(properFraction,\ approxRational),}\\
+\mbox{\tt \ \ \ \ RealFloat(floatRadix,\ floatDigits,\ floatRange,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ encodeFloat,\ decodeFloat,\ exponent,\ significand,\ scaleFloat),}\\
+\mbox{\tt \ \ \ \ Ix(range,\ index,\ inRange),}\\
+\mbox{\tt \ \ \ \ Enum(enumFrom,\ enumFromThen,\ enumFromTo,\ enumFromThenTo),}\\
+\mbox{\tt \ \ \ \ Text(readsPrec,\ showsPrec,\ readList,\ showList),}\\
+\mbox{\tt \ \ \ \ Binary(readBin,\ showBin),}\\
+\mbox{\tt --\ \ List\ type:\ [{\char'137}]((:),\ [])}\\
+\mbox{\tt --\ \ Tuple\ types:\ ({\char'137},{\char'137}),\ ({\char'137},{\char'137},{\char'137}),\ etc.}\\
+\mbox{\tt --\ \ Trivial\ type:\ ()\ }\\
+\mbox{\tt \ \ \ \ Bool(True,\ False),}\\
+\mbox{\tt \ \ \ \ Char,\ Int,\ Integer,\ Float,\ Double,\ Bin,}\\
+\mbox{\tt \ \ \ \ Ratio,\ Complex((:+)),\ Assoc((:=)),\ Array,}\\
+\mbox{\tt \ \ \ \ String,\ Rational\ )\ \ where}
+\index{PreludeCore@{\ptt PreludeCore} (module)}%
+\eprogB\noindent\bprogB
+\mbox{\tt import\ PreludeBuiltin}\\
+\mbox{\tt import\ Prelude(iterate)}\\
+\mbox{\tt import\ PreludeText(Text(readsPrec,\ showsPrec,\ readList,\ showList))}\\
+\mbox{\tt import\ PreludeRatio(Ratio,\ Rational)}\\
+\mbox{\tt import\ PreludeComplex(Complex((:+)))}\\
+\mbox{\tt import\ PreludeArray(Assoc((:=)),\ Array)}\\
+\mbox{\tt import\ PreludeIO(Name,\ Request,\ Response,\ IOError,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Dialogue,\ SuccCont,\ StrCont,\ BinCont,\ FailCont)}
+\index{PreludeBuiltin@{\ptt PreludeBuiltin} (module)}%
+\index{Prelude@{\ptt Prelude} (module)}%
+\index{PreludeText@{\ptt PreludeText} (module)}%
+\index{PreludeRatio@{\ptt PreludeRatio} (module)}%
+\index{PreludeComplex@{\ptt PreludeComplex} (module)}%
+\index{PreludeArray@{\ptt PreludeArray} (module)}%
+\index{PreludeIO@{\ptt PreludeIO} (module)}%
+\eprogB\noindent\bprogB
+\mbox{\tt infixr\ 8\ \ **}\\
+\mbox{\tt infixl\ 7\ \ *}\\
+\mbox{\tt infix\ \ 7\ \ /,\ `div`,\ `rem`,\ `mod`}\\
+\mbox{\tt infixl\ 6\ \ +,\ -}\\
+\mbox{\tt infix\ \ 4\ \ ==,\ /=,\ <,\ <=,\ >=,\ >}
+\index{**@{\ptt **}}%
+\index{*@{\ptt *}}%
+\index{/@{\ptt /}}%
+\indextt{div}%
+\indextt{rem}%
+\indextt{mod}%
+\index{+@{\ptt +}}%
+\index{-@{\ptt -}}%
+\index{==@{\ptt ==}}%
+\index{/=@{\ptt /=}}%
+\index{<@{\ptt <}}%
+\index{<=@{\ptt <=}}%
+\index{>=@{\ptt >=}}%
+\index{>@{\ptt >}}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Equality\ and\ Ordered\ classes}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt class\ \ Eq\ a\ \ where}\\
+\mbox{\tt \ \ \ \ (==),\ (/=)\ \ \ \ \ \ \ \ \ \ ::\ a\ ->\ a\ ->\ Bool}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ x\ /=\ y\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ not\ (x\ ==\ y)}
+\index{==@{\ptt ==}}%
+\index{/=@{\ptt /=}}%
+\indextt{Eq}%
+\eprogB\noindent\bprogB
+\mbox{\tt class\ \ (Eq\ a)\ =>\ Ord\ a\ \ where}\\
+\mbox{\tt \ \ \ \ (<),\ (<=),\ (>=),\ (>)::\ a\ ->\ a\ ->\ Bool}\\
+\mbox{\tt \ \ \ \ max,\ min\ \ \ \ \ \ \ \ \ \ \ \ ::\ a\ ->\ a\ ->\ a}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ x\ <\ \ y\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ x\ <=\ y\ {\char'46}{\char'46}\ x\ /=\ y}\\
+\mbox{\tt \ \ \ \ x\ >=\ y\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ y\ <=\ x}\\
+\mbox{\tt \ \ \ \ x\ >\ \ y\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ y\ <\ \ x}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ --\ The\ following\ default\ methods\ are\ appropriate\ for\ partial\ orders.}\\
+\mbox{\tt \ \ \ \ --\ Note\ that\ the\ second\ guards\ in\ each\ function\ can\ be\ replaced}\\
+\mbox{\tt \ \ \ \ --\ by\ "otherwise"\ for\ total\ orders.}\\
+\mbox{\tt \ \ \ \ max\ x\ y\ |\ x\ >=\ y\ \ \ \ =\ \ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ |\ y\ >=\ x\ \ \ \ =\ \ y}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ |otherwise\ \ =\ \ error\ "max{\char'173}PreludeCore{\char'175}:\ no\ ordering\ relation"}\\
+\mbox{\tt \ \ \ \ min\ x\ y\ |\ x\ <=\ y\ \ \ \ =\ \ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ |\ y\ <=\ x\ \ \ \ =\ \ y}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ |otherwise\ \ =\ \ error\ "min{\char'173}PreludeCore{\char'175}:\ no\ ordering\ relation"}
+\index{<@{\ptt <}}%
+\index{<=@{\ptt <=}}%
+\index{>=@{\ptt >=}}%
+\index{>@{\ptt >}}%
+\indextt{max}%
+\indextt{min}%
+\indextt{Ord}%
+\index{Eq@{\ptt Eq}!superclass of {\ptt Ord}}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Numeric\ classes}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt class\ \ (Eq\ a,\ Text\ a)\ =>\ Num\ a\ \ where}\\
+\mbox{\tt \ \ \ \ (+),\ (-),\ (*)\ \ \ \ \ \ \ ::\ a\ ->\ a\ ->\ a}\\
+\mbox{\tt \ \ \ \ negate\ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ a\ ->\ a}\\
+\mbox{\tt \ \ \ \ abs,\ signum\ \ \ \ \ \ \ \ \ ::\ a\ ->\ a}\\
+\mbox{\tt \ \ \ \ fromInteger\ \ \ \ \ \ \ \ \ ::\ Integer\ ->\ a}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ x\ -\ y\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ x\ +\ negate\ y}
+\index{+@{\ptt +}}%
+\index{-@{\ptt -}}%
+\index{*@{\ptt *}}%
+\indextt{negate}%
+\indextt{abs}%
+\indextt{signum}%
+\indextt{fromInteger}%
+\indextt{Num}%
+\index{Eq@{\ptt Eq}!superclass of {\ptt Num}}%
+\index{Text@{\ptt Text}!superclass of {\ptt Num}}%
+\eprogB\noindent\bprogB
+\mbox{\tt class\ \ (Num\ a,\ Ord\ a)\ =>\ Real\ a\ where}\\
+\mbox{\tt \ \ \ \ toRational\ \ \ \ \ \ \ \ \ \ ::\ \ a\ ->\ Rational}
+\indextt{toRational}%
+\indextt{Real}%
+\index{Num@{\ptt Num}!superclass of {\ptt Real}}%
+\index{Ord@{\ptt Ord}!superclass of {\ptt Real}}%
+\eprogB\noindent\bprogB
+\mbox{\tt class\ \ (Real\ a)\ =>\ Integral\ a\ \ where}\\
+\mbox{\tt \ \ \ \ div,\ rem,\ mod\ \ \ \ \ \ \ ::\ a\ ->\ a\ ->\ a}\\
+\mbox{\tt \ \ \ \ divRem\ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ a\ ->\ a\ ->\ (a,a)}\\
+\mbox{\tt \ \ \ \ even,\ odd\ \ \ \ \ \ \ \ \ \ \ ::\ a\ ->\ Bool}\\
+\mbox{\tt \ \ \ \ toInteger\ \ \ \ \ \ \ \ \ \ \ ::\ a\ ->\ Integer}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ x\ `div`\ y\ \ \ \ \ \ \ \ \ \ \ =\ \ q\ \ where\ (q,r)\ =\ divRem\ x\ y}\\
+\mbox{\tt \ \ \ \ x\ `rem`\ y\ \ \ \ \ \ \ \ \ \ \ =\ \ r\ \ where\ (q,r)\ =\ divRem\ x\ y}\\
+\mbox{\tt \ \ \ \ x\ `mod`\ y\ \ \ \ \ \ \ \ \ \ \ =\ \ if\ signum\ r\ ==\ -\ signum\ y\ then\ r\ +\ y\ else\ r}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ r\ =\ x\ `rem`\ y}\\
+\mbox{\tt \ \ \ \ even\ x\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ x\ `rem`\ 2\ ==\ 0}\\
+\mbox{\tt \ \ \ \ odd\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ not\ .\ even}
+\indextt{div}%
+\indextt{rem}%
+\indextt{mod}%
+\indextt{divRem}%
+\indextt{even}%
+\indextt{odd}%
+\indextt{toInteger}%
+\indextt{Integral}%
+\index{Real@{\ptt Real}!superclass of {\ptt Integral}}%
+\eprogB\noindent\bprogB
+\mbox{\tt class\ \ (Num\ a)\ =>\ Fractional\ a\ \ where}\\
+\mbox{\tt \ \ \ \ (/)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ a\ ->\ a\ ->\ a}\\
+\mbox{\tt \ \ \ \ fromRational\ \ \ \ \ \ \ \ ::\ Rational\ ->\ a}
+\index{/@{\ptt /}}%
+\indextt{fromRational}%
+\indextt{Fractional}%
+\index{Num@{\ptt Num}!superclass of {\ptt Fractional}}%
+\eprogB\noindent\bprogB
+\mbox{\tt class\ \ (Fractional\ a)\ =>\ Floating\ a\ \ where}\\
+\mbox{\tt \ \ \ \ pi\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ a}\\
+\mbox{\tt \ \ \ \ exp,\ log,\ sqrt\ \ \ \ \ \ ::\ a\ ->\ a}\\
+\mbox{\tt \ \ \ \ (**),\ logBase\ \ \ \ \ \ \ ::\ a\ ->\ a\ ->\ a}\\
+\mbox{\tt \ \ \ \ sin,\ cos,\ tan\ \ \ \ \ \ \ ::\ a\ ->\ a}\\
+\mbox{\tt \ \ \ \ asin,\ acos,\ atan\ \ \ \ ::\ a\ ->\ a}\\
+\mbox{\tt \ \ \ \ sinh,\ cosh,\ tanh\ \ \ \ ::\ a\ ->\ a}\\
+\mbox{\tt \ \ \ \ asinh,\ acosh,\ atanh\ ::\ a\ ->\ a}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ x\ **\ y\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ exp\ (log\ x\ *\ y)}\\
+\mbox{\tt \ \ \ \ logBase\ x\ y\ \ \ \ \ \ \ \ \ =\ \ log\ y\ /\ log\ x}\\
+\mbox{\tt \ \ \ \ sqrt\ x\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ x\ **\ 0.5}\\
+\mbox{\tt \ \ \ \ tan\ \ x\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ sin\ \ x\ /\ cos\ \ x}\\
+\mbox{\tt \ \ \ \ tanh\ x\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ sinh\ x\ /\ cosh\ x}
+\indextt{pi}%
+\indextt{exp}%
+\indextt{log}%
+\indextt{sqrt}%
+\index{**@{\ptt **}}%
+\indextt{logBase}%
+\indextt{sin}%
+\indextt{cos}%
+\indextt{tan}%
+\indextt{asin}%
+\indextt{acos}%
+\indextt{atan}%
+\indextt{sinh}%
+\indextt{cosh}%
+\indextt{tanh}%
+\indextt{asinh}%
+\indextt{acosh}%
+\indextt{atanh}%
+\indextt{Floating}%
+\index{Fractional@{\ptt Fractional}!superclass of {\ptt Floating}}%
+\eprogB\noindent\bprogB
+\mbox{\tt class\ \ (Real\ a,\ Fractional\ a)\ =>\ RealFrac\ a\ \ where}\\
+\mbox{\tt \ \ \ \ properFraction\ \ \ \ \ \ ::\ (Integral\ b)\ =>\ a\ ->\ (b,a)}\\
+\mbox{\tt \ \ \ \ approxRational\ \ \ \ \ \ ::\ a\ ->\ a\ ->\ Rational}
+\indextt{properFraction}%
+\indextt{approxRational}%
+\indextt{RealFrac}%
+\index{Real@{\ptt Real}!superclass of {\ptt RealFrac}}%
+\index{Fractional@{\ptt Fractional}!superclass of {\ptt RealFrac}}%
+\eprogB\noindent\bprogB
+\mbox{\tt class\ \ (RealFrac\ a,\ Floating\ a)\ =>\ RealFloat\ a\ \ where}\\
+\mbox{\tt \ \ \ \ floatRadix\ \ \ \ \ \ \ \ \ \ ::\ a\ ->\ Integer}\\
+\mbox{\tt \ \ \ \ floatDigits\ \ \ \ \ \ \ \ \ ::\ a\ ->\ Int}\\
+\mbox{\tt \ \ \ \ floatRange\ \ \ \ \ \ \ \ \ \ ::\ a\ ->\ (Int,Int)}\\
+\mbox{\tt \ \ \ \ decodeFloat\ \ \ \ \ \ \ \ \ ::\ a\ ->\ (Integer,Int)}\\
+\mbox{\tt \ \ \ \ encodeFloat\ \ \ \ \ \ \ \ \ ::\ Integer\ ->\ Int\ ->\ a}\\
+\mbox{\tt \ \ \ \ exponent\ \ \ \ \ \ \ \ \ \ \ \ ::\ a\ ->\ Int}\\
+\mbox{\tt \ \ \ \ significand\ \ \ \ \ \ \ \ \ ::\ a\ ->\ a}\\
+\mbox{\tt \ \ \ \ scaleFloat\ \ \ \ \ \ \ \ \ \ ::\ Int\ ->\ a\ ->\ a}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ exponent\ x\ \ \ \ \ \ \ \ \ \ =\ \ if\ m\ ==\ 0\ then\ 0\ else\ n\ +\ floatDigits\ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (m,n)\ =\ decodeFloat\ x}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ significand\ x\ \ \ \ \ \ \ =\ \ encodeFloat\ m\ (-\ floatDigits\ x)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (m,{\char'137})\ =\ decodeFloat\ x}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ scaleFloat\ k\ x\ \ \ \ \ \ =\ \ encodeFloat\ m\ (n+k)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (m,n)\ =\ decodeFloat\ x}
+\indextt{floatRadix}%
+\indextt{floatDigits}%
+\indextt{floatRange}%
+\indextt{decodeFloat}%
+\indextt{encodeFloat}%
+\indextt{exponent}%
+\indextt{significand}%
+\indextt{scaleFloat}%
+\indextt{RealFloat}%
+\index{RealFrac@{\ptt RealFrac}!superclass of {\ptt RealFloat}}%
+\index{Floating@{\ptt Floating}!superclass of {\ptt RealFloat}}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Index\ and\ Enumeration\ classes}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt class\ \ (Ord\ a)\ =>\ Ix\ a\ \ where}\\
+\mbox{\tt \ \ \ \ range\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a,a)\ ->\ [a]}\\
+\mbox{\tt \ \ \ \ index\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a,a)\ ->\ a\ ->\ Int}\\
+\mbox{\tt \ \ \ \ inRange\ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a,a)\ ->\ a\ ->\ Bool}
+\indextt{range}%
+\indextt{index}%
+\indextt{inRange}%
+\indextt{Ix}%
+\index{Ord@{\ptt Ord}!superclass of {\ptt Ix}}%
+\eprogB\noindent\bprogB
+\mbox{\tt class\ \ (Ord\ a)\ =>\ Enum\ a\ \ \ \ \ \ \ \ where}\\
+\mbox{\tt \ \ \ \ enumFrom\ \ \ \ \ \ \ \ \ \ \ \ ::\ a\ ->\ [a]\ \ \ \ \ \ \ \ \ \ \ \ \ --\ [n..]}\\
+\mbox{\tt \ \ \ \ enumFromThen\ \ \ \ \ \ \ \ ::\ a\ ->\ a\ ->\ [a]\ \ \ \ \ \ \ \ --\ [n,n'..]}\\
+\mbox{\tt \ \ \ \ enumFromTo\ \ \ \ \ \ \ \ \ \ ::\ a\ ->\ a\ ->\ [a]\ \ \ \ \ \ \ \ --\ [n..m]}\\
+\mbox{\tt \ \ \ \ enumFromThenTo\ \ \ \ \ \ ::\ a\ ->\ a\ ->\ a\ ->\ [a]\ \ \ --\ [n,n'..m]}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ enumFromTo\ n\ m\ \ \ \ \ \ =\ \ takeWhile\ (<=\ m)\ (enumFrom\ n)}\\
+\mbox{\tt \ \ \ \ enumFromThenTo\ n\ n'\ m}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ takeWhile\ (if\ n'\ >=\ n\ then\ (<=\ m)\ else\ (>=\ m))}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (enumFromThen\ n\ n')}
+\indextt{enumFrom}%
+\indextt{enumFromThen}%
+\indextt{enumFromTo}%
+\indextt{enumFromThenTo}%
+\indextt{Enum}%
+\index{Ord@{\ptt Ord}!superclass of {\ptt Enum}}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Binary\ class}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt class\ \ Binary\ a\ \ where}\\
+\mbox{\tt \ \ \ \ readBin\ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Bin\ ->\ (a,Bin)}\\
+\mbox{\tt \ \ \ \ showBin\ \ \ \ \ \ \ \ \ \ \ \ \ ::\ a\ ->\ Bin\ ->\ Bin}
+\indextt{readBin}%
+\indextt{showBin}%
+\indextt{Binary}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Boolean\ type}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt data\ \ Bool\ \ =\ \ False\ |\ True\ \ \ \ \ deriving\ (Eq,\ Ord,\ Ix,\ Enum,\ Text,\ Binary)}
+\index{Bool@{\ptt Bool} (datatype)}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Character\ type}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ \ Eq\ Char\ \ where}\\
+\mbox{\tt \ \ \ \ c\ ==\ c'\ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ ord\ c\ ==\ ord\ c'}
+\index{Eq@{\ptt Eq}!instance for {\ptt Char}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Ord\ Char\ \ where}\\
+\mbox{\tt \ \ \ \ c\ <=\ c'\ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ ord\ c\ <=\ ord\ c'}
+\index{Ord@{\ptt Ord}!instance for {\ptt Char}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Ix\ Char\ \ where}\\
+\mbox{\tt \ \ \ \ range\ (c,c')\ \ \ \ \ \ \ \ =\ \ [c..c']}\\
+\mbox{\tt \ \ \ \ index\ (c,c')\ ci\ \ \ \ \ =\ \ ord\ ci\ -\ ord\ c}\\
+\mbox{\tt \ \ \ \ inRange\ (c,c')\ ci\ \ \ =\ \ ord\ c\ <=\ i\ {\char'46}{\char'46}\ i\ <=\ ord\ c'}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ i\ =\ ord\ ci}
+\index{Ix@{\ptt Ix}!instance for {\ptt Char}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Enum\ Char\ \ where}\\
+\mbox{\tt \ \ \ \ enumFrom\ c\ \ \ \ \ \ \ \ \ \ =\ \ map\ chr\ [ord\ c\ ..]}\\
+\mbox{\tt \ \ \ \ enumFromThen\ c\ c'\ \ \ =\ \ map\ chr\ [ord\ c,\ ord\ c'\ ..]}
+\index{Enum@{\ptt Enum}!instance for {\ptt Char}}%
+\eprogB\noindent\bprogB
+\mbox{\tt type\ \ String\ =\ [Char]}
+\index{String@{\ptt String} (type synonym)}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Standard\ Integral\ types}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ \ Eq\ Int\ \ where}\\
+\mbox{\tt \ \ \ \ (==)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primEqInt}
+\index{Eq@{\ptt Eq}!instance for {\ptt Int}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Eq\ Integer\ \ where}\\
+\mbox{\tt \ \ \ \ (==)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primEqInteger}
+\index{Eq@{\ptt Eq}!instance for {\ptt Integer}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Ord\ Int\ \ where}\\
+\mbox{\tt \ \ \ \ (<=)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primLeInt}
+\index{Ord@{\ptt Ord}!instance for {\ptt Int}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Ord\ Integer\ \ where}\\
+\mbox{\tt \ \ \ \ (<=)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primLeInteger}
+\index{Ord@{\ptt Ord}!instance for {\ptt Integer}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Num\ Int\ \ where}\\
+\mbox{\tt \ \ \ \ (+)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primPlusInt}\\
+\mbox{\tt \ \ \ \ negate\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primNegInt}\\
+\mbox{\tt \ \ \ \ (*)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primMulInt}\\
+\mbox{\tt \ \ \ \ abs\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ absReal}\\
+\mbox{\tt \ \ \ \ signum\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ signumReal}\\
+\mbox{\tt \ \ \ \ fromInteger\ \ \ \ \ \ \ \ \ =\ \ primIntegerToInt}
+\index{Num@{\ptt Num}!instance for {\ptt Int}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Num\ Integer\ \ where}\\
+\mbox{\tt \ \ \ \ (+)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primPlusInteger}\\
+\mbox{\tt \ \ \ \ negate\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primNegInteger}\\
+\mbox{\tt \ \ \ \ (*)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primMulInteger}\\
+\mbox{\tt \ \ \ \ abs\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ absReal}\\
+\mbox{\tt \ \ \ \ signum\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ signumReal}\\
+\mbox{\tt \ \ \ \ fromInteger\ x\ \ \ \ \ \ \ =\ \ x}
+\index{Num@{\ptt Num}!instance for {\ptt Integer}}%
+\eprogB\noindent\bprogB
+\mbox{\tt absReal\ x\ \ \ \ |\ x\ >=\ 0\ \ \ \ =\ \ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ otherwise\ =\ \ -\ x}
+\eprogB\noindent\bprogB
+\mbox{\tt signumReal\ x\ |\ x\ ==\ 0\ \ \ \ =\ \ 0}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ x\ >\ 0\ \ \ \ \ =\ \ 1}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ otherwise\ =\ -1}
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Real\ Int\ \ where}\\
+\mbox{\tt \ \ \ \ toRational\ x\ \ \ \ \ \ \ \ =\ \ toInteger\ x\ {\char'45}\ 1}
+\index{Real@{\ptt Real}!instance for {\ptt Int}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Real\ Integer\ \ where}\\
+\mbox{\tt \ \ \ \ toRational\ x\ \ \ \ \ \ \ \ =\ \ x\ {\char'45}\ 1}
+\index{Real@{\ptt Real}!instance for {\ptt Integer}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Integral\ Int\ \ where}\\
+\mbox{\tt \ \ \ \ divRem\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primDivRemInt}\\
+\mbox{\tt \ \ \ \ toInteger\ \ \ \ \ \ \ \ \ \ \ =\ \ primIntToInteger}
+\index{Integral@{\ptt Integral}!instance for {\ptt Int}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Integral\ Integer\ \ where}\\
+\mbox{\tt \ \ \ \ divRem\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primDivRemInteger}\\
+\mbox{\tt \ \ \ \ toInteger\ x\ \ \ \ \ \ \ \ \ =\ \ x}
+\index{Integral@{\ptt Integral}!instance for {\ptt Integer}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Ix\ Int\ \ where}\\
+\mbox{\tt \ \ \ \ range\ (m,n)\ \ \ \ \ \ \ \ \ =\ \ [m..n]}\\
+\mbox{\tt \ \ \ \ index\ (m,n)\ i\ \ \ \ \ \ \ =\ \ i\ -\ m}\\
+\mbox{\tt \ \ \ \ inRange\ (m,n)\ i\ \ \ \ \ =\ \ m\ <=\ i\ {\char'46}{\char'46}\ i\ <=\ n}
+\index{Ix@{\ptt Ix}!instance for {\ptt Int}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Ix\ Integer\ \ where}\\
+\mbox{\tt \ \ \ \ range\ (m,n)\ \ \ \ \ \ \ \ \ =\ \ [m..n]}\\
+\mbox{\tt \ \ \ \ index\ (m,n)\ i\ \ \ \ \ \ \ =\ \ fromInteger\ (i\ -\ m)}\\
+\mbox{\tt \ \ \ \ inRange\ (m,n)\ i\ \ \ \ \ =\ \ m\ <=\ i\ {\char'46}{\char'46}\ i\ <=\ n}
+\index{Ix@{\ptt Ix}!instance for {\ptt Integer}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Enum\ Int\ \ where}\\
+\mbox{\tt \ \ \ \ enumFrom\ \ \ \ \ \ \ \ \ \ \ \ =\ \ numericEnumFrom}\\
+\mbox{\tt \ \ \ \ enumFromThen\ \ \ \ \ \ \ \ =\ \ numericEnumFromThen}
+\index{Enum@{\ptt Enum}!instance for {\ptt Int}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Enum\ Integer\ \ where}\\
+\mbox{\tt \ \ \ \ enumFrom\ \ \ \ \ \ \ \ \ \ \ \ =\ \ numericEnumFrom}\\
+\mbox{\tt \ \ \ \ enumFromThen\ \ \ \ \ \ \ \ =\ \ numericEnumFromThen}
+\index{Enum@{\ptt Enum}!instance for {\ptt Integer}}%
+\eprogB\noindent\bprogB
+\mbox{\tt numericEnumFrom\ \ \ \ \ \ \ \ \ ::\ (Real\ a)\ =>\ a\ ->\ [a]}\\
+\mbox{\tt numericEnumFromThen\ \ \ \ \ ::\ (Real\ a)\ =>\ a\ ->\ a\ ->\ [a]}\\
+\mbox{\tt numericEnumFrom\ \ \ \ \ \ \ \ \ =\ \ iterate\ (+1)}\\
+\mbox{\tt numericEnumFromThen\ n\ m\ =\ \ interate\ (+(m-n))\ n}
+\indextt{numericEnumFrom}%
+\indextt{numericEnumFromThen}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Standard\ Floating\ types}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ \ Eq\ Float\ \ where}\\
+\mbox{\tt \ \ \ \ (==)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primEqFloat}
+\index{Eq@{\ptt Eq}!instance for {\ptt Float}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Eq\ Double\ \ where}\\
+\mbox{\tt \ \ \ \ (==)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primEqDouble}
+\index{Eq@{\ptt Eq}!instance for {\ptt Double}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Ord\ Float\ \ where}\\
+\mbox{\tt \ \ \ \ (<=)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primLeFloat}
+\index{Ord@{\ptt Ord}!instance for {\ptt Float}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Ord\ Double\ \ where}\\
+\mbox{\tt \ \ \ \ (<=)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primLeDouble}
+\index{Ord@{\ptt Ord}!instance for {\ptt Double}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Num\ Float\ \ where}\\
+\mbox{\tt \ \ \ \ (+)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primPlusFloat}\\
+\mbox{\tt \ \ \ \ negate\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primNegFloat}\\
+\mbox{\tt \ \ \ \ (*)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primMulFloat}\\
+\mbox{\tt \ \ \ \ abs\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ absReal}\\
+\mbox{\tt \ \ \ \ signum\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ signumReal}\\
+\mbox{\tt \ \ \ \ fromInteger\ n\ \ \ \ \ \ \ =\ \ encodeFloat\ n\ 0}
+\index{Num@{\ptt Num}!instance for {\ptt Float}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Num\ Double\ \ where}\\
+\mbox{\tt \ \ \ \ (+)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primPlusDouble}\\
+\mbox{\tt \ \ \ \ negate\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primNegDouble}\\
+\mbox{\tt \ \ \ \ (*)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primMulDouble}\\
+\mbox{\tt \ \ \ \ abs\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ absReal}\\
+\mbox{\tt \ \ \ \ signum\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ signumReal}\\
+\mbox{\tt \ \ \ \ fromInteger\ n\ \ \ \ \ \ \ =\ \ encodeFloat\ n\ 0}
+\index{Num@{\ptt Num}!instance for {\ptt Double}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Real\ Float\ \ where}\\
+\mbox{\tt \ \ \ \ toRational\ \ \ \ \ \ \ \ \ \ =\ \ floatingToRational}
+\index{Real@{\ptt Real}!instance for {\ptt Float}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Real\ Double\ \ where}\\
+\mbox{\tt \ \ \ \ toRational\ \ \ \ \ \ \ \ \ \ =\ \ floatingToRational}
+\index{Real@{\ptt Real}!instance for {\ptt Double}}%
+\eprogB\noindent\bprogB
+\mbox{\tt floatingToRational\ x\ \ \ \ =\ \ (m{\char'45}1)*(b{\char'45}1){\char'136}{\char'136}n}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (m,n)\ =\ decodeFloat\ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ b\ \ \ \ \ =\ floatRadix\ \ x}
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Fractional\ Float\ \ where}\\
+\mbox{\tt \ \ \ \ (/)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primDivFloat}\\
+\mbox{\tt \ \ \ \ fromRational\ \ \ \ \ \ \ \ =\ \ rationalToFloating}
+\index{Fractional@{\ptt Fractional}!instance for {\ptt Float}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Fractional\ Double\ \ where}\\
+\mbox{\tt \ \ \ \ (/)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primDivDouble}\\
+\mbox{\tt \ \ \ \ fromRational\ \ \ \ \ \ \ \ =\ \ rationalToFloating}
+\index{Fractional@{\ptt Fractional}!instance for {\ptt Double}}%
+\eprogB\noindent\bprogB
+\mbox{\tt rationalToFloating\ x\ \ \ \ =\ \ fromInteger\ (numerator\ x)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ /\ fromInteger\ (denominator\ x)}
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Floating\ Float\ \ where}\\
+\mbox{\tt \ \ \ \ pi\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primPiFloat}\\
+\mbox{\tt \ \ \ \ exp\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primExpFloat}\\
+\mbox{\tt \ \ \ \ log\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primLogFloat}\\
+\mbox{\tt \ \ \ \ sqrt\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primSqrtFloat}\\
+\mbox{\tt \ \ \ \ sin\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primSinFloat}\\
+\mbox{\tt \ \ \ \ cos\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primCosFloat}\\
+\mbox{\tt \ \ \ \ tan\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primTanFloat}\\
+\mbox{\tt \ \ \ \ asin\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primAsinFloat}\\
+\mbox{\tt \ \ \ \ acos\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primAcosFloat}\\
+\mbox{\tt \ \ \ \ atan\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primAtanFloat}\\
+\mbox{\tt \ \ \ \ sinh\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primSinhFloat}\\
+\mbox{\tt \ \ \ \ cosh\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primCoshFloat}\\
+\mbox{\tt \ \ \ \ tanh\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primTanhFloat}\\
+\mbox{\tt \ \ \ \ asinh\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primAsinhFloat}\\
+\mbox{\tt \ \ \ \ acosh\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primAcoshFloat}\\
+\mbox{\tt \ \ \ \ atanh\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primAtanhFloat}
+\index{Floating@{\ptt Floating}!instance for {\ptt Float}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Floating\ Double\ \ where}\\
+\mbox{\tt \ \ \ \ pi\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primPiDouble}\\
+\mbox{\tt \ \ \ \ exp\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primExpDouble}\\
+\mbox{\tt \ \ \ \ log\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primLogDouble}\\
+\mbox{\tt \ \ \ \ sqrt\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primSqrtDouble}\\
+\mbox{\tt \ \ \ \ sin\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primSinDouble}\\
+\mbox{\tt \ \ \ \ cos\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primCosDouble}\\
+\mbox{\tt \ \ \ \ tan\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primTanDouble}\\
+\mbox{\tt \ \ \ \ asin\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primAsinDouble}\\
+\mbox{\tt \ \ \ \ acos\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primAcosDouble}\\
+\mbox{\tt \ \ \ \ atan\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primAtanDouble}\\
+\mbox{\tt \ \ \ \ sinh\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primSinhDouble}\\
+\mbox{\tt \ \ \ \ cosh\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primCoshDouble}\\
+\mbox{\tt \ \ \ \ tanh\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primTanhDouble}\\
+\mbox{\tt \ \ \ \ asinh\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primAsinhDouble}\\
+\mbox{\tt \ \ \ \ acosh\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primAcoshDouble}\\
+\mbox{\tt \ \ \ \ atanh\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ primAtanhDouble}
+\index{Floating@{\ptt Floating}!instance for {\ptt Double}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ RealFrac\ Float\ \ where}\\
+\mbox{\tt \ \ \ \ properFraction\ \ \ \ \ \ =\ \ floatProperFraction}\\
+\mbox{\tt \ \ \ \ approxRational\ \ \ \ \ \ =\ \ floatApproxRational}
+\index{RealFrac@{\ptt RealFrac}!instance for {\ptt Float}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ RealFrac\ Double\ \ where}\\
+\mbox{\tt \ \ \ \ properFraction\ \ \ \ \ \ =\ \ floatProperFraction}\\
+\mbox{\tt \ \ \ \ approxRational\ \ \ \ \ \ =\ \ floatApproxRational}
+\index{RealFrac@{\ptt RealFrac}!instance for {\ptt Double}}%
+\eprogB\noindent\bprogB
+\mbox{\tt floatProperFraction\ x\ \ \ =\ \ let\ (m,n)\ =\ decodeFloat\ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ b\ \ \ \ \ =\ floatRadix\ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ in\ if\ n\ >=\ 0}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ then\ (fromInteger\ m\ *\ fromInteger\ b\ {\char'136}\ n,\ 0)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ else\ let\ d\ \ \ \ \ \ =\ b\ {\char'136}\ (-n)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (m',k)\ =\ divRem\ m\ d}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ in\ (fromInteger\ m',}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ fromInteger\ k\ /\ fromInteger\ d)}
+\eprogB\noindent\bprogB
+\mbox{\tt floatApproxRational\ x\ eps\ =}\\
+\mbox{\tt \ \ \ \ let\ (m,n)\ =\ decodeFloat\ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ b\ \ \ \ \ =\ floatRadix\ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ (p,q)\ =\ if\ n\ <\ 0\ then\ (m,\ b{\char'136}(-n))\ else\ (m*b{\char'136}n,\ 1)}\\
+\mbox{\tt \ \ \ \ in\ case\ dropWhile\ ({\char'134}r\ ->\ abs\ (fromRational\ r\ -\ x)\ >\ eps)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (approximants\ p\ q)}\\
+\mbox{\tt \ \ \ \ \ \ \ of\ ({\char'137}:r:{\char'137})\ |\ denominator\ r\ ==\ 1\ ->\ r}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ (r:{\char'137})\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ->\ r}
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ RealFloat\ Float\ \ where}\\
+\mbox{\tt \ \ \ \ floatRadix\ {\char'137}\ \ \ \ \ \ \ \ =\ \ primFloatRadix}\\
+\mbox{\tt \ \ \ \ floatDigits\ {\char'137}\ \ \ \ \ \ \ =\ \ primFloatDigits}\\
+\mbox{\tt \ \ \ \ floatRange\ {\char'137}\ \ \ \ \ \ \ \ =\ \ (primFloatMinExp,primFloatMaxExp)}\\
+\mbox{\tt \ \ \ \ decodeFloat\ \ \ \ \ \ \ \ \ =\ \ primDecodeFloat}\\
+\mbox{\tt \ \ \ \ encodeFloat\ \ \ \ \ \ \ \ \ =\ \ primEncodeFloat}
+\index{RealFloat@{\ptt RealFloat}!instance for {\ptt Float}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ RealFloat\ Double\ \ where}\\
+\mbox{\tt \ \ \ \ floatRadix\ {\char'137}\ \ \ \ \ \ \ \ =\ \ primDoubleRadix}\\
+\mbox{\tt \ \ \ \ floatDigits\ {\char'137}\ \ \ \ \ \ \ =\ \ primDoubleDigits}\\
+\mbox{\tt \ \ \ \ floatRange\ {\char'137}\ \ \ \ \ \ \ \ =\ \ (primDoubleMinExp,primDoubleMaxExp)}\\
+\mbox{\tt \ \ \ \ decodeFloat\ \ \ \ \ \ \ \ \ =\ \ primDecodeDouble}\\
+\mbox{\tt \ \ \ \ encodeFloat\ \ \ \ \ \ \ \ \ =\ \ primEncodeDouble}
+\index{RealFloat@{\ptt RealFloat}!instance for {\ptt Double}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Enum\ Float\ \ where}\\
+\mbox{\tt \ \ \ \ enumFrom\ \ \ \ \ \ \ \ \ \ \ \ =\ \ numericEnumFrom}\\
+\mbox{\tt \ \ \ \ enumFromThen\ \ \ \ \ \ \ \ =\ \ numericEnumFromThen}
+\index{Enum@{\ptt Enum}!instance for {\ptt Float}}%
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ Enum\ Double\ \ where}\\
+\mbox{\tt \ \ \ \ enumFrom\ \ \ \ \ \ \ \ \ \ \ \ =\ \ numericEnumFrom}\\
+\mbox{\tt \ \ \ \ enumFromThen\ \ \ \ \ \ \ \ =\ \ numericEnumFromThen}
+\index{Enum@{\ptt Enum}!instance for {\ptt Double}}%
+\eprogB

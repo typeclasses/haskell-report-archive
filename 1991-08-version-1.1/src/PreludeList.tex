@@ -1,0 +1,415 @@
+\noindent\bprogB
+\mbox{\tt --\ Standard\ list\ functions}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt module\ PreludeList\ \ where}
+\index{PreludeList@{\ptt PreludeList} (module)}%
+\eprogB\noindent\bprogB
+\mbox{\tt infixl\ 9\ \ !!}\\
+\mbox{\tt infix\ \ 5\ \ {\char'134}{\char'134}}\\
+\mbox{\tt infixr\ 5\ \ ++}\\
+\mbox{\tt infix\ \ 4\ `elem`,\ `notElem`}
+\index{!!@{\ptt {\char'041}{\char'041}}}%
+\index{\\@{\ptt {\char'134}{\char'134}}}%
+\index{++@{\ptt ++}}%
+\indextt{elem}%
+\indextt{notElem}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ head\ and\ tail\ extract\ the\ first\ element\ and\ remaining\ elements,}\\
+\mbox{\tt --\ respectively,\ of\ a\ list,\ which\ must\ be\ non-empty.\ \ last\ and\ init}\\
+\mbox{\tt --\ are\ the\ dual\ functions\ working\ from\ the\ end\ of\ a\ finite\ list,}\\
+\mbox{\tt --\ rather\ than\ the\ beginning.}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt head\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [a]\ ->\ a}\\
+\mbox{\tt head\ (x:{\char'137})\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ x}\\
+\mbox{\tt head\ []\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ error\ "head{\char'173}PreludeList{\char'175}:\ head\ []"}
+\indextt{head}%
+\eprogB\noindent\bprogB
+\mbox{\tt last\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [a]\ ->\ a}\\
+\mbox{\tt last\ [x]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ x}\\
+\mbox{\tt last\ ({\char'137}:xs)\ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ last\ xs}\\
+\mbox{\tt last\ []\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ error\ "last{\char'173}PreludeList{\char'175}:\ last\ []"}
+\indextt{last}%
+\eprogB\noindent\bprogB
+\mbox{\tt tail\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [a]\ ->\ [a]}\\
+\mbox{\tt tail\ ({\char'137}:xs)\ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ xs}\\
+\mbox{\tt tail\ []\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ error\ "tail{\char'173}PreludeList{\char'175}:\ tail\ []"}
+\indextt{tail}%
+\eprogB\noindent\bprogB
+\mbox{\tt init\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [a]\ ->\ [a]}\\
+\mbox{\tt init\ [x]\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ []}\\
+\mbox{\tt init\ (x:xs)\ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ x\ :\ init\ xs}\\
+\mbox{\tt init\ []\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ error\ "init{\char'173}PreludeList{\char'175}:\ init\ []"}
+\indextt{init}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ null\ determines\ if\ a\ list\ is\ empty.}\\
+\mbox{\tt null\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [a]\ ->\ Bool}\\
+\mbox{\tt null\ []\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ True}\\
+\mbox{\tt null\ ({\char'137}:{\char'137})\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ False}
+\indextt{null}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ list\ concatenation\ (right-associative)}\\
+\mbox{\tt (++)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [a]\ ->\ [a]\ ->\ [a]}\\
+\mbox{\tt xs\ ++\ ys\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ foldr\ (:)\ ys\ xs}
+\index{++@{\ptt ++}}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ list\ difference\ (non-associative).\ \ In\ the\ result\ of\ xs\ {\char'134}{\char'134}\ ys,}\\
+\mbox{\tt --\ the\ first\ occurrence\ of\ each\ element\ of\ ys\ in\ turn\ (if\ any)}\\
+\mbox{\tt --\ has\ been\ removed\ from\ xs.\ \ Thus,\ (xs\ ++\ ys)\ {\char'134}{\char'134}\ xs\ ==\ ys.}\\
+\mbox{\tt ({\char'134}{\char'134})\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (Eq\ a)\ =>\ [a]\ ->\ [a]\ ->\ [a]}\\
+\mbox{\tt ({\char'134}{\char'134})\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ foldl\ del}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ []\ `del`\ {\char'137}\ \ \ \ \ \ \ \ \ =\ []}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (x:xs)\ `del`\ y}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ x\ ==\ y\ \ \ \ =\ xs}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ otherwise\ =\ x\ :\ xs\ `del`\ y}
+\index{\\@{\ptt {\char'134}{\char'134}}}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ length\ returns\ the\ length\ of\ a\ finite\ list\ as\ an\ Int;\ it\ is\ an\ instance}\\
+\mbox{\tt --\ of\ the\ more\ general\ genericLength,\ the\ result\ type\ of\ which\ may\ be}\\
+\mbox{\tt --\ any\ kind\ of\ number.}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt genericLength\ \ \ \ \ \ \ \ \ \ \ ::\ (Num\ a)\ =>\ [b]\ ->\ a}\\
+\mbox{\tt genericLength\ \ \ \ \ \ \ \ \ \ \ =\ \ foldl\ ({\char'134}n\ {\char'137}\ ->\ n+1)\ 0}
+\indextt{genericLength}%
+\eprogB\noindent\bprogB
+\mbox{\tt length\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [a]\ ->\ Int}\\
+\mbox{\tt length\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ genericLength}
+\indextt{length}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Array\ index\ (subscript)\ operator,\ 0-origin}\\
+\mbox{\tt (!!)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (Integral\ a)\ =>\ [b]\ ->\ a\ ->\ b}\\
+\mbox{\tt (x:{\char'137})\ \ !!\ 0\ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ x}\\
+\mbox{\tt ({\char'137}:xs)\ !!\ (n+1)\ \ \ \ \ \ \ \ \ =\ \ xs\ !!\ n}\\
+\mbox{\tt ({\char'137}:{\char'137})\ \ !!\ {\char'137}\ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ error\ "(!!){\char'173}PreludeList{\char'175}:\ negative\ index"}\\
+\mbox{\tt []\ \ \ \ \ !!\ ({\char'137}+1)\ \ \ \ \ \ \ \ \ =\ \ error\ "(!!){\char'173}PreludeList{\char'175}:\ index\ too\ large"}
+\index{!!@{\ptt {\char'041}{\char'041}}}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ map\ f\ xs\ applies\ f\ to\ each\ element\ of\ xs;\ i.e.,\ map\ f\ xs\ ==\ [f\ x\ |\ x\ <-\ xs].}\\
+\mbox{\tt map\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ b)\ ->\ [a]\ ->\ [b]}\\
+\mbox{\tt map\ f\ []\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ []}\\
+\mbox{\tt map\ f\ (x:xs)\ \ \ \ \ \ \ \ \ \ \ \ =\ \ f\ x\ :\ map\ f\ xs}
+\indextt{map}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ filter,\ applied\ to\ a\ predicate\ and\ a\ list,\ returns\ the\ list\ of\ those}\\
+\mbox{\tt --\ elements\ that\ satisfy\ the\ predicate;\ i.e.,}\\
+\mbox{\tt --\ filter\ p\ xs\ ==\ [x\ |\ x\ <-\ xs,\ p\ x].}\\
+\mbox{\tt filter\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ Bool)\ ->\ [a]\ ->\ [a]}\\
+\mbox{\tt filter\ p\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ foldr\ ({\char'134}x\ xs\ ->\ if\ p\ x\ then\ x:xs\ else\ xs)\ []}
+\indextt{filter}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ partition\ takes\ a\ predicate\ and\ a\ list\ and\ returns\ a\ pair\ of\ lists:}\\
+\mbox{\tt --\ those\ elements\ of\ the\ argument\ list\ that\ do\ and\ do\ not\ satisfy\ the}\\
+\mbox{\tt --\ predicate,\ respectively;\ i.e.,}\\
+\mbox{\tt --\ partition\ p\ xs\ ==\ (filter\ p\ xs,\ filter\ (not\ .\ p)\ xs).}\\
+\mbox{\tt partition\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ Bool)\ ->\ [a]\ ->\ ([a],[a])}\\
+\mbox{\tt partition\ p\ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ foldr\ select\ ([],[])}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ select\ x\ (ts,fs)\ |\ p\ x\ \ \ \ \ \ \ =\ (x:ts,fs)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ otherwise\ =\ (ts,x:fs)}
+\indextt{partition}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ foldl,\ applied\ to\ a\ binary\ operator,\ a\ starting\ value\ (typically\ the}\\
+\mbox{\tt --\ left-identity\ of\ the\ operator),\ and\ a\ list,\ reduces\ the\ list\ using}\\
+\mbox{\tt --\ the\ binary\ operator,\ from\ left\ to\ right:}\\
+\mbox{\tt --\ \ \ \ \ \ foldl\ f\ z\ [x1,\ x2,\ ...,\ xn]\ ==\ (...((z\ `f`\ x1)\ `f`\ x2)\ `f`...)\ `f`\ xn}\\
+\mbox{\tt --\ foldl1\ is\ a\ variant\ that\ has\ no\ starting\ value\ argument,\ and\ \ thus\ must}\\
+\mbox{\tt --\ be\ applied\ to\ non-empty\ lists.\ \ scanl\ is\ similar\ to\ foldl,\ but\ returns}\\
+\mbox{\tt --\ a\ list\ of\ successive\ reduced\ values\ from\ the\ left:}\\
+\mbox{\tt --\ \ \ \ \ \ scanl\ f\ z\ [x1,\ x2,\ ...]\ ==\ [z,\ z\ `f`\ x1,\ (z\ `f`\ x1)\ `f`\ x2,\ ...]}\\
+\mbox{\tt --\ Note\ that\ \ last\ (scanl\ f\ z\ xs)\ ==\ foldl\ f\ z\ xs.\ \ scanl1\ is\ similar,}\\
+\mbox{\tt --\ again\ without\ the\ starting\ element:}\\
+\mbox{\tt --\ \ \ \ \ \ scanl1\ f\ [x1,\ x2,\ ...]\ =\ [x1,\ x1\ `f`\ x2,\ ...]}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt foldl\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ b\ ->\ a)\ ->\ a\ ->\ [b]\ ->\ a}\\
+\mbox{\tt foldl\ f\ z\ []\ \ \ \ \ \ \ \ \ \ \ \ =\ \ z}\\
+\mbox{\tt foldl\ f\ z\ (x:xs)\ \ \ \ \ \ \ \ =\ \ foldl\ f\ (f\ z\ x)\ xs}
+\indextt{foldl}%
+\eprogB\noindent\bprogB
+\mbox{\tt foldl1\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ a\ ->\ a)\ ->\ [a]\ ->\ a}\\
+\mbox{\tt foldl1\ f\ (x:xs)\ \ \ \ \ \ \ \ \ =\ \ foldl\ f\ x\ xs}
+\indextt{foldl1}%
+\eprogB\noindent\bprogB
+\mbox{\tt scanl\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ b\ ->\ a)\ ->\ a\ ->\ [b]\ ->\ [a]}\\
+\mbox{\tt scanl\ f\ q\ xs\ \ \ \ \ \ \ \ \ \ \ \ =\ \ q\ :\ (case\ xs\ of}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ []\ \ \ ->\ []}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ x:xs\ ->\ scanl\ f\ (f\ q\ x)\ xs)}
+\indextt{scanl}%
+\eprogB\noindent\bprogB
+\mbox{\tt scanl1\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ a\ ->\ a)\ ->\ [a]\ ->\ [a]}\\
+\mbox{\tt scanl1\ f\ (x:xs)\ \ \ \ \ \ \ \ \ =\ \ scanl\ f\ x\ xs}
+\indextt{scanl1}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ foldr,\ foldr1,\ scanr,\ and\ scanr1\ are\ the\ right-to-left\ duals\ of\ the}\\
+\mbox{\tt --\ above\ functions.}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt foldr\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ b\ ->\ b)\ ->\ b\ ->\ [a]\ ->\ b}\\
+\mbox{\tt foldr\ f\ z\ []\ \ \ \ \ \ \ \ \ \ \ \ =\ \ z}\\
+\mbox{\tt foldr\ f\ z\ (x:xs)\ \ \ \ \ \ \ \ =\ \ f\ x\ (foldr\ f\ z\ xs)}
+\indextt{foldr}%
+\eprogB\noindent\bprogB
+\mbox{\tt foldr1\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ a\ ->\ a)\ ->\ [a]\ ->\ a}\\
+\mbox{\tt foldr1\ f\ [x]\ \ \ \ \ \ \ \ \ \ \ \ =\ \ x}\\
+\mbox{\tt foldr1\ f\ (x:xs)\ \ \ \ \ \ \ \ \ =\ \ f\ x\ (foldr1\ f\ xs)}
+\indextt{foldr1}%
+\eprogB\noindent\bprogB
+\mbox{\tt scanr\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ b\ ->\ b)\ ->\ b\ ->\ [a]\ ->\ [b]}\\
+\mbox{\tt scanr\ f\ q0\ []\ \ \ \ \ \ \ \ \ \ \ =\ \ [q0]}\\
+\mbox{\tt scanr\ f\ q0\ (x:xs)\ \ \ \ \ \ \ =\ \ f\ x\ q\ :\ qs}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ qs@(q:{\char'137})\ =\ scanr\ f\ q0\ xs\ }
+\indextt{scanr}%
+\eprogB\noindent\bprogB
+\mbox{\tt scanr1\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ a\ ->\ a)\ ->\ [a]\ ->\ [a]}\\
+\mbox{\tt scanr1\ f\ \ [x]\ \ \ \ \ \ \ \ \ \ \ =\ \ [x]}\\
+\mbox{\tt scanr1\ f\ \ (x:xs)\ \ \ \ \ \ \ \ =\ \ f\ x\ q\ :\ qs}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ qs@(q:{\char'137})\ =\ scanr1\ f\ xs\ }
+\indextt{scanr1}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ iterate\ f\ x\ returns\ an\ infinite\ list\ of\ repeated\ applications\ of\ f\ to\ x:}\\
+\mbox{\tt --\ iterate\ f\ x\ ==\ [x,\ f\ x,\ f\ (f\ x),\ ...]}\\
+\mbox{\tt iterate\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ a)\ ->\ a\ ->\ [a]}\\
+\mbox{\tt iterate\ f\ x\ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ x\ :\ iterate\ f\ (f\ x)}
+\indextt{iterate}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ repeat\ x\ is\ an\ infinite\ list,\ with\ x\ the\ value\ of\ every\ element.}\\
+\mbox{\tt repeat\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ a\ ->\ [a]}\\
+\mbox{\tt repeat\ x\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ xs\ where\ xs\ =\ x:xs}
+\indextt{repeat}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ cycle\ ties\ a\ finite\ list\ into\ a\ circular\ one,\ or\ equivalently,}\\
+\mbox{\tt --\ the\ infinite\ repetition\ of\ the\ original\ list.\ \ It\ is\ the\ identity}\\
+\mbox{\tt --\ on\ infinite\ lists.}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt cycle\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [a]\ ->\ [a]}\\
+\mbox{\tt cycle\ xs\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ xs'\ where\ xs'\ =\ xs\ ++\ xs'}
+\indextt{cycle}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ take\ n,\ applied\ to\ a\ list\ xs,\ returns\ the\ prefix\ of\ xs\ of\ length\ n,}\\
+\mbox{\tt --\ or\ xs\ itself\ if\ n\ >\ length\ xs.\ \ drop\ n\ xs\ returns\ the\ suffix\ of\ xs}\\
+\mbox{\tt --\ after\ the\ first\ n\ elements,\ or\ []\ if\ n\ >\ length\ xs.\ \ splitAt\ n\ xs}\\
+\mbox{\tt --\ is\ equivalent\ to\ (take\ n\ xs,\ drop\ n\ xs).}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt take\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (Integral\ a)\ =>\ a\ ->\ [b]\ ->\ [b]}\\
+\mbox{\tt take\ \ 0\ \ \ \ \ {\char'137}\ \ \ \ \ \ \ \ \ \ \ =\ \ []}\\
+\mbox{\tt take\ \ {\char'137}\ \ \ \ \ []\ \ \ \ \ \ \ \ \ \ =\ \ []}\\
+\mbox{\tt take\ (n+1)\ (x:xs)\ \ \ \ \ \ \ =\ \ x\ :\ take\ n\ xs}
+\indextt{take}%
+\eprogB\noindent\bprogB
+\mbox{\tt drop\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (Integral\ a)\ =>\ a\ ->\ [b]\ ->\ [b]}\\
+\mbox{\tt drop\ \ 0\ \ \ \ \ xs\ \ \ \ \ \ \ \ \ \ =\ \ xs}\\
+\mbox{\tt drop\ \ {\char'137}\ \ \ \ \ []\ \ \ \ \ \ \ \ \ \ =\ \ []}\\
+\mbox{\tt drop\ (n+1)\ ({\char'137}:xs)\ \ \ \ \ \ \ =\ \ drop\ n\ xs}
+\indextt{drop}%
+\eprogB\noindent\bprogB
+\mbox{\tt splitAt\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (Integral\ a)\ =>\ a\ ->\ [b]\ ->\ ([b],[b])}\\
+\mbox{\tt splitAt\ \ 0\ \ \ \ \ xs\ \ \ \ \ \ \ =\ \ ([],xs)}\\
+\mbox{\tt splitAt\ \ {\char'137}\ \ \ \ \ []\ \ \ \ \ \ \ =\ \ ([],[])}\\
+\mbox{\tt splitAt\ (n+1)\ (x:xs)\ \ \ \ =\ \ (x:xs',xs'')\ where\ (xs',xs'')\ =\ splitAt\ n\ xs}
+\indextt{splitAt}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ takeWhile,\ applied\ to\ a\ predicate\ p\ and\ a\ list\ xs,\ returns\ the\ longest}\\
+\mbox{\tt --\ prefix\ (possibly\ empty)\ of\ xs\ of\ elements\ that\ satisfy\ p.\ \ dropWhile\ p\ xs}\\
+\mbox{\tt --\ returns\ the\ remaining\ suffix.\ \ Span\ p\ xs\ is\ equivalent\ to}\\
+\mbox{\tt --\ (takeWhile\ p\ xs,\ dropWhile\ p\ xs),\ while\ break\ p\ uses\ the\ negation\ of\ p.}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt takeWhile\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ Bool)\ ->\ [a]\ ->\ [a]}\\
+\mbox{\tt takeWhile\ p\ []\ \ \ \ \ \ \ \ \ \ =\ \ []}\\
+\mbox{\tt takeWhile\ p\ (x:xs)\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ |\ p\ x\ \ \ \ \ \ \ =\ \ x\ :\ takeWhile\ p\ xs}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ |\ otherwise\ =\ \ []}
+\indextt{takeWhile}%
+\eprogB\noindent\bprogB
+\mbox{\tt dropWhile\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ Bool)\ ->\ [a]\ ->\ [a]}\\
+\mbox{\tt dropWhile\ p\ []\ \ \ \ \ \ \ \ \ \ =\ \ []}\\
+\mbox{\tt dropWhile\ p\ xs@(x:xs')}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ |\ p\ x\ \ \ \ \ \ \ =\ \ dropWhile\ p\ xs'}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ |\ otherwise\ =\ \ xs}
+\indextt{dropWhile}%
+\eprogB\noindent\bprogB
+\mbox{\tt span,\ break\ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ Bool)\ ->\ [a]\ ->\ ([a],[a])}\\
+\mbox{\tt span\ p\ []\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ ([],[])}\\
+\mbox{\tt span\ p\ xs@(x:xs')}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ |\ p\ x\ \ \ \ \ \ \ \ =\ \ (x:ys,zs)\ where\ (ys,zs)\ =\ span\ p\ xs'}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ |\ otherwise\ \ =\ \ ([],xs)}\\
+\mbox{\tt break\ p\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ span\ (not\ .\ p)}
+\indextt{span}%
+\indextt{break}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ lines\ breaks\ a\ string\ up\ into\ a\ list\ of\ strings\ at\ newline\ characters.}\\
+\mbox{\tt --\ The\ resulting\ strings\ do\ not\ contain\ newlines.\ \ Similary,\ words}\\
+\mbox{\tt --\ breaks\ a\ string\ up\ into\ a\ list\ of\ words,\ which\ were\ delimited\ by}\\
+\mbox{\tt --\ white\ space.\ \ unlines\ and\ unwords\ are\ the\ inverse\ operations.}\\
+\mbox{\tt --\ unlines\ joins\ lines\ with\ terminating\ newlines,\ and\ unwords\ joins}\\
+\mbox{\tt --\ words\ with\ separating\ spaces.}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt lines\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ String\ ->\ [String]}\\
+\mbox{\tt lines\ ""\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ []}\\
+\mbox{\tt lines\ s\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ l\ :\ (if\ null\ s'\ then\ []\ else\ lines\ (tail\ s'))}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (l,\ s')\ =\ break\ ((==)\ '{\char'134}n')\ s}
+\indextt{lines}%
+\eprogB\noindent\bprogB
+\mbox{\tt words\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ String\ ->\ [String]}\\
+\mbox{\tt words\ s\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ case\ dropWhile\ isSpace\ s\ of}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ""\ ->\ []}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ s'\ ->\ w\ :\ words\ s''}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (w,\ s'')\ =\ break\ isSpace\ s'}
+\indextt{words}%
+\eprogB\noindent\bprogB
+\mbox{\tt unlines\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [String]\ ->\ String}\\
+\mbox{\tt unlines\ ls\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ concat\ (map\ ({\char'134}l\ ->\ l\ ++\ "{\char'134}n")\ ls)}
+\indextt{unlines}%
+\eprogB\noindent\bprogB
+\mbox{\tt unwords\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [String]\ ->\ String}\\
+\mbox{\tt unwords\ []\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ ""}\\
+\mbox{\tt unwords\ ws\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ foldr1\ ({\char'134}w\ s\ ->\ w\ ++\ '\ ':s)\ ws}
+\indextt{unwords}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ nub\ (meaning\ "essence")\ removes\ duplicate\ elements\ from\ its\ list\ argument.}\\
+\mbox{\tt nub\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (Eq\ a)\ =>\ [a]\ ->\ [a]}\\
+\mbox{\tt nub\ []\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ []}\\
+\mbox{\tt nub\ (x:xs)\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ x\ :\ nub\ (filter\ (/=\ x)\ xs)}
+\indextt{nub}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ reverse\ xs\ returns\ the\ elements\ of\ xs\ in\ reverse\ order.\ \ xs\ must\ be\ finite.}\\
+\mbox{\tt reverse\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [a]\ ->\ [a]}\\
+\mbox{\tt reverse\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ foldl\ (flip\ (:))\ []}
+\indextt{reverse}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ and\ returns\ the\ conjunction\ of\ a\ Boolean\ list.\ \ For\ the\ result\ to\ be}\\
+\mbox{\tt --\ True,\ the\ list\ must\ be\ finite;\ False,\ however,\ results\ from\ a\ False}\\
+\mbox{\tt --\ value\ at\ a\ finite\ index\ of\ a\ finite\ or\ infinite\ list.\ \ or\ is\ the}\\
+\mbox{\tt --\ disjunctive\ dual\ of\ and.}\\
+\mbox{\tt and,\ or\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [Bool]\ ->\ Bool}\\
+\mbox{\tt and\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ foldr\ ({\char'46}{\char'46})\ True}\\
+\mbox{\tt or\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ foldr\ (||)\ False}
+\indextt{and}%
+\indextt{or}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ Applied\ to\ a\ predicate\ and\ a\ list,\ any\ determines\ if\ any\ element}\\
+\mbox{\tt --\ of\ the\ list\ satisfies\ the\ predicate.\ \ Similarly,\ for\ all.}\\
+\mbox{\tt any,\ all\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ Bool)\ ->\ [a]\ ->\ Bool}\\
+\mbox{\tt any\ p\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ or\ .\ map\ p}\\
+\mbox{\tt all\ p\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ and\ .\ map\ p}
+\indextt{any}%
+\indextt{all}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ elem\ is\ the\ list\ membership\ predicate,\ usually\ written\ in\ infix\ form,}\\
+\mbox{\tt --\ e.g.,\ x\ `elem`\ xs.\ \ notElem\ is\ the\ negation.}\\
+\mbox{\tt elem,\ notElem\ \ \ \ \ \ \ \ \ \ \ ::\ (Eq\ a)\ =>\ a\ ->\ [a]\ ->\ Bool}\\
+\mbox{\tt elem\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ any\ .\ (==)}\\
+\mbox{\tt notElem\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ all\ .\ (/=)}
+\indextt{elem}%
+\indextt{notElem}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ sum\ and\ product\ compute\ the\ sum\ or\ product\ of\ a\ finite\ list\ of\ numbers.}\\
+\mbox{\tt sum,\ product\ \ \ \ \ \ \ \ \ \ \ \ ::\ (Num\ a)\ =>\ [a]\ ->\ a}\\
+\mbox{\tt sum\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ foldl\ (+)\ 0\ \ }\\
+\mbox{\tt product\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ foldl\ (*)\ 1}
+\indextt{sum}%
+\indextt{product}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ sums\ and\ products\ give\ a\ list\ of\ running\ sums\ or\ products\ from}\\
+\mbox{\tt --\ a\ list\ of\ numbers.\ \ For\ example,\ \ sums\ [1,2,3]\ ==\ [0,1,3,6].}\\
+\mbox{\tt sums,\ products\ \ \ \ \ \ \ \ \ \ ::\ (Num\ a)\ =>\ [a]\ ->\ [a]}\\
+\mbox{\tt sums\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ scanl\ (+)\ 0}\\
+\mbox{\tt products\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ scanl\ (*)\ 1}
+\indextt{sums}%
+\indextt{products}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ maximum\ and\ minimum\ return\ the\ maximum\ or\ minimum\ value\ from\ a\ list,}\\
+\mbox{\tt --\ which\ must\ be\ non-empty,\ finite,\ and\ of\ an\ ordered\ type.}\\
+\mbox{\tt maximum,\ minimum\ \ \ \ \ \ \ \ ::\ (Ord\ a)\ =>\ [a]\ ->\ a}\\
+\mbox{\tt maximum\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ foldl1\ max}\\
+\mbox{\tt minimum\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ foldl1\ min}
+\indextt{maximum}%
+\indextt{minimum}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ concat,\ applied\ to\ a\ list\ of\ lists,\ returns\ their\ flattened\ concatenation.}\\
+\mbox{\tt concat\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [[a]]\ ->\ [a]}\\
+\mbox{\tt concat\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ foldr\ (++)\ []}
+\indextt{concat}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ transpose,\ applied\ to\ a\ list\ of\ lists,\ returns\ that\ list\ with\ the}\\
+\mbox{\tt --\ "rows"\ and\ "columns"\ interchanged.\ \ The\ input\ need\ not\ be\ rectangular}\\
+\mbox{\tt --\ (a\ list\ of\ equal-length\ lists)\ to\ be\ completely\ transposable,\ but\ can}\\
+\mbox{\tt --\ be\ "triangular":\ \ Each\ successive\ component\ list\ must\ be\ not\ longer}\\
+\mbox{\tt --\ than\ the\ previous\ one;\ any\ elements\ outside\ of\ the\ "triangular"}\\
+\mbox{\tt --\ transposable\ region\ are\ lost.\ \ The\ input\ can\ be\ infinite\ in\ either}\\
+\mbox{\tt --\ dimension\ or\ both.}\\
+\mbox{\tt transpose\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [[a]]\ ->\ [[a]]}\\
+\mbox{\tt transpose\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ foldr\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ({\char'134}xs\ xss\ ->\ zipWith\ (:)\ xs\ (xss\ ++\ repeat\ []))}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ []}
+\indextt{transpose}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ zip\ takes\ two\ lists\ and\ returns\ a\ list\ of\ corresponding\ pairs.\ \ If\ one}\\
+\mbox{\tt --\ input\ list\ is\ short,\ excess\ elements\ of\ the\ longer\ list\ are\ discarded.}\\
+\mbox{\tt --\ zip3\ takes\ three\ lists\ and\ returns\ a\ list\ of\ triples,\ etc.\ \ Versions}\\
+\mbox{\tt --\ of\ zip\ producing\ up\ to\ septuplets\ are\ defined\ here.}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt zip\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [a]\ ->\ [b]\ ->\ [(a,b)]}\\
+\mbox{\tt zip\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ zipWith\ ({\char'134}a\ b\ ->\ (a,b))}
+\indextt{zip}%
+\eprogB\noindent\bprogB
+\mbox{\tt zip3\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [a]\ ->\ [b]\ ->\ [c]\ ->\ [(a,b,c)]}\\
+\mbox{\tt zip3\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ zipWith3\ ({\char'134}a\ b\ c\ ->\ (a,b,c))}
+\indextt{zip3}%
+\eprogB\noindent\bprogB
+\mbox{\tt zip4\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [a]\ ->\ [b]\ ->\ [c]\ ->\ [d]\ ->\ [(a,b,c,d)]}\\
+\mbox{\tt zip4\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ zipWith4\ ({\char'134}a\ b\ c\ d\ ->\ (a,b,c,d))}
+\indextt{zip4}%
+\eprogB\noindent\bprogB
+\mbox{\tt zip5\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [a]\ ->\ [b]\ ->\ [c]\ ->\ [d]\ ->\ [e]\ ->\ [(a,b,c,d,e)]}\\
+\mbox{\tt zip5\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ zipWith5\ ({\char'134}a\ b\ c\ d\ e\ ->\ (a,b,c,d,e))}
+\indextt{zip5}%
+\eprogB\noindent\bprogB
+\mbox{\tt zip6\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [a]\ ->\ [b]\ ->\ [c]\ ->\ [d]\ ->\ [e]\ ->\ [f]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ->\ [(a,b,c,d,e,f)]}\\
+\mbox{\tt zip6\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ zipWith6\ ({\char'134}a\ b\ c\ d\ e\ f\ ->\ (a,b,c,d,e,f))}
+\indextt{zip6}%
+\eprogB\noindent\bprogB
+\mbox{\tt zip7\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [a]\ ->\ [b]\ ->\ [c]\ ->\ [d]\ ->\ [e]\ ->\ [f]\ ->\ [g]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ->\ [(a,b,c,d,e,f,g)]}\\
+\mbox{\tt zip7\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ zipWith7\ ({\char'134}a\ b\ c\ d\ e\ f\ g\ ->\ (a,b,c,d,e,f,g))}
+\indextt{zip7}%
+\eprogB\noindent\bprogB
+\mbox{\tt --\ The\ zipWith\ family\ generalises\ the\ zip\ family\ by\ zipping\ with\ the}\\
+\mbox{\tt --\ function\ given\ as\ the\ first\ argument,\ instead\ of\ a\ tupling\ function.}\\
+\mbox{\tt --\ For\ example,\ zipWith\ (+)\ is\ applied\ to\ two\ lists\ to\ produce\ the\ list}\\
+\mbox{\tt --\ of\ corresponding\ sums.}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt zipWith\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a->b->c)\ ->\ [a]->[b]->[c]}\\
+\mbox{\tt zipWith\ z\ (a:as)\ (b:bs)\ =\ \ z\ a\ b\ :\ zipWith\ z\ as\ bs}\\
+\mbox{\tt zipWith\ {\char'137}\ {\char'137}\ {\char'137}\ \ \ \ \ \ \ \ \ \ \ =\ \ []}
+\indextt{zipWith}%
+\eprogB\noindent\bprogB
+\mbox{\tt zipWith3\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a->b->c->d)\ ->\ [a]->[b]->[c]->[d]}\\
+\mbox{\tt zipWith3\ z\ (a:as)\ (b:bs)\ (c:cs)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ z\ a\ b\ c\ :\ zipWith3\ z\ as\ bs\ cs}\\
+\mbox{\tt zipWith3\ {\char'137}\ {\char'137}\ {\char'137}\ {\char'137}\ \ \ \ \ \ \ \ =\ \ []}
+\indextt{zipWith3}%
+\eprogB\noindent\bprogB
+\mbox{\tt zipWith4\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a->b->c->d->e)\ ->\ [a]->[b]->[c]->[d]->[e]}\\
+\mbox{\tt zipWith4\ z\ (a:as)\ (b:bs)\ (c:cs)\ (d:ds)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ z\ a\ b\ c\ d\ :\ zipWith4\ z\ as\ bs\ cs\ ds}\\
+\mbox{\tt zipWith4\ {\char'137}\ {\char'137}\ {\char'137}\ {\char'137}\ {\char'137}\ \ \ \ \ \ =\ \ []}
+\indextt{zipWith4}%
+\eprogB\noindent\bprogB
+\mbox{\tt zipWith5\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a->b->c->d->e->f)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ->\ [a]->[b]->[c]->[d]->[e]->[f]}\\
+\mbox{\tt zipWith5\ z\ (a:as)\ (b:bs)\ (c:cs)\ (d:ds)\ (e:es)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ z\ a\ b\ c\ d\ e\ :\ zipWith5\ z\ as\ bs\ cs\ ds\ es}\\
+\mbox{\tt zipWith5\ {\char'137}\ {\char'137}\ {\char'137}\ {\char'137}\ {\char'137}\ {\char'137}\ \ \ \ =\ \ []}
+\indextt{zipWith5}%
+\eprogB\noindent\bprogB
+\mbox{\tt zipWith6\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a->b->c->d->e->f->g)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ->\ [a]->[b]->[c]->[d]->[e]->[f]->[g]}\\
+\mbox{\tt zipWith6\ z\ (a:as)\ (b:bs)\ (c:cs)\ (d:ds)\ (e:es)\ (f:fs)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ z\ a\ b\ c\ d\ e\ f\ :\ zipWith6\ z\ as\ bs\ cs\ ds\ es\ fs}\\
+\mbox{\tt zipWith6\ {\char'137}\ {\char'137}\ {\char'137}\ {\char'137}\ {\char'137}\ {\char'137}\ {\char'137}\ \ =\ \ []}
+\indextt{zipWith6}%
+\eprogB\noindent\bprogB
+\mbox{\tt zipWith7\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a->b->c->d->e->f->g->h)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ->\ [a]->[b]->[c]->[d]->[e]->[f]->[g]->[h]}\\
+\mbox{\tt zipWith7\ z\ (a:as)\ (b:bs)\ (c:cs)\ (d:ds)\ (e:es)\ (f:fs)\ (g:gs)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ z\ a\ b\ c\ d\ e\ f\ g\ :\ zipWith7\ z\ as\ bs\ cs\ ds\ es\ fs\ gs}\\
+\mbox{\tt zipWith7\ {\char'137}\ {\char'137}\ {\char'137}\ {\char'137}\ {\char'137}\ {\char'137}\ {\char'137}\ {\char'137}\ =\ \ []}
+\indextt{zipWith7}%
+\eprogB

@@ -1,0 +1,792 @@
+%
+% $Header$
+%
+\section{Input/Output}
+\label{io}
+\index{input/output}
+
+\Haskell{}'s I/O system is based on the view that a program
+communicates to the outside world via {\em streams of messages}:
+a program issues a stream of {\em requests} to the
+operating system and in return receives a stream of {\em responses}.
+Since a stream in \Haskell{} is only a lazy list,
+a \Haskell{} program has the type:
+\bprog
+\mbox{\tt type\ \ Dialogue\ =\ [Response]\ ->\ [Request]}
+\eprog\indexsynonym{Dialogue}%
+The datatypes \mbox{\tt Response}\indextycon{Response} and
+\mbox{\tt Request}\indextycon{Request} are defined below.  Intuitively,
+\mbox{\tt [Response]} is an ordered list of {\em responses} and \mbox{\tt [Request]} is
+an ordered list of {\em requests}; the $n\/$th response is the
+operating system's reply to the $n\/$th request.
+
+With this view of I/O, there is no need for any special-purpose
+syntax or constructs for I/O; the I/O system is defined
+entirely in terms of how the operating system responds to a program
+with the above type---i.e.~what response it issues for each request.
+An abstract specification of this behaviour is defined by
+giving a definition of the operating system as a function that takes
+as input an initial state and a collection of \Haskell{} programs,
+each with the above type.  This specification appears in
+Appendix~\ref{io-semantics}, using standard \Haskell{} syntax
+augmented with a single non-deterministic merge operator.
+
+% Due to the equivalence of stream-based and continuation-based I/O (see
+% the technical report by Hudak and Sundaresh \cite{hudak:io}),
+One can
+define a continuation-based
+version of I/O in terms of a stream-based version.  Such a definition
+is provided in Section~\ref{continuation-io}.
+The specific I/O requests available in each style are identical;
+what differs is the way they are expressed.  This means that programs
+in either style may be combined with a well-defined semantics.  In
+both cases arbitrary I/O requests within conventional operating
+systems may be induced while retaining referential transparency within
+a \Haskell{} program.
+
+The required requests for a valid implementation are:
+\bprog
+\mbox{\tt data\ \ Request\ =\ }\\
+\mbox{\tt \ \ \ \ \ --\ file\ system\ requests:}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ReadFile\ \ \ \ \ \ String\ \ \ \ \ \ \ \ \ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ WriteFile\ \ \ \ \ String\ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ AppendFile\ \ \ \ String\ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ ReadBinFile\ \ \ String\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ WriteBinFile\ \ String\ Bin}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ AppendBinFile\ String\ Bin}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ DeleteFile\ \ \ \ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ StatusFile\ \ \ \ String}\\
+\mbox{\tt \ \ \ \ \ --\ channel\ system\ requests:}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ ReadChan\ \ \ \ \ \ String\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ AppendChan\ \ \ \ String\ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ ReadBinChan\ \ \ String\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ AppendBinChan\ String\ Bin}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ StatusChan\ \ \ \ String}
+\eprogNoSkip
+% utter page-breaking hack
+\bprog
+\mbox{\tt \ \ \ \ \ --\ environment\ requests:}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ Echo\ \ \ \ \ \ \ \ \ \ Bool}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ GetArgs}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ GetEnv\ \ \ \ \ \ \ \ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ |\ SetEnv\ \ \ \ \ \ \ \ String\ String}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt stdin\ \ \ \ \ \ \ =\ "stdin"}\\
+\mbox{\tt stdout\ \ \ \ \ \ =\ "stdout"}\\
+\mbox{\tt stderr\ \ \ \ \ \ =\ "stderr"}\\
+\mbox{\tt stdecho\ \ \ \ \ =\ "stdecho"}
+\eprog%
+\indextycon{Request}\indextt{ReadFile}\indextt{WriteFile}%
+\indextt{AppendFile}\indextt{ReadBinFile}\indextt{WriteBinFile}%
+\indextt{AppendBinFile}\indextt{DeleteFile}\indextt{StatusFile}%
+\indextt{ReadChan}\indextt{AppendChan}%
+\indextt{ReadBinChan}\indextt{AppendBinChan}%
+\indextt{StatusChan}\indextt{GetArgs}%
+\indextt{GetEnv}\indextt{SetEnv}%
+\indextt{stdin}\indextt{stdout}\indextt{stderr}\indextt{stdecho}%
+Conceptually the above requests can be organised into three groups:
+those relating to the {\em file system}\index{file} component of the
+operating system (the first eight), those relating to the {\em channel
+system}\index{channel} (the next five), and those relating to the
+{\em environment} (the last four).  
+
+The file system is fairly conventional: a mapping of file names to
+contents.  The channel system consists of a collection of {\em
+channels}, examples of which include standard input (\mbox{\tt stdin}),
+standard output (\mbox{\tt stdout}), standard error (\mbox{\tt stderr}), and standard
+echo (\mbox{\tt stdecho}) channels.  A channel is a one-way communication
+medium---it either consumes values from the program (via \mbox{\tt AppendChan}
+or \mbox{\tt AppendBinChan}) or produces values for the program (by responding
+to \mbox{\tt ReadChan} or \mbox{\tt ReadBinChan}).  Channels communicate to and from
+{\em agents}\index{agent} (a concept made more precise in
+Appendix~\ref{io-semantics}).  Examples of agents include line printers, disk
+controllers, networks, and human beings.  As an example of the latter,
+the {\em user} is normally the consumer of standard output and the
+producer of standard input.  Channels cannot be deleted, nor is there
+a notion of creating a channel.
+
+Apart from these required requests, several optional requests are
+described in Appendix~\ref{io-options}.  Although not required for a
+valid \Haskell{} implementation, they may be useful in
+particular implementations.
+
+Requests to the file system are in general order-dependent; if $i>j$
+then the response to the $i$th request may depend on the $j$th
+request.  In the case of the channel system the nature of the
+dependencies is dictated by the agents.  In all cases external
+effects may also be felt ``between'' internal effects.
+%All of this is formalised in Appendix~\ref{io-semantics}.
+
+Responses are defined by:
+\bprog
+\mbox{\tt data\ \ Response\ =\ Success}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ Str\ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ StrList\ [String]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ Bn\ \ Bin}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ Failure\ IOError}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt data\ \ IOError\ \ =\ WriteError\ \ \ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ ReadError\ \ \ \ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ SearchError\ \ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ FormatError\ \ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ OtherError\ \ \ String}
+\eprog%
+\indextycon{Response}%
+\indextt{Success}\indextt{Str}%
+\indextt{Failure}\indextt{Bn}%
+\indextt{IOError}%
+\indextt{WriteError}\indextt{ReadError}\indextt{SearchError}%
+\indextt{FormatError}\indextt{OtherError}%
+The response to a request is either \mbox{\tt Success}, when no value is
+returned; \mbox{$\it \makebox{\tt Str\ }s$} [\mbox{$\it \makebox{\tt Bn\ }b$}], when a string [binary] value \mbox{$\it s$} [\mbox{$\it b$}]
+is returned; or \mbox{$\it \makebox{\tt Failure\ }e$},
+indicating failure with I/O error $e$.
+
+The nature of a failure is defined by the \mbox{\tt IOError} datatype, which
+captures the most common kinds of errors.  The \mbox{\tt String} components of
+these errors are implementation dependent, and may be used to refine
+the description of the error (for example, for \mbox{\tt ReadError}, the
+string might be \mbox{\tt "file\ locked"}, \mbox{\tt "access\ rights\ violation"}, etc.).
+An implementation is free to extend \mbox{\tt IOError} as required.
+
+\subsection{I/O Modes}
+\label{io-modes}
+\index{input/output!mode}
+
+The I/O requests \mbox{\tt ReadFile}, \mbox{\tt WriteFile}, \mbox{\tt AppendFile}, \mbox{\tt ReadChan},
+and \mbox{\tt AppendChan} all work with {\em text} values---i.e.~strings.  Any
+value whose type is an instance of the class \mbox{\tt Text} may be written to
+a file (or communicated on a channel) by using the appropriate output
+request if it is first converted to a string, using \mbox{\tt shows} (see
+Section~\ref{derived-decls}).  Similarly, \mbox{\tt reads} can be used with the
+appropriate input request to read such a value from a file (or a
+channel).  This is text mode I/O.
+
+For both efficiency and transparency,
+\Haskell{} also supports a corresponding set of {\em binary} I/O
+requests---\mbox{\tt ReadBinFile}, \mbox{\tt WriteBinFile}, \mbox{\tt AppendBinFile},
+\mbox{\tt ReadBinChan}, and \mbox{\tt AppendBinChan}.  \mbox{\tt showBin} and \mbox{\tt readBin} are using
+analogously to \mbox{\tt shows} and \mbox{\tt reads} (see Section~\ref{derived-decls})
+for values whose types are instances of the class \mbox{\tt Binary}
+(see Section~\ref{bin-type}).
+
+Binary mode I/O ensures transparency {\em within} an
+implementation---i.e.~``what is read is what was written.''
+Implementations on conventional machines
+will probably be able to realise binary mode more efficiently than text
+mode.  On the other hand, the \mbox{\tt Bin} datatype itself is implementation
+dependent, and thus binary mode {\em should not} be used as a method
+to ensure transparency {\em between} implementations.
+
+In the remainder of this section, various aspects of text mode will be
+discussed, including the behaviour of standard channels such as \mbox{\tt stdin}
+and \mbox{\tt stdout}.
+
+\subsubsection{Transparent Character Set}
+\index{input/output!transparency}
+
+The {\em transparent character set}\index{transparent character set}
+is defined by:
+
+\begin{tabular}{l}
+the 52 uppercase and lowercase alphabetic characters \\
+the 10 decimal digits \\
+the 32 graphic characters: \\
+\ \ \ \ \mbox{\tt !} \mbox{\tt "} \mbox{\tt {\char'43}} \mbox{\tt {\char'44}} \mbox{\tt {\char'45}} \mbox{\tt {\char'46}} \fwq\ \mbox{\tt (} \mbox{\tt )} \mbox{\tt *} \mbox{\tt +} \mbox{\tt ,} \mbox{\tt -} \mbox{\tt .} \mbox{\tt /} \mbox{\tt :} \mbox{\tt ;} \mbox{\tt <} \mbox{\tt =} \mbox{\tt >} \mbox{\tt ?} @ \mbox{\tt [} \mbox{\tt {\char'134}} \mbox{\tt ]} \mbox{\tt {\char'136}} \mbox{\tt {\char'137}} \bkq\ \mbox{\tt {\char'173}} \mbox{\tt |} \mbox{\tt {\char'175}} \mbox{\tt {\char'176}}\\ 
+the space character\\
+\end{tabular}
+
+\noindent (This is identical to the \mbox{$\it any$} syntactic category defined
+in Section~\ref{whitespace}, with \mbox{$\it tab$} excluded.)
+
+A {\em transparent line}\index{transparent line} is a list of no more
+than 254 transparent characters followed by a \mbox{\tt {\char'134}n} character (i.e.~no
+more than 255
+characters in total).  A {\em transparent string}\index{transparent
+string} is the finite concatenation of zero or more transparent lines.
+
+\Haskell{}'s {\em text mode for files is transparent whenever the string
+being used is transparent}.  An implementation must
+ensure that a transparent string written to a file in text mode is
+identical to the string read back from the same file in text mode
+(assuming there were no intervening external effects).
+
+The transparent character set is restricted because of
+the inconsistent treatment of text files by operating systems.  For
+example, some systems translate the newline character \mbox{\tt {\char'134}n} into
+\mbox{\tt CR/LF}, and others into just \mbox{\tt CR} or just \mbox{\tt LF}---so none of these
+characters can be in the transparent character set.  Similarly, some
+systems truncate lines exceeding a certain length, others do not.
+\Haskell{}'s transparent string is intended to provide a useful degree
+of portability of text file manipulating programs.  Of course, an
+implementation is free to guarantee a higher degree of transparency
+than that defined here (such as longer lines or more character types).
+
+Besides this definition of text mode transparency, the standard
+input and output channels carry with them notions of standard {\em
+presentation} and {\em acceptance}, as defined below.
+
+\subsubsection{Presentation}
+\label{presentation}
+\index{input/output!presentation}
+
+{\em Standard text mode presentation}
+guarantees a minimum kind of presentable output on standard output
+devices; thus it is only defined for \mbox{\tt AppendChan} using the channels
+\mbox{\tt stdout}, \mbox{\tt stderr}, and \mbox{\tt stdecho}.  Abstractly, these channels are
+assumed to be attached to a sequence of rectangular grids of
+characters called {\em pages}; each page consists of a number of lines
+and columns, with the first line presented at the ``top'' and the
+first column presented to the ``left.''  The width of a column is
+assumed to be constant.  (On a paper printing device, we expect an
+abstract page to correspond to a physical page; on a terminal
+display, it will correspond to whatever abstraction is presented by the
+terminal, but at a minimum the terminal should support display of at
+least one full page.)
+
+Characters obtained from \mbox{\tt AppendChan} requests are written
+sequentially into these pages starting at the top left hand corner of
+the first page.  The characters are written in order horizontally
+across the page until a newline character (\mbox{\tt {\char'134}n}) is processed, at
+which point the subsequent characters are written starting in column
+one of line two, and so on.  If a form feed character (\mbox{\tt {\char'134}f}) is
+processed, writing starts at the top left hand corner of the second
+page, and so on.
+
+Maximum line length and page length for the output channels \mbox{\tt stdout},
+\mbox{\tt stdecho}, and \mbox{\tt stderr} may be obtained via the \mbox{\tt StatusChan} request
+as described in Section~\ref{channel-system-requests}.  These are
+implementation-dependent constants, but must be at least 40 characters
+and 20 lines, respectively.  \mbox{\tt AppendChan} may induce a
+\mbox{\tt FormatError} if either of these limits is exceeded.
+
+Presentation of the transparent character set may be in any readable
+font.  Presentation of \mbox{\tt {\char'134}n} and \mbox{\tt {\char'134}f} is as defined above.
+Presentation of any other character is not defined---presentation of
+such a character may invalidate standard presentation
+of all subsequent characters.  An implementation, of course, may
+guarantee other forms of useful presentation beyond what is
+specified here.
+
+To facilitate processing of text to and from standard input/output
+channels, the auxiliary functions shown in Figure~\ref{auxiliary-io}
+are provided in the standard prelude.
+\begin{figure}
+\outline{
+\mbox{\tt span,\ break\ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (a\ ->\ Bool)\ ->\ [a]\ ->\ ([a],[a])}\\
+\mbox{\tt span\ p\ xs\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ (takeWhile\ p\ xs,\ dropWhile\ p\ xs)}\\
+\mbox{\tt break\ p\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ span\ (not\ .\ p)}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt lines\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ String\ ->\ [String]}\\
+\mbox{\tt lines\ ""\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ []}\\
+\mbox{\tt lines\ s\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ l\ :\ (if\ null\ s'\ then\ []\ else\ lines\ (tail\ s'))}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (l,\ s')\ =\ break\ ((==)\ '{\char'134}n')\ s}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt words\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ String\ ->\ [String]}\\
+\mbox{\tt words\ s\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ case\ dropWhile\ isSpace\ s\ of}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ""\ ->\ []}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ s'\ ->\ w\ :\ words\ s''}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (w,\ s'')\ =\ break\ isSpace\ s'}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt unlines\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [String]\ ->\ String}\\
+\mbox{\tt unlines\ ls\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ concat\ (map\ ({\char'134}l\ ->\ l\ ++\ "{\char'134}n")\ ls)}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt unwords\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ [String]\ ->\ String}\\
+\mbox{\tt unwords\ []\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ ""}\\
+\mbox{\tt unwords\ [w]\ \ \ \ \ \ \ \ \ \ \ \ \ =\ w}\\
+\mbox{\tt unwords\ (w:ws)\ \ \ \ \ \ \ \ \ \ =\ w\ ++\ concat\ (map\ ('\ '\ :)\ ws)}
+}
+\caption{Auxiliary Functions for Text Processing of Standard Output}
+\label{auxiliary-io} 
+\indextt{span}\indextt{break}\indextt{lines}\indextt{words}
+\indextt{unlines}\indextt{unwords}
+\end{figure}
+
+\subsubsection{Acceptance}
+\index{input/output!acceptance}
+
+{\em Standard text mode acceptance}
+guarantees a minimum kind of character input from standard input
+devices; thus it is only defined for \mbox{\tt ReadChan} using the channel
+\mbox{\tt stdin}.  Abstractly, \mbox{\tt stdin} is assumed to be attached to a {\em
+keyboard}.  The only requirement of the keyboard is that it have keys
+to support the transparent character set plus the newline (\mbox{\tt {\char'134}n})
+character.
+
+\subsubsection{Echoing}
+\label{echoing}
+\index{input/output!echoing}
+
+The channel \mbox{\tt stdecho} is assumed connected to the display associated
+with the device to which \mbox{\tt stdin} is connected.  It may be possible for
+\mbox{\tt stdout} and \mbox{\tt stdecho} to be connected to the same device, but this is
+not required.  It may be possible in some operating systems to
+redirect \mbox{\tt stdout} to a file while still displaying information to
+the user on \mbox{\tt stdecho}.
+
+The \mbox{\tt Echo} request (described in Section~\ref{environment-requests})
+controls echoing of \mbox{\tt stdin} on \mbox{\tt stdecho}.  When echoing
+is enabled, characters typed at the terminal connected to \mbox{\tt stdin} are
+echoed onto \mbox{\tt stdecho}, with
+optional implementation-specific line-editing functions available.
+% each \mbox{\tt DEL} character treated as a
+% request to ``delete previous character'' (up to the previous newline).
+The list of characters returned by a read request to
+\mbox{\tt stdin} should be the result of this processing.  As an
+entire line may be erased by the user, a program will not see
+any of the line until a \mbox{\tt {\char'134}n} character is typed.
+
+A display may receive data from four
+different sources: echoing from \mbox{\tt stdin}, and explicit output to
+\mbox{\tt stdecho}, \mbox{\tt stdout}, and \mbox{\tt stderr}.  The result is an interleaving of
+these character streams, but it is not an arbitrary one, because of
+two constraints: (1)~{\em explicit} output (via \mbox{\tt AppendChan}) must
+appear as the concatenation of the individual streams; i.e.~they
+cannot be interleaved (this is consistent with the hyperstrict nature
+of \mbox{\tt AppendChan}), and (2)~if echoing is on, characters from \mbox{\tt stdin}
+that a program depends on for some I/O request must appear on the
+display before that I/O occurs.  These constraints permit a
+user to type ahead, but prevent a system from printing a reply
+before echoing the user's request.
+
+\subsection{File System Requests}
+\label{file-system-requests}
+\index{file system request}
+
+In this section, each request is described using the
+stream model---the corresponding behaviour using the
+continuation model should be obvious.  Optional requests, not required
+of a valid \Haskell{} implementation, are described in
+Appendix~\ref{io-options}.
+
+\begin{itemize}
+\item
+\mbox{\tt ReadFile\ \ \ \ name}\\
+\mbox{\tt ReadBinFile\ name}
+\indextt{ReadFile}\indextt{ReadBinFile}
+
+Returns the contents of file \mbox{\tt name} treated as a text
+[binary] file.  If successful, the response will be of the form
+\mbox{\tt Str\ s} [\mbox{\tt Bn\ b}], where \mbox{\tt s} [\mbox{\tt b}] is a string [binary] value.  If the
+file is not found, the response \mbox{\tt Failure\ (SearchError\ string)} is
+induced; if it is unreadable for some other reason, the 
+\mbox{\tt Failure\ (ReadError\ string)} error is induced.
+
+%For example, to sum together all of the elements of a file named
+%\mbox{\tt "grades"} that was written with a list of integers (i.e.~written in
+%text mode with \mbox{\tt show\ gradeList}), one would first issue
+%the request \mbox{\tt ReadFile\ "grades"}.  If the response is of the form
+%\mbox{\tt Str\ filedGradeList}, then the grades may be summed with:
+%\bprog
+%@
+%foldl (+) 0 (read filedGradeList)
+%@
+%\eprog
+
+\item
+\mbox{\tt WriteFile\ \ \ \ name\ string}\\
+\mbox{\tt WriteBinFile\ name\ bin}
+\indextt{WriteFile}\indextt{WriteBinFile}
+
+Writes \mbox{\tt string} [\mbox{\tt bin}] to file \mbox{\tt name}.  If
+the file does not exist, it is created.  If it already exists, it is
+overwritten.  A successful response has form \mbox{\tt Success}; the only
+failure possible has the form \mbox{\tt Failure\ (WriteError\ string)}.
+
+Both of these requests are ``hyperstrict'' in their second argument:
+no response is returned until the entire list of values is
+completely evaluated.
+
+\item
+\mbox{\tt AppendFile\ \ \ \ name\ string}\\
+\mbox{\tt AppendBinFile\ name\ bin}
+\indextt{AppendFile}\indextt{AppendBinFile}
+
+Identical to \mbox{\tt WriteFile} [\mbox{\tt WriteBinFile}], except that (1)~the \mbox{\tt string} [\mbox{\tt bin}] argument
+is appended to the current contents of the file named \mbox{\tt name}; (2)~if
+the I/O mode does not match the previous mode with which \mbox{\tt name} was
+written, the behaviour is not specified; and (3)~if the file does not
+exist, the response \mbox{\tt Failure\ (SearchError\ string)} is induced.
+All other errors have form
+\mbox{\tt Failure\ (WriteError\ string)}, and both
+requests are hyperstrict in their second argument.
+
+\item
+\mbox{\tt DeleteFile\ name}
+\indextt{DeleteFile}
+
+Deletes file \mbox{\tt name}, with successful response \mbox{\tt Success}.  If
+the file does not exist, the response \mbox{\tt Failure\ (SearchError\ string)}
+is induced.  If it cannot be deleted for some other reason, a response
+of the form \mbox{\tt Failure\ (WriteError\ string)} is induced.
+
+\item
+\mbox{\tt StatusFile\ name}
+\indextt{StatusFile}
+
+Induces \mbox{\tt Failure\ (SearchError\ string)} if an object \mbox{\tt name}
+does not exist, otherwise induces \mbox{\tt Str\ status} where \mbox{\tt status} is a
+string containing, in this order: (1)~either \fwq\mbox{\tt t}\fwq,\
+\fwq\mbox{\tt b}\fwq,\ \fwq\mbox{\tt d}\fwq, or \fwq\mbox{\tt u}\fwq\ depending on whether the
+object is a text file, binary file, directory, or something else,
+respectively (if text and binary files cannot be distinguished,
+\fwq\mbox{\tt f}\fwq\ indicates either text or binary file);
+(2)~\fwq\mbox{\tt r}\fwq\ if the object is readable by this program,
+\fwq\mbox{\tt -}\fwq\ if not; and (3)~\fwq\mbox{\tt w}\fwq\ if the object is writable by this
+program, \fwq\mbox{\tt -}\fwq\ if not.  For example \mbox{\tt "dr-"} denotes a directory
+that can be read but not written.  An implementation is
+free to append more status information to this string.
+% for example, if \mbox{\tt name} is a directory, an implementation may
+% include a directory listing in an implementation-dependent format.
+\end{itemize}
+
+{\em Note 1.} A proper implementation of \mbox{\tt ReadFile} or \mbox{\tt ReadBinFile} may
+have to make copies of files in order to preserve referential
+transparency---a successful read of a file returns a {\em lazy list}
+whose contents should be preserved, despite future writes to or
+deletions of that file, even if the lazy list has not yet been completely
+evaluated.
+
+{\em Note 2.} Given the two juxtaposed requests:
+\bprog
+\mbox{\tt [\ ...,\ WriteFile\ name\ contents1,\ ReadFile\ name,\ ...\ ]}
+\eprog
+with the corresponding responses:
+\bprog
+\mbox{\tt [\ ...,\ Success,\ Str\ contents2,\ ...\ ]}
+\eprog
+then \mbox{\tt contents1\ ==\ contents2} if \mbox{\tt contents1} is a transparent string,
+assuming that there were no external effects.  A
+similar result would hold if the binary versions were used.
+
+
+\subsection{Channel System Requests}
+\label{channel-system-requests}
+\index{channel system request}
+
+Channels are inherently different from files---they contain
+ephemeral streams of data as opposed to persistent stationary
+values.  The most common channels are standard input (\mbox{\tt stdin}),
+standard output (\mbox{\tt stdout}), standard error (\mbox{\tt stderr}), and standard
+echo (\mbox{\tt stdecho}); these four are the only required channels
+in a valid implementation.
+
+\begin{itemize}
+\item
+\mbox{\tt ReadChan\ \ \ \ name}\\
+\mbox{\tt ReadBinChan\ name}
+\indextt{ReadChan}\indextt{ReadBinChan}
+
+Opens channel \mbox{\tt name} for input.  A successful response
+returns the contents of the channel as a lazy stream of characters [a binary
+value].  If the channel does not exist the response 
+\mbox{\tt Failure\ (SearchError\ string)} is induced; all other errors have form
+\mbox{\tt Failure\ (ReadError\ string)}.
+
+Unlike files, once a \mbox{\tt ReadChan} or \mbox{\tt ReadBinChan} request has been
+issued for a particular channel, it cannot be issued again for the
+same channel in that program.  This reflects the ephemeral nature of
+its contents and prevents a serious space leak.
+
+\item
+\mbox{\tt AppendChan\ \ \ \ name\ string}\\
+\mbox{\tt AppendBinChan\ name\ bin}
+\indextt{AppendChan}\indextt{AppendBinChan}
+
+Writes \mbox{\tt string} [\mbox{\tt bin}] to channel
+\mbox{\tt name}.  The semantics is as for \mbox{\tt AppendFile}, except:
+(1)~the second argument is appended to whatever was
+previously written (if anything); (2)~if \mbox{\tt AppendChan} and
+\mbox{\tt AppendBinChan} are both issued to the same channel, the resulting
+behaviour is not specified; (3)~if the channel does not exist, the
+% hacked format because of impossible linebreaking
+response \mbox{\tt Failure} \mbox{\tt (SearchError} \mbox{\tt string)} is induced; and (4)~if the
+maximum line or page length of \mbox{\tt stdout}, \mbox{\tt stderr}, or \mbox{\tt stdecho} is
+exceeded, the response \mbox{\tt Failure} \mbox{\tt (FormatError} \mbox{\tt string)} is induced (see
+Section~\ref{presentation}).  All other errors have form 
+\mbox{\tt Failure} \mbox{\tt (WriteError} \mbox{\tt string)}.
+Both requests are hyperstrict in their second argument.
+
+\item
+\mbox{\tt StatusChan\ name}
+\indextt{StatusChan}
+
+Induces \mbox{\tt Failure\ (SearchError\ string)} if channel \mbox{\tt name}
+does not exist, otherwise induces \mbox{\tt Str\ status} where \mbox{\tt status} is a
+string containing implementation-dependent information about the named
+channel.  The only information required of a valid implementation is
+that for the output channels \mbox{\tt stdout}, \mbox{\tt stdecho}, and \mbox{\tt stderr}: the
+beginning of the status string must contain two integers separated by
+a space, the first integer indicating the maximum line length (in
+characters) allowed on the channel, the second indicating the maximum
+page length (in lines) allowed (see Section~\ref{presentation}).
+A zero length implies that there is no bound.
+
+\end{itemize}
+
+\subsection{Environment Requests}
+\label{environment-requests}
+\index{environment request}
+
+\begin{itemize}
+\item
+\mbox{\tt Echo\ bool}
+\indextt{Echo}
+
+\nopagebreak[4]
+\mbox{\tt Echo\ True} enables echoing of \mbox{\tt stdin} on \mbox{\tt stdecho}; \mbox{\tt Echo\ False}
+disables it (see Section~\ref{echoing}).  Either \mbox{\tt Success} or 
+\mbox{\tt Failure\ (OtherError\ string)} is induced.
+
+The echo mode can only be set once by a particular program, and it
+must be done before any I/O operation involving \mbox{\tt stdin}.  If no \mbox{\tt Echo}
+request is made, a valid implementation is expected to use the echoing
+mode of the OS at the time the program is run.
+
+\item
+\mbox{\tt GetArgs}
+\indextt{GetArgs}
+
+\nopagebreak[4]
+Induces the response \mbox{\tt StrList\ str{\char'137}list},
+where \mbox{\tt str{\char'137}list} is a list of the program's command line arguments.
+
+\item
+\mbox{\tt GetEnv\ name}
+\indextt{GetEnv}
+
+\nopagebreak[4]
+Returns the value of environment variable \mbox{\tt name}.  If successful,
+the response will be of the form \mbox{\tt Str\ s}, where \mbox{\tt s} is a string.  If
+the environment variable does not exist, a \mbox{\tt SearchError} is induced.
+
+\item
+\mbox{\tt SetEnv\ name\ string}
+\indextt{SetEnv}
+
+\nopagebreak[4]
+Sets environment variable \mbox{\tt name} to value \mbox{\tt string}, with response \mbox{\tt Success}.
+If the environment variable does not exist, it is created.
+\end{itemize}
+
+\subsection{Continuation-based I/O}
+\label{continuation-io}
+
+\Haskell{} supports an alternative
+style of I/O called {\em continuation-based I/O}.  Under this model, a
+\Haskell{} program still has type
+\mbox{\tt [Response]->[Request]}, but instead of the user manipulating the
+requests and responses directly, a collection of {\em 
+transactions}\index{transaction} defined in a continuation style,
+captures the effect of each request/response pair.
+
+Transactions are functions.  For each request \mbox{\tt Req} there
+corresponds a transaction \mbox{\tt req}, as shown in
+Figure~\ref{continuation-fig}.  For example, \mbox{\tt ReadFile}
+induces
+either a failure response \mbox{\tt Failure\ msg} or success response 
+\mbox{\tt Str\ contents}.  In contrast the transaction \mbox{\tt readFile} would be used
+in continuation-based I/O, as for example,
+\bprog
+\mbox{\tt readFile\ name\ ({\char'134}\ msg\ ->\ errorTransaction)\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ ({\char'134}\ contents\ ->\ successTransaction)}
+\eprog
+where the second and third arguments are the {\em failure
+continuation} and {\em success continuation}, respectively.  If the
+transaction fails then the error continuation is applied to the error
+message; if it succeeds then the success continuation is applied to the
+contents of the file.
+The following type synonyms and auxiliary functions are defined for
+continuation-based I/O:
+\bprog
+\mbox{\tt type\ \ Dialogue\ \ \ \ \ =\ \ [Response]\ ->\ [Request]}\\
+\mbox{\tt type\ \ SuccCont\ \ \ \ \ =\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Dialogue}\\
+\mbox{\tt type\ \ StrCont\ \ \ \ \ \ =\ \ String\ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt type\ \ StrListCont\ \ =\ \ [String]\ \ \ ->\ Dialogue}\\
+\mbox{\tt type\ \ BinCont\ \ \ \ \ \ =\ \ Bin\ \ \ \ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt type\ \ FailCont\ \ \ \ \ =\ \ IOError\ \ \ \ ->\ Dialogue}
+\eprogNoSkip%
+\indexsynonym{Dialogue}\indexsynonym{SuccCont}%
+\indexsynonym{StrCont}\indexsynonym{BinCont}\indexsynonym{FailCont}%
+\indexsynonym{StrListCont}%
+\bprog
+\mbox{\tt strDispatch\ fail\ succ\ (resp:resps)\ =\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ case\ resp\ of\ Str\ val\ \ \ \ \ ->\ succ\ val\ resps}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Failure\ msg\ ->\ fail\ msg\ resps}\\
+\mbox{\tt strListDispatch\ fail\ succ\ (resp:resps)\ =\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ case\ resp\ of\ StrList\ val\ ->\ succ\ val\ resps}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Failure\ msg\ ->\ fail\ msg\ resps}\\
+\mbox{\tt binDispatch\ fail\ succ\ (resp:resps)\ =\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ case\ resp\ of\ Bn\ val\ \ \ \ \ \ ->\ succ\ val\ resps}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Failure\ msg\ ->\ fail\ msg\ resps}\\
+\mbox{\tt succDispatch\ fail\ succ\ (resp:resps)\ =\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ case\ resp\ of\ Success\ \ \ \ \ ->\ succ\ resps}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Failure\ msg\ ->\ fail\ msg\ resps}
+\eprogNoSkip
+\indextt{strDispatch}\indextt{binDispatch}\indextt{succDispatch}%
+\indextt{strListDispatch}
+\begin{figure}
+\outline{
+\mbox{\tt done\ \ \ \ \ \ \ \ \ \ ::\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Dialogue}\\
+\mbox{\tt readFile\ \ \ \ \ \ ::\ String\ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ StrCont\ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt writeFile\ \ \ \ \ ::\ String\ ->\ String\ ->\ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt appendFile\ \ \ \ ::\ String\ ->\ String\ ->\ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt readBinFile\ \ \ ::\ String\ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ BinCont\ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt writeBinFile\ \ ::\ String\ ->\ Bin\ \ \ \ ->\ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt appendBinFile\ ::\ String\ ->\ Bin\ \ \ \ ->\ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt deleteFile\ \ \ \ ::\ String\ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt statusFile\ \ \ \ ::\ String\ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ StrCont\ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt readChan\ \ \ \ \ \ ::\ String\ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ StrCont\ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt appendChan\ \ \ \ ::\ String\ ->\ String\ ->\ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt readBinChan\ \ \ ::\ String\ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ BinCont\ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt appendBinChan\ ::\ String\ ->\ Bin\ \ \ \ ->\ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt statusChan\ \ \ \ ::\ String\ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ StrCont\ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt echo\ \ \ \ \ \ \ \ \ \ ::\ Bool\ \ \ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt getArgs\ \ \ \ \ \ \ ::\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ StrListCont\ ->\ Dialogue}\\
+\mbox{\tt getEnv\ \ \ \ \ \ \ \ ::\ String\ ->\ \ \ \ \ \ \ \ \ \ \ FailCont\ ->\ StrCont\ \ \ \ \ ->\ Dialogue}\\
+\mbox{\tt setEnv\ \ \ \ \ \ \ \ ::\ String\ ->\ String\ ->\ FailCont\ ->\ SuccCont\ \ \ \ ->\ Dialogue}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt done\ resps\ =\ []}\\
+\mbox{\tt readFile\ name\ fail\ succ\ resps\ =\ \ \ \ \ \ \ \ \ \ \ \ --similarly\ for\ readBinFile}\\
+\mbox{\tt \ \ \ (ReadFile\ name)\ :\ strDispatch\ fail\ succ\ resps}\\
+\mbox{\tt writeFile\ name\ contents\ fail\ succ\ resps\ =\ \ --similarly\ for\ writeBinFile}\\
+\mbox{\tt \ \ \ (WriteFile\ name\ contents)\ :\ succDispatch\ fail\ succ\ resps}\\
+\mbox{\tt appendFile\ name\ contents\ fail\ succ\ resps\ =\ --similarly\ for\ appendBinFile}\\
+\mbox{\tt \ \ \ (AppendFile\ name\ contents)\ :\ succDispatch\ fail\ succ\ resps}\\
+\mbox{\tt deleteFile\ name\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ (DeleteFile\ name)\ :\ succDispatch\ fail\ succ\ resps}\\
+\mbox{\tt statusFile\ name\ fail\ succ\ resps\ =\ \ \ \ \ \ \ \ \ \ --similarly\ for\ statusChan}\\
+\mbox{\tt \ \ \ (StatusFile\ name)\ :\ strDispatch\ fail\ succ\ resps}\\
+\mbox{\tt readChan\ name\ fail\ succ\ resps\ =\ \ \ \ \ \ \ \ \ \ \ \ --similarly\ for\ readBinChan}\\
+\mbox{\tt \ \ \ (ReadChan\ name)\ :\ strDispatch\ fail\ succ\ resps}\\
+\mbox{\tt appendChan\ name\ contents\ fail\ succ\ resps\ =\ --similarly\ for\ appendBinChan}\\
+\mbox{\tt \ \ \ (AppendChan\ name\ contents)\ :\ succDispatch\ fail\ succ\ resps}\\
+\mbox{\tt echo\ bool\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ (Echo\ bool)\ :\ succDispatch\ fail\ succ\ resps}\\
+\mbox{\tt getArgs\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ GetArgs\ :\ strListDispatch\ fail\ succ\ resps}\\
+\mbox{\tt getEnv\ name\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ (GetEnv\ name)\ :\ strDispatch\ fail\ succ\ resps}\\
+\mbox{\tt setEnv\ name\ contents\ fail\ succ\ resps\ =}\\
+\mbox{\tt \ \ \ (SetEnv\ name\ contents)\ :\ succDispatch\ fail\ succ\ resps}
+}
+\caption{Transactions of continuation-based I/O.}
+\label{continuation-fig}
+\indextt{done}\indextt{readFile}\indextt{writeFile}
+\indextt{appendFile}\indextt{readBinFile}\indextt{writeBinFile}
+\indextt{appendBinFile}\indextt{deleteFile}\indextt{statusFile}
+\indextt{readChan}\indextt{appendChan}
+\indextt{readBinChan}\indextt{appendBinChan}\indextt{statusChan}
+\indextt{echo}\indextt{getArgs}\indextt{getEnv}\indextt{setEnv}
+\end{figure}
+\bprog
+\mbox{\tt abort\ \ \ \ \ ::\ \ FailCont}\\
+\mbox{\tt abort\ err\ \ =\ \ done}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt exit\ \ \ \ \ ::\ \ FailCont}\\
+\mbox{\tt exit\ err\ \ =\ \ appendChan\ stdout\ msg\ abort\ done}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ where\ msg\ =\ case\ err\ of\ ReadError\ \ \ s\ ->\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ WriteError\ \ s\ ->\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ SearchError\ s\ ->\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ FormatError\ s\ ->\ s}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ OtherError\ \ s\ ->\ s}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt print\ \ \ \ \ \ \ \ \ \ \ ::\ (Text\ a)\ =>\ a\ ->\ Dialogue}\\
+\mbox{\tt print\ x\ \ \ \ \ \ \ \ \ =\ \ appendChan\ stdout\ (show\ x)\ abort\ done}\\
+\mbox{\tt prints\ \ \ \ \ \ \ \ \ \ ::\ (Text\ a)\ =>\ a\ ->\ String\ ->\ Dialogue}\\
+\mbox{\tt prints\ x\ s\ \ \ \ \ \ =\ \ appendChan\ stdout\ (shows\ x\ s)\ abort\ done}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt interact\ \ ::\ \ (String\ ->\ String)\ ->\ Dialogue}\\
+\mbox{\tt interact\ f\ =\ readChan\ stdin\ abort}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ({\char'134}x\ ->\ appendChan\ stdout\ (f\ x)\ abort\ done)}
+\eprogNoSkip
+\indextt{abort}\indextt{exit}%
+\indextt{print}\indextt{prints}\indextt{interact}
+
+\subsection{A Small Example}
+
+Both of the following programs prompt the user for the name of a
+file, and then look up and display the contents of the file on
+standard-output.  The filename as typed by the user is also echoed.
+The first program uses the stream-based style (note the irrefutable
+patterns):\nopagebreak[4]
+\bprog
+\mbox{\tt main\ {\char'176}(Success\ :\ {\char'176}((Str\ userInput)\ :\ {\char'176}(Success\ :\ {\char'176}(r4\ :\ {\char'137}))))\ =}\\
+\mbox{\tt \ \ [\ AppendChan\ stdout\ "please\ type\ a\ filename{\char'134}n",}\\
+\mbox{\tt \ \ \ \ ReadChan\ stdin,}\\
+\mbox{\tt \ \ \ \ AppendChan\ stdout\ name,}\\
+\mbox{\tt \ \ \ \ ReadFile\ name,}\\
+\mbox{\tt \ \ \ \ AppendChan\ stdout\ (case\ r4\ of\ Str\ contents\ \ \ \ ->\ contents}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Failure\ ioerror\ ->\ "can't\ open\ file")}\\
+\mbox{\tt \ \ ]\ where\ (name\ :\ {\char'137})\ =\ lines\ userInput}
+\eprog
+The second program uses the continuation-based style:\nopagebreak[4]
+\bprog
+\mbox{\tt main\ =\ appendChan\ stdout\ "please\ type\ a\ filename{\char'134}n"\ abort\ (}\\
+\mbox{\tt \ \ \ \ \ \ \ readChan\ stdin\ abort\ ({\char'134}\ userInput\ ->}\\
+\mbox{\tt \ \ \ \ \ \ \ let\ (name\ :\ {\char'137})\ =\ lines\ userInput\ in}\\
+\mbox{\tt \ \ \ \ \ \ \ appendChan\ stdout\ name\ abort\ (}\\
+\mbox{\tt \ \ \ \ \ \ \ readFile\ name\ ({\char'134}\ ioerror\ ->\ appendChan\ stdout\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ "can't\ open\ file"\ abort\ done)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ({\char'134}\ contents\ ->}\\
+\mbox{\tt \ \ \ \ \ \ \ appendChan\ stdout\ contents\ abort\ done)))))}
+\eprog
+
+More examples and a general discussion of both forms of I/O may
+be found in a report by Hudak and Sundaresh \cite{hudak:io}.
+\pagebreak[4]
+
+\subsection{An Example Involving Synchronisation}
+
+The following program reads two numbers and prints their sum.  After
+the initial \mbox{\tt readChan} request, the value of the input stream must be
+passed in and out of the functions which actually obtain the user
+input.  The programmer must control the synchronisation between the
+\mbox{\tt appendChan} requests and when the program stops to read input.  The
+\mbox{\tt readChan} request does not actually cause the program to stop and
+wait for the user to enter the entire input stream; only at demands
+for actual input characters will execution pause for input.  This
+program assures that this demand is properly synchronised with the
+\mbox{\tt appendChan} requests by verifying input values in the \mbox{\tt readInt}
+function.
+\bprog
+\mbox{\tt main\ ::\ Dialogue}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt main\ =\ readChan\ stdin\ abort\ ({\char'134}\ userInput\ ->\ readNums\ (lines\ userInput))}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt readNums\ ::\ [String]\ ->\ Dialogue}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt readNums\ inputLines\ =}\\
+\mbox{\tt \ \ \ readInt\ "Enter\ first\ number:\ "\ inputLines}\\
+\mbox{\tt \ \ \ \ \ ({\char'134}\ num1\ inputLines1\ ->}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ readInt\ "Enter\ second\ number:\ "\ inputLines1}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ ({\char'134}\ num2\ {\char'137}\ ->\ reportResult\ num1\ num2))}\\
+\mbox{\tt reportResult\ ::\ Int\ ->\ Int\ ->\ Dialogue}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt reportResult\ num1\ num2\ =}\\
+\mbox{\tt \ \ appendChan\ stdout\ ("Their\ sum\ is:\ "\ ++\ show\ (num1\ +\ num2))\ abort\ done}
+\eprog
+\bprog
+\mbox{\tt --\ readInt\ prints\ a\ prompt\ and\ then\ reads\ a\ line\ of\ input.\ \ If\ the}\\
+\mbox{\tt --\ line\ contains\ an\ integer,\ the\ value\ of\ the\ integer\ is\ passed\ to\ the}\\
+\mbox{\tt --\ success\ continuation.\ \ If\ a\ line\ cannot\ be\ parsed\ as\ an\ integer,}\\
+\mbox{\tt --\ an\ error\ message\ is\ printed\ and\ the\ user\ is\ asked\ to\ try\ again.}\\
+\mbox{\tt --\ If\ EOF\ is\ detected,\ the\ program\ is\ aborted.}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt readInt\ ::\ String\ ->\ [String]\ ->\ (Int\ ->\ [String]\ ->\ Dialogue)\ ->\ Dialogue}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt readInt\ prompt\ inputLines\ succ\ =}\\
+\mbox{\tt \ \ appendChan\ stdout\ prompt\ abort}\\
+\mbox{\tt \ \ \ \ (case\ inputLines\ of}\\
+\mbox{\tt \ \ \ \ \ \ \ (l1\ :\ rest)\ ->\ case\ (reads\ l1)\ of}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ [(x,"")]\ ->\ succ\ x\ rest}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ {\char'137}\ \ \ \ \ \ \ \ ->\ appendChan\ stdout}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ "Error\ -\ retype\ the\ number{\char'134}n"\ abort}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (readInt\ prompt\ rest\ succ)}\\
+\mbox{\tt \ \ \ \ \ \ \ {\char'137}\ \ \ \ \ \ \ \ \ \ \ ->\ appendChan\ stdout\ "Early\ EOF"\ abort\ done)}
+\eprog
+
+% Local Variables: 
+% mode: latex
+% End:
+

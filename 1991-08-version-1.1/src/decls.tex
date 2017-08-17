@@ -1,0 +1,1337 @@
+%
+% $Header$
+%
+\section{Declarations and Bindings}
+\index{declaration}
+\index{binding}
+\label{declarations}
+
+In this section, we describe the syntax and informal semantics of \Haskell{}
+{\em declarations}.
+% including their translations into
+% the \Haskell{} kernel where appropriate.
+% (see Appendix~\ref{formal-semantics} for a complete formal semantics).
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it module$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt module}\ modid\ [exports]\ \makebox{\tt where}\ body$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it body$\\ 
+$\it body$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt {\char'173}}\ [impdecls\ \makebox{\tt ;}]\ [[fixdecls\ \makebox{\tt ;}]\ topdecls\ [\makebox{\tt ;}]]\ \makebox{\tt {\char'175}}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt {\char'173}}\ impdecls\ [\makebox{\tt ;}]\ \makebox{\tt {\char'175}}$\\ 
+$\it $\\ 
+$\it topdecls$\>\makebox[3.5em]{$\rightarrow$}$\it topdecl_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ topdecl_n$\>\makebox[3em]{}$\it \qquad\ (n\geq 1)$\\ 
+$\it topdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt type}\ simple\ \makebox{\tt =}\ type$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt data}\ [context\ \makebox{\tt =>}]\ simple\ \makebox{\tt =}\ constrs\ [\makebox{\tt deriving}\ (tycls\ |\ \makebox{\tt (}tyclses\makebox{\tt )})]$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt class}\ [context\ \makebox{\tt =>}]\ class\ [\makebox{\tt where}\ \makebox{\tt {\char'173}}\ cbody\ [\makebox{\tt ;}]\ \makebox{\tt {\char'175}}]$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt instance}\ [context\ \makebox{\tt =>}]\ tycls\ inst\ [\makebox{\tt where}\ \makebox{\tt {\char'173}}\ valdefs\ [\makebox{\tt ;}]\ \makebox{\tt {\char'175}}]$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt default}\ (type\ |\ \makebox{\tt (}type_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ type_n\makebox{\tt )})$\>\makebox[3em]{}$\it \qquad\ (n\geq 0)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it decl$\\ 
+$\it $\\ 
+$\it decls$\>\makebox[3.5em]{$\rightarrow$}$\it decl_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ decl_n$\>\makebox[3em]{}$\it \qquad\ (n\geq 0)$\\ 
+$\it decl$\>\makebox[3.5em]{$\rightarrow$}$\it vars\ \makebox{\tt ::}\ [context\ \makebox{\tt =>}]\ type$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it valdef$
+\end{tabbing}\end{flushleft}
+\indexsyn{module}%
+\indexsyn{body}%
+\indexsyn{topdecls}%
+\indexsyn{topdecl}%
+\indexsyn{decls}%
+\indexsyn{decl}%
+
+The declarations in the syntactic category \mbox{$\it topdecls$} are only allowed
+at the top level of a \Haskell{} module (see
+Section~\ref{modules}), whereas \mbox{$\it decls$} may be used either at the top level or
+in nested scopes (i.e.~those within a \mbox{\tt let} or \mbox{\tt where} construct).
+
+For exposition, we divide the declarations into
+three groups: user-defined datatypes, consisting of \mbox{\tt type} and \mbox{\tt data}
+declarations (Section~\ref{user-defined-datatypes}); type classes and
+overloading, consisting of \mbox{\tt class}, \mbox{\tt instance}, and \mbox{\tt default}
+declarations (Section~\ref{overloading}); and nested declarations,
+consisting of value bindings and type signatures
+(Section~\ref{nested}).
+
+%The \mbox{\tt module} declaration, along with \mbox{\tt import} and
+%infix declarations, is described in Section~\ref{modules}.
+
+\Haskell{} has several primitive datatypes that are ``hard-wired''
+(such as integers and arrays), but most ``built-in'' datatypes are
+defined in the standard prelude with normal \Haskell{} code, using
+\mbox{\tt type} and \mbox{\tt data} declarations. % (see Section~\ref{user-defined-datatypes}).
+These ``built-in'' datatypes are described in 
+detail in Section~\ref{basic-types}.
+
+\subsection{Overview of Types and Classes}
+\label{types-overview}
+
+\Haskell{} uses a traditional
+Hindley-Milner\index{Hindley-Milner type system}
+polymorphic type system to provide a static type semantics
+\cite{damas-milner82,hindley69}, but the type system has been extended with
+{\em type classes} (or just {\em classes}\index{class}) that provide
+a structured way to introduce {\em overloaded} functions.
+This is the major technical innovation in \Haskell{}.
+
+A \mbox{\tt class} declaration (Section~\ref{class-decls}) introduces a new
+{\em type class} and the overloaded {\em operations} that must be
+supported by any type that is an instance of that class.  An
+\mbox{\tt instance} declaration (Section~\ref{instance-decls}) declares that a
+type is an {\em instance} of a class and includes
+the definitions of the overloaded operations---called {\em
+methods}---instantiated on the named type.
+\index{class method}
+
+For example, suppose we wish to overload the operations \mbox{\tt (+)} and
+\mbox{\tt negate} on types \mbox{\tt Int} and \mbox{\tt Float}.  We introduce a new
+type class called \mbox{\tt Num}:\nopagebreak[4]
+\bprog
+\mbox{\tt class\ Num\ a\ \ where\ \ \ \ \ \ \ \ \ \ --\ simplified\ class\ declaration\ for\ Num}\\
+\mbox{\tt \ \ (+)\ \ \ \ ::\ a\ ->\ a\ ->\ a}\\
+\mbox{\tt \ \ negate\ ::\ a\ ->\ a}
+\eprog
+This declaration may be read ``a type \mbox{\tt a} is an instance of the class
+\mbox{\tt Num} if there are (overloaded) operations \mbox{\tt (+)} and \mbox{\tt negate}, of the
+appropriate types, defined on it.''
+
+We may then declare \mbox{\tt Int} and \mbox{\tt Float} to be instances of this class:
+\bprog
+\mbox{\tt instance\ Num\ Int\ \ where\ \ \ \ \ --\ simplified\ instance\ of\ Num\ Int}\\
+\mbox{\tt \ \ x\ +\ y\ \ \ \ \ \ \ =\ \ addInt\ x\ y}\\
+\mbox{\tt \ \ negate\ x\ \ \ \ =\ \ negateInt\ x}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt instance\ Num\ Float\ \ where\ \ \ --\ simplified\ instance\ of\ Num\ Float}\\
+\mbox{\tt \ \ x\ +\ y\ \ \ \ \ \ \ =\ \ addFloat\ x\ y}\\
+\mbox{\tt \ \ negate\ x\ \ \ \ =\ \ negateFloat\ x}
+\eprog
+where \mbox{\tt addInt}, \mbox{\tt negateInt}, \mbox{\tt addFloat}, and \mbox{\tt negateFloat} are assumed
+in this case to be primitive functions, but in general could be any
+user-defined function.  The first declaration above may be read
+``\mbox{\tt Int} is an instance of the class \mbox{\tt Num} as witnessed by these
+definitions (i.e.~methods)\index{class method} for \mbox{\tt (+)} and \mbox{\tt negate}.''
+
+More examples can be found in Wadler and Blott's paper
+\cite{wadler:classes}.
+
+\subsubsection{Syntax of Types}
+\label{type-syntax}
+\index{type}
+\label{types}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it type$\>\makebox[3.5em]{$\rightarrow$}$\it atype$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it type_1\ \makebox{\tt ->}\ type_2$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it tycon\ atype_1\ \ldots \ atype_k$\>\makebox[3em]{}$\it (\arity{tycon}=k\geq 1)$\\ 
+$\it $\\ 
+$\it atype$\>\makebox[3.5em]{$\rightarrow$}$\it tyvar$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it tycon$\>\makebox[3em]{}$\it (\arity{tycon}=0)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt ()}$\>\makebox[3em]{}$\it (\tr{unit\ type})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ type\ \makebox{\tt )}$\>\makebox[3em]{}$\it (\tr{parenthesised\ type})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ type_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ type_k\ \makebox{\tt )}$\>\makebox[3em]{}$\it (\tr{tuple\ type},\ k\geq 2)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt [}\ type\ \makebox{\tt ]}$
+\end{tabbing}\end{flushleft}
+\indexsyn{type}%
+\indexsyn{atype}%
+%\ToDo{I left off \mbox{$\it tyvar$} and \mbox{$\it tycon$}}
+
+\noindent
+The syntax for \Haskell{}
+{\em type expressions} is given above.\index{type expression} 
+They are built in the usual way
+from type variables, function types, type constructors, tuple types,
+and list types.  Type variables are identifiers beginning with a lower-case
+letter and type constructors are identifiers beginning with an upper-case
+letter.  A type is one of:\nopagebreak[4]
+\begin{enumerate}
+\item A {\em function type}\index{function type} having form 
+\mbox{$\it t_1\ \makebox{\tt ->}\ t_2$}.  Function arrows associate to the right.
+
+\item A {\em constructed type}\index{constructed type} having form 
+\mbox{$\it T\ t_1\ \ldots \ t_k$}, where \mbox{$\it T$} is a type constructor of arity \mbox{$\it k$}.
+
+\item A {\em tuple type}\index{tuple type} having form 
+\mbox{$\it \makebox{\tt (}t_1\makebox{\tt ,}\ \ldots \makebox{\tt ,}\ t_k\makebox{\tt )}$} where \mbox{$\it k\geq 2$}.  It denotes the type of
+\mbox{$\it k$}-tuples with the first component of type \mbox{$\it t_1$}, the second
+component of type \mbox{$\it t_2$}, and so on (see Sections~\ref{tuples}
+and \ref{basic-tuples}).
+
+\item A {\em list type}\index{list type} has the form \mbox{$\it \makebox{\tt [}t\makebox{\tt ]}$}.  
+It denotes the type of lists with elements of type \mbox{$\it t$} (see
+Sections~\ref{lists} and \ref{basic-lists}).
+
+\item The {\em trivial type}\index{trivial type} having form \mbox{\tt ()}.
+% was ``degenerate tuple'' (mismatched exps.verb)
+It denotes the ``nullary tuple'' type, and has exactly one value,
+also written \mbox{\tt ()} (see Sections~\ref{unit-expression}
+and~\ref{basic-trivial}).
+
+\item A {\em parenthesised type}, having form \mbox{$\it \makebox{\tt (}t\makebox{\tt )}$}, is identical to
+the type \mbox{$\it t$}.
+\end{enumerate}
+
+Although the tuple, list, and trivial types have special syntax, they
+are not different from user-defined types with equivalent
+functionality.
+
+% \outline{
+% \paragraph{Translation:}  
+% The list type \mbox{$\it \makebox{\tt [}t\makebox{\tt ]}$} is equivalent to the constructed type 
+% \mbox{$\it \makebox{\tt List}\ t$}, where \mbox{\tt List} is a datatype defined in the standard prelude
+% (see Section~\ref{lists}).  Similarly, the tuple type
+% \mbox{$\it \makebox{\tt (}t_1\makebox{\tt ,}\ldots \makebox{\tt ,}t_k\makebox{\tt )}$} is syntax for \mbox{$\it \makebox{\tt Tuple}k\ t_1\ \ldots \ t_k$}, where
+% \mbox{$\it \makebox{\tt Tuple}k$} is a type constructor implicitly defined for k-tuples in
+% the standard prelude (see Section~\ref{tuples}).  Finally, the
+% trivial type \mbox{\tt ()} is syntax for the type \mbox{\tt Triv} defined in the
+% standard prelude (see Section~\ref{basic-trivial}).
+% }
+
+Expressions and types have a consistent syntax.
+If \mbox{$\it t_i$} is the type of
+expression or pattern \mbox{$\it e_i$}, then the expressions \mbox{$\it \makebox{\tt ({\char'134}}\ e_1\ \makebox{\tt ->}\ e_2\makebox{\tt )}$},
+\mbox{$\it \makebox{\tt [}e_1\makebox{\tt ]}$}, and \mbox{$\it \makebox{\tt (}e_1,e_2\makebox{\tt )}$} have the types \mbox{$\it \makebox{\tt (}t_1\ \makebox{\tt ->}\ t_2\makebox{\tt )}$},
+\mbox{$\it \makebox{\tt [}t_1\makebox{\tt ]}$}, and \mbox{$\it \makebox{\tt (}t_1,t_2\makebox{\tt )}$}, respectively.
+
+With one exception, the type variables in a \Haskell{} type expression
+are all assumed to be universally quantified; there is no explicit
+syntax for universal quantification \cite{damas-milner82,reynolds90}.
+For example, the type expression
+\mbox{\tt a\ ->\ a} denotes the type $\forall a.~a \rightarrow a$.
+For clarity, however, we will often write quantification explicitly
+when discussing the types of \Haskell{} programs.
+
+The exception referred to is that of the distinguished type variable
+in a class declaration (Section~\ref{class-decls}).
+
+%Every type variable appearing in a signature
+%is universally quantified over that signature.  This last
+%constraint implies that signatures such as:
+%\bprog
+%@
+%       \ x -> ([x] :: [a])
+%@
+%\eprog
+%are not valid, because this declares \mbox{\tt [x]} to be of type 
+%\mbox{$\it \forall\ a.\makebox{\tt [}a\makebox{\tt ]}$}.  In contrast, this {\em is} a valid signature:
+%\mbox{\tt ({\char'134}\ x\ ->\ [x])\ ::\ a\ ->\ [a]}; it declares that \mbox{\tt ({\char'134}\ x\ ->\ [x])} has type
+%\mbox{$\it \forall\ a.a\ \makebox{\tt ->}\ \makebox{\tt [}a\makebox{\tt ]}$}.
+
+\subsubsection{Syntax of Class Assertions and Contexts}
+\index{class assertion}
+\index{context}
+\label{classes&contexts}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it context$\>\makebox[3.5em]{$\rightarrow$}$\it class$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ class_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ class_n\ \makebox{\tt )}$\>\makebox[3em]{}$\it (n\geq 1)$\\ 
+$\it class$\>\makebox[3.5em]{$\rightarrow$}$\it tycls\ tyvar$\\ 
+$\it tycls$\>\makebox[3.5em]{$\rightarrow$}$\it aconid$\\ 
+$\it tyvar$\>\makebox[3.5em]{$\rightarrow$}$\it avarid$
+\end{tabbing}\end{flushleft}
+\indexsyn{context}%
+\indexsyn{class}%
+\indexsyn{tycls}%
+\indexsyn{tyvar}%
+A {\em class assertion} has form \mbox{$\it tycls\ tyvar$}, and
+indicates the membership of the parameterised type \mbox{$\it tyvar$} in the class
+\mbox{$\it tycls$}.  A class identifier begins with a capital
+letter.
+
+A {\em context} consists of one or more class assertions,
+and has the general form
+\[
+\mbox{$\it \makebox{\tt (}\ C_1\ u_1,\ \ldots ,\ C_n\ u_n\ \makebox{\tt )}$}
+\]
+where \mbox{$\it C_1,\ \ldots ,\ C_n$} are class identifiers, and \mbox{$\it u_1,\ \ldots ,\ u_n$} are
+type variables; the parentheses may be omitted when \mbox{$\it n=1$}.  In
+general, we use \mbox{$\it c$} to denote a context and we write \mbox{$\it c\ \makebox{\tt =>}\ t$} to
+indicate the type \mbox{$\it t$} restricted by the context \mbox{$\it c$}.
+The context \mbox{$\it c$} must only contain type variables referenced in \mbox{$\it t$}.
+For convenience,
+we write \mbox{$\it c\ \makebox{\tt =>}\ t$} even if the context \mbox{$\it c$} is empty, although in this
+case the concrete syntax contains no \mbox{\tt =>}.
+
+\subsubsection{Semantics of Types and Classes}
+\label{type-semantics}
+
+In this subsection, we provide informal details of the type system.
+% the formal semantics is described in Appendix~\ref{static-semantics}
+(Wadler and Blott \cite{wadler:classes} discuss type
+classes further.)
+
+%A type is a {\em monotype\/}\index{monotype} if it contains no type
+%variables, and is {\em monomorphic\/}
+%\index{monomorphic type}
+%if it contains type variables
+%but is not polymorphic (in Milner's original terminology,
+%it is monomorphic if it contains no generic type variables).
+
+The \Haskell{} type system attributes a {\em type} to each
+\index{type}
+expression in the program.  In general, a type is of the form
+$\forall \overline{u}.~c \Rightarrow t$,
+where $\overline{u}$ is a set of type variables \mbox{$\it u_1,\ \ldots ,\ u_n$}.
+In any such type, any of the universally-quantified type variables \mbox{$\it u_i$}
+which are free in \mbox{$\it c$} must also be free in \mbox{$\it t$}.
+
+The type of an expression $e$
+depends on a {\em type environment}
+\index{type environment}
+that gives types for the free variables in \mbox{$\it e$}, and a
+{\em class environment}
+\index{class environment}
+that declares which types are instances of which classes (a type becomes
+an instance of a class only via the presence of an
+\mbox{\tt instance} declaration or a \mbox{\tt deriving} clause).
+
+Types are related by a generalisation order
+\index{generalisation order}
+(specified below);
+the most general type that can be assigned to a particular
+expression (in a given environment) is called its {\em
+principal type}.
+\index{principal type}
+\Haskell{}'s extended Hindley-Milner type system can infer the principal
+type of all expressions, including the proper use of overloaded
+operations (although certain ambiguous overloadings could arise, as
+described in Section~\ref{default-decls}).  Therefore, explicit typings (called
+{\em type signatures})
+\index{type signature}
+are optional (see
+Sections~\ref{expression-type-sigs} and~\ref{type-signatures}).
+
+The type $\forall \overline{u}.~c_1 \Rightarrow t_1$ is
+{\em more general than}
+the type $\forall \overline{w}.~c_2 \Rightarrow t_2$ if and only if there is 
+a substitution \mbox{$\it S$} whose domain is $\overline{u}$ such that:
+\begin{itemize}
+\item \mbox{$\it t_2$} is identical to \mbox{$\it S(t_1)$}.
+\item Whenever \mbox{$\it c_2$} holds in the class environment, \mbox{$\it S(c_1)$} also holds.
+\end{itemize}
+
+The main point about contexts above is that, given the type
+$\forall \overline{u}.~c \Rightarrow t$,
+the presence of \mbox{$\it C\ u_i$} in the context \mbox{$\it c$} expresses the
+constraint that the type variable \mbox{$\it u_i$} may be instantiated as \mbox{$\it t'$}
+within the type expression \mbox{$\it t$} only if \mbox{$\it t'$} is a member of the class
+\mbox{$\it C$}.  For example, consider the function \mbox{\tt double}:
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ double\ x\ =\ x\ +\ x}
+\eprog
+The most general type of \mbox{\tt double} is
+$\forall a.~\mbox{\tt Num}~a \Rightarrow a \rightarrow a$.
+\mbox{\tt double} may be applied to values of type \mbox{\tt Int} (instantiating \mbox{$\it a$} to
+\mbox{\tt Int}), since \mbox{\tt Int} is an instance of the class \mbox{\tt Num}.  However,
+\mbox{\tt double} may not be applies to values of type \mbox{\tt Char}, because \mbox{\tt Char}
+is not an instance of class \mbox{\tt Num}.
+
+
+\subsection{User-Defined Datatypes}
+\index{datatype}
+\label{user-defined-datatypes}
+
+In this section, we describe algebraic datatypes (\mbox{\tt data} declarations)
+and type synonyms (\mbox{\tt type} declarations).  These declarations
+may only appear at the top level of a module.
+
+\subsubsection{Algebraic Datatype Declarations}
+\index{algebraic datatype}
+\label{datatype-decls}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it topdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt data}\ [context\ \makebox{\tt =>}]\ simple\ \makebox{\tt =}\ constrs\ [\makebox{\tt deriving}\ (tycls\ |\ \makebox{\tt (}tyclses\makebox{\tt )})]$\\ 
+$\it simple$\>\makebox[3.5em]{$\rightarrow$}$\it tycon\ tyvar_1\ \ldots \ tyvar_k$\>\makebox[3em]{}$\it (\arity{tycon}=k\geq 0)$\\ 
+$\it constrs$\>\makebox[3.5em]{$\rightarrow$}$\it constr_1\ \makebox{\tt |}\ \ldots \ \makebox{\tt |}\ constr_n$\>\makebox[3em]{}$\it (n\geq 1)$\\ 
+$\it constr$\>\makebox[3.5em]{$\rightarrow$}$\it con\ atype_1\ \ldots \ atype_k$\>\makebox[3em]{}$\it (\arity{con}=k\geq 0)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it type_1\ conop\ type_2$\>\makebox[3em]{}$\it (\infix{conop})$\\ 
+$\it tyclses$\>\makebox[3.5em]{$\rightarrow$}$\it tycls_1\makebox{\tt ,}\ \ldots \makebox{\tt ,}\ tycls_n$\>\makebox[3em]{}$\it (n\geq 0)$
+\end{tabbing}\end{flushleft}
+\index{topdecl@{\em topdecl} (\mbox{\tt data})}%
+\indexsyn{simple}%
+\indexsyn{constrs}%
+\indexsyn{constr}%
+\indexsyn{tyclses}%
+\index{data declaration@{\ptt data} declaration}
+The precedence\index{precedence} for \mbox{$\it constr$} is the same as that for
+expressions---normal constructor application has higher precedence
+than infix constructor application (thus \mbox{\tt a\ :\ Foo\ a} parses as 
+\mbox{\tt a\ :\ (Foo\ a)}).
+
+An algebraic datatype declaration introduces a new type
+and constructors over that type and has the form:
+\[
+\mbox{$\it \makebox{\tt data}\ c\ \makebox{\tt =>}\ T\ u_1\ \ldots \ u_k\ \makebox{\tt =}\ K_1\ t_{11}\ \ldots \ t_{1k_1}\ \makebox{\tt |}\ \cdots\ \makebox{\tt |}\ K_n\ t_{n1}\ \ldots \ t_{nk_n}$}
+\]
+where \mbox{$\it c$} is a context.
+\index{context!in data declaration@in {\ptt data} declaration}
+This declaration
+introduces a new type constructor \mbox{$\it T$} with constituent data
+constructors \mbox{$\it K_1,\ \ldots ,\ K_n$} whose types are given by:
+\[
+\mbox{$\it K_i\ ::\ \forall\ u_1\ \ldots \ u_k.~\ c_i\ \Rightarrow\ t_{i1}\ \rightarrow\ \cdots\ \rightarrow\ t_{ik_i}\ \rightarrow\ (T\ u_1\ \ldots \ u_k)$}
+\]
+where \mbox{$\it c_i$} is the largest subset of \mbox{$\it c$} that constrains only those type
+variables free in the types \mbox{$\it t_{i1},\ \ldots ,\ t_{ik_i}$}.
+The type variables \mbox{$\it u_1$} through \mbox{$\it u_k$} must be distinct and may appear
+in \mbox{$\it c$} and the $t_{ij}$; it is a static error
+for any other type variable to appear in \mbox{$\it c$} or on the right-hand-side.
+
+For example, the declaration
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ data\ Eq\ a\ =>\ Set\ a\ =\ NilSet\ |\ ConsSet\ a\ (Set\ a)}
+\eprog
+introduces a type constructor \mbox{\tt Set}, and constructors \mbox{\tt NilSet} and
+\mbox{\tt ConsSet} with types
+\[\begin{array}{ll}
+\mbox{\tt NilSet}  & \mbox{$\it ::\ \forall\ a.~\ \makebox{\tt Set}~\ a$} \\
+\mbox{\tt ConsSet} & \mbox{$\it ::\ \forall\ a.~\ \makebox{\tt Eq}~\ a\ \Rightarrow\ a\ \rightarrow\ \makebox{\tt Set}~\ a\ \rightarrow\ \makebox{\tt Set}~\ a$}
+\end{array}\]
+In the example given, the overloaded
+type for \mbox{\tt ConsSet} ensures that \mbox{\tt ConsSet} can only be applied to values whose
+type is an instance of the class \mbox{\tt Eq}.  The context in the \mbox{\tt data}
+declaration has no other effect whatsoever.  In particular, pattern
+matching is unaffected.
+
+The visibility of a datatype's constructors (i.e.~the ``abstractness''
+of the datatype) outside of the module in which the datatype is
+defined is controlled by the form of the datatype's name in the export
+list as described in Section~\ref{abstract-types}.
+
+The optional \mbox{$\it \makebox{\tt deriving}$} part of a \mbox{\tt data} declaration has to do
+with {\em derived instances}, and is described in
+Section~\ref{derived-decls}.
+
+\subsubsection{Type Synonym Declarations}
+\index{type synonym}
+\label{type-synonym-decls}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it topdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt type}\ simple\ \makebox{\tt =}\ type$\\ 
+$\it simple$\>\makebox[3.5em]{$\rightarrow$}$\it tycon\ tyvar_1\ \ldots \ tyvar_k$\>\makebox[3em]{}$\it (\arity{tycon}=k\geq 0)$
+\end{tabbing}\end{flushleft}
+\index{topdecl@{\em topdecl} (\mbox{\tt type})}%
+\indexsyn{simple}%
+A type synonym declaration introduces a new type that
+is equivalent to an old type and has the form
+\[
+\mbox{$\it \makebox{\tt type}\ T\ u_1\ \ldots \ u_k\ \makebox{\tt =}\ t$}
+\]
+which introduces a new type constructor, \mbox{$\it T$}.  The type \mbox{$\it (T\ t_1\ \ldots \\
+\it t_k)$} is equivalent to the type \mbox{$\it t[t_1/u_1,\ \ldots ,\ t_k/u_k]$}.  The type
+variables \mbox{$\it u_1$} through \mbox{$\it u_k$} must be distinct and are scoped only
+over \mbox{$\it t$}; it is a static error for any other type variable to appear
+in \mbox{$\it t$}.
+
+Although recursive and mutually recursive datatypes are allowed,
+\index{recursive datatype}
+\index{type synonym!recursive}
+this is not so for type synonyms, {\em unless an algebraic datatype
+intervenes}.  For example,
+\bprog
+\mbox{\tt type\ Rec\ a\ \ \ =\ \ [Circ\ a]}\\
+\mbox{\tt data\ Circ\ a\ \ =\ \ Tag\ [Rec\ a]}
+\eprog
+is allowed, whereas
+\bprog
+\mbox{\tt type\ Rec\ a\ \ \ =\ \ [Circ\ a]\ \ \ \ \ \ \ \ --\ ILLEGAL}\\
+\mbox{\tt type\ Circ\ a\ \ =\ \ [Rec\ a]\ \ \ \ \ \ \ \ \ --}
+\eprog
+is not. Similarly, \mbox{\tt type\ Rec\ a\ =\ [Rec\ a]} is not allowed.
+
+\subsection{Type Classes and Overloading}
+\index{class}
+\index{overloading}
+\label{overloading}
+\label{classes}
+
+\subsubsection{Class Declarations}
+\index{class declaration}
+%\index{class declaration@{\ptt class} declaration}
+\label{class-decls}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it topdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt class}\ [context\ \makebox{\tt =>}]\ class\ [\makebox{\tt where}\ \makebox{\tt {\char'173}}\ cbody\ [\makebox{\tt ;}]\ \makebox{\tt {\char'175}}]$\\ 
+$\it cbody$\>\makebox[3.5em]{$\rightarrow$}$\it [csigns\ \makebox{\tt ;}]\ [valdefs]$\\ 
+$\it csigns$\>\makebox[3.5em]{$\rightarrow$}$\it csign_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ csign_n$\>\makebox[3em]{}$\it (n\geq 1)$\\ 
+$\it csign$\>\makebox[3.5em]{$\rightarrow$}$\it vars\ \makebox{\tt ::}\ [context\ \makebox{\tt =>}]\ type$\\ 
+$\it vars$\>\makebox[3.5em]{$\rightarrow$}$\it var_1\ \makebox{\tt ,}\ \ldots \makebox{\tt ,}\ var_n$\>\makebox[3em]{}$\it (n\geq 1)$
+\end{tabbing}\end{flushleft}
+\index{topdecl@{\em topdecl} (\mbox{\tt class})}%
+\indexsyn{cbody}%
+\indexsyn{csigns}%
+\indexsyn{csign}%
+\indexsyn{vars}%
+\index{declaration!within a {\ptt class} declaration}
+%\ToDo{tycls and tyvar left off above}
+
+\noindent
+A {\em class declaration} introduces a new class and the operations on it.
+A class declaration has the general form:
+\[\begin{array}{rl}
+\mbox{$\it \makebox{\tt class}\ c\ \makebox{\tt =>}\ C\ u\ \makebox{\tt where}\ \makebox{\tt {\char'173}}$}&\mbox{$\it v_1\ \makebox{\tt ::}\ c_1\ \makebox{\tt =>}\ t_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ v_n\ \makebox{\tt ::}\ c_n\ \makebox{\tt =>}\ t_n\ \makebox{\tt ;}$}\\
+                                &\mbox{$\it valdef_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ valdef_m\ \makebox{\tt {\char'175}}$}
+\end{array}\]
+This introduces a new class name \mbox{$\it C$}; the type variable \mbox{$\it u$} is
+scoped only over the method signatures in the class body.
+The context \mbox{$\it c$} specifies the superclasses\index{superclass} of \mbox{$\it C$}, as
+described below; the only type variable that may be referred to in \mbox{$\it c$}
+is \mbox{$\it u$}.
+The class declaration introduces new {\em class methods}
+\index{class method}
+\mbox{$\it v_1,\ \ldots ,\ v_n$}, whose scope extends outside the \mbox{\tt class} declaration,
+with types:
+\[
+v_i :: \forall u,\overline{w}.~(C u, c_i) \Rightarrow t_i
+\]
+%old:
+%Note the implicit context in the types for each \mbox{$\it v_i$}.  
+The \mbox{$\it t_i$} must mention \mbox{$\it u$}; they may mention type variables
+$\overline{w}$ other than \mbox{$\it u$}, and the type of \mbox{$\it v_i$} is
+polymorphic in both \mbox{$\it u$} and $\overline{w}\/$.
+The \mbox{$\it c_i$} may constrain only $\overline{w}$; in particular,
+the \mbox{$\it c_i$} may not constrain \mbox{$\it u$}.
+For example:
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ class\ Foo\ a\ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ op\ ::\ Num\ b\ =>\ a\ ->\ b\ ->\ a}
+\eprog
+Here the type of \mbox{\tt op} is
+$\forall a, b.~(\mbox{\tt Foo}~a,~\mbox{\tt Num}~b)~ \Rightarrow a \rightarrow b \rightarrow a$.
+
+{\em Default methods}
+\index{default method}
+for any of the \mbox{$\it v_i$} may be included in the
+\mbox{\tt class} declaration as a normal \mbox{$\it valdef$}; no other definitions are
+permitted.  The default method for \mbox{$\it v_i$} is used if no binding for it
+is given in a particular \mbox{\tt instance} declaration (see
+Section~\ref{instance-decls}).
+
+Two classes in scope at the same time may not share any of the same
+methods.
+
+\begin{figure}
+\outline{
+\mbox{\tt class\ \ Eq\ a\ \ where\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ --\ \ \ Eq}\\
+\mbox{\tt \ \ \ \ \ \ \ \ (==),\ (/=)\ \ ::\ \ a\ ->\ a\ ->\ Bool\ \ \ \ \ \ \ \ \ \ \ --\ \ \ \ |}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ --\ \ \ Ord}\\
+\mbox{\tt \ \ \ \ \ \ \ \ x\ /=\ y\ \ \ =\ \ not\ (x\ ==\ y)\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ --\ \ \ /\ {\char'134}}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ --\ \ Ix\ Enum}\\
+\mbox{\tt class\ \ (Eq\ a)\ =>\ Ord\ a\ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ (<),\ (<=),\ (>=),\ (>)\ ::\ \ a\ ->\ a\ ->\ Bool}\\
+\mbox{\tt \ \ \ \ \ \ \ \ max,\ min\ \ \ \ \ \ \ \ \ \ \ \ \ ::\ \ a\ ->\ a\ ->\ a}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ \ \ \ \ x\ <\ \ y\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ x\ <=\ y\ {\char'46}{\char'46}\ x\ /=\ y}\\
+\mbox{\tt \ \ \ \ \ \ \ \ x\ >=\ y\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ y\ <=\ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ x\ >\ \ y\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ y\ <\ \ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ max\ x\ y\ |\ x\ >=\ y\ \ \ \ \ \ =\ \ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ y\ >=\ x\ \ \ \ \ \ =\ \ y}\\
+\mbox{\tt \ \ \ \ \ \ \ \ min\ x\ y\ |\ x\ <=\ y\ \ \ \ \ \ =\ \ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ y\ <=\ x\ \ \ \ \ \ =\ \ y}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt class\ \ Text\ a\ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ showsPrec\ ::\ Int\ ->\ a\ ->\ String\ ->\ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readsPrec\ ::\ Int\ ->\ String\ ->\ [(a,String)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ showList\ \ ::\ [a]\ ->\ String\ ->\ String}\\
+\mbox{\tt \ \ \ \ \ \ \ \ readList\ \ ::\ String\ ->\ [([a],String)]}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ \ \ \ \ showList\ =\ ...\ --\ see\ Appendix\ A\ \ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ readList\ =\ ...\ --\ see\ Appendix\ A\ \ }\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt class\ \ Binary\ a\ \ where\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ showBin\ ::\ a\ ->\ Bin\ ->\ Bin\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ readBin\ ::\ Bin\ ->\ (a,Bin)\ \ }\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt class\ \ (Ord\ a)\ =>\ Ix\ a\ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ range\ \ \ ::\ (a,a)\ ->\ [a]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ index\ \ \ ::\ (a,a)\ ->\ a\ ->\ Int}\\
+\mbox{\tt \ \ \ \ \ \ \ \ inRange\ ::\ (a,a)\ ->\ a\ ->\ Bool}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt class\ \ (Ord\ a)\ =>\ Enum\ a\ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ enumFrom\ \ \ \ \ \ \ ::\ a\ ->\ [a]\ \ \ \ \ \ \ \ \ \ \ \ \ --\ [n..]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ enumFromThen\ \ \ ::\ a\ ->\ a\ ->\ [a]\ \ \ \ \ \ \ \ --\ [n,n'..]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ enumFromTo\ \ \ \ \ ::\ a\ ->\ a\ ->\ [a]\ \ \ \ \ \ \ \ --\ [n..m]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ enumFromThenTo\ ::\ a\ ->\ a\ ->\ a\ ->\ [a]\ \ \ --\ [n,n'..m]}\\
+\mbox{\tt }\\[-8pt]
+\mbox{\tt \ \ \ \ \ \ \ \ enumFromTo\ n\ m\ \ \ \ \ \ \ \ =\ takeWhile\ ((>=)\ m)\ (enumFrom\ n)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ enumFromThenTo\ n\ n'\ m\ =\ takeWhile}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ((if\ n'\ >=\ n\ then\ (>=)\ else\ (<=))\ m)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (enumFromThen\ n\ n')}
+}
+\ecaption{Standard Classes and Associated Functions}
+\label{standard-classes}
+\indextt{Eq}\indextt{==}\indextt{/=}
+\indextt{Ord}\indextt{<}\indextt{<=}\indextt{>}\indextt{>=}\indextt{max}\indextt{min}
+\indextt{Text}\indextt{showsPrec}\indextt{readsPrec}\indextt{showList}\indextt{readList}
+\indextt{Binary}\indextt{showBin}\indextt{readBin}
+\indextt{Ix}\indextt{range}\indextt{index}\indextt{inRange}
+\indextt{Enum}\indextt{enumFrom}\indextt{enumFromThen}
+\indextt{enumFromTo}\indextt{enumFromThenTo}
+\end{figure}
+
+Figure~\ref{standard-classes} shows some standard \Haskell{}
+classes, including the use of superclasses; note the class inclusion
+diagram on the right.  For example, \mbox{\tt Eq} is a superclass of \mbox{\tt Ord}, and
+thus in any context \mbox{\tt Ord\ a} is equivalent to \mbox{\tt (Eq\ a,\ Ord\ a)}.  
+
+A \mbox{\tt class}
+declaration with no \mbox{\tt where} part
+\index{class declaration!with an empty \mbox{\tt where} part}
+may be useful for combining a
+collection of classes into a larger one that inherits all of the
+operations in the original ones.  For example:
+\bprog
+\mbox{\tt class\ \ (Ord\ a,\ Text\ a,\ Binary\ a)\ =>\ Data\ a}
+\eprog
+In such a case, if a type is an instance of all superclasses,\index{superclass} it is
+not {\em automatically} an instance of the subclass, even though the
+subclass has no immediate operations.  The \mbox{\tt instance} declaration must be
+given explicitly, and it must have an empty \mbox{\tt where} part as well.
+\index{instance declaration!with an empty \mbox{\tt where} part}
+
+The superclass relation must not be cyclic; i.e.~it must form a
+directed acyclic graph.\index{superclass}
+
+\subsubsection{Instance Declarations}
+\label{instance-decls}
+\index{instance declaration}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it topdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt instance}\ [context\ \makebox{\tt =>}]\ tycls\ inst\ [\makebox{\tt where}\ \makebox{\tt {\char'173}}\ valdefs\ [\makebox{\tt ;}]\ \makebox{\tt {\char'175}}]$\\ 
+$\it inst$\>\makebox[3.5em]{$\rightarrow$}$\it tycon$\>\makebox[3em]{}$\it (\arity{tycon}=0)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ tycon\ tyvar_1\ \ldots \ tyvar_k\ \makebox{\tt )}$\>\makebox[3em]{}$\it (k\geq 1,\ tyvars\ {\rm\ distinct})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ tyvar_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ tyvar_k\ \makebox{\tt )}$\>\makebox[3em]{}$\it (k\geq 2,\ tyvars\ {\rm\ distinct})$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt ()}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt [}\ tyvar\ \makebox{\tt ]}$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ tyvar_1\ \makebox{\tt ->}\ tyvar_2\ \makebox{\tt )}$\>\makebox[3em]{}$\it tyvar_1\ {\rm\ and}\ tyvar_2\ {\rm\ distinct}$\\ 
+$\it $\\ 
+$\it valdefs$\>\makebox[3.5em]{$\rightarrow$}$\it valdef_1\ \makebox{\tt ;}\ \ldots \ \makebox{\tt ;}\ valdef_n$\>\makebox[3em]{}$\it (n\geq 0)$
+\end{tabbing}\end{flushleft}
+\index{topdecl@{\em topdecl} (\mbox{\tt instance})}
+\indexsyn{inst}%
+\indexsyn{valdefs}%
+%\index{instance declaration@{\ptt instance} declaration}
+\index{declaration!within an {\ptt instance} declaration}
+%\ToDo{tycls left off above}
+An {\em instance declaration} introduces an instance of a class.  Let
+\[ \mbox{$\it \makebox{\tt class}\ c\ \makebox{\tt =>}\ C\ u\ \makebox{\tt where}\ \makebox{\tt {\char'173}}\ cbody\ \makebox{\tt {\char'175}}$} \]
+be a \mbox{\tt class} declaration.  The general form of the corresponding
+instance declaration is:
+\[ \mbox{$\it \makebox{\tt instance}\ c'\ \makebox{\tt =>}\ C\ (T\ u_1\ \ldots \ u_k)\ \makebox{\tt where}\ \makebox{\tt {\char'173}}\ d\ \makebox{\tt {\char'175}}$} \]
+where \mbox{$\it k\geq0$} and \mbox{$\it T$} is not a type synonym.
+\index{type synonym}
+The type being instanced, \mbox{$\it (T\ u_1\ \ldots \ u_k)$}, is
+a type constructor applied to simple type variables \mbox{$\it u_1,\ \ldots \ u_k$},
+which must be distinct.  This prohibits instance declarations
+such as:
+\bprog
+\mbox{\tt instance\ C\ (a,a)\ where\ ...}\\
+\mbox{\tt instance\ C\ (Int,a)\ where\ ...}\\
+\mbox{\tt instance\ C\ [[a]]\ where\ ...}
+\eprog
+
+The context \mbox{$\it c'$} must
+imply the context \mbox{$\it c[(T\ u_1\ \ldots \ u_k)/u]$}, and \mbox{$\it d$} may contain bindings
+\index{class method}
+only for the class methods of \mbox{$\it C$}.  No type signatures
+\index{type signature} may appear in \mbox{$\it d$}, as the signatures for the
+methods have already been given in the \mbox{\tt class} declaration.
+
+%No contexts may appear
+%in \mbox{$\it d$}, since they are implied: any signature declaration in \mbox{$\it d$} will
+%have the form \mbox{$\it v\ \makebox{\tt ::}\ t$}, abbreviating \mbox{$\it v\ \makebox{\tt ::}\ c'\ \makebox{\tt =>}\ t$}.
+%Each \mbox{$\it v_i$} has type:
+%\[ \mbox{$\it v_i\ \makebox{\tt ::}\ c'\ \makebox{\tt =>}\ (t_i[(T\ u_1\ \ldots \ u_k)/u])$} \]
+
+If no binding is given for some class method then the
+corresponding default method
+\index{default method}
+in the \mbox{\tt class} declaration is used (if
+present); if such a default does
+not exist then the class method at this instance
+is implicitly bound to the completely undefined
+function (of the appropriate type) and no static error results.
+
+An \mbox{\tt instance} declaration that makes the type \mbox{$\it T$} to be an instance
+of class \mbox{$\it C$} is called a {\em C-T instance declaration}
+\index{C-T instance declaration@$C$-$T$ instance declaration} and is
+subject to these static restrictions:
+\index{instance declaration!with respect to modules}
+\begin{itemize}
+\item A $C$-$T$ instance declaration may only appear either in the module
+in which $C$ is declared or in the module in which $T$ is declared, and
+only where both $C$ and $T$ are in scope.
+
+\item A type may not be declared as an instance of a
+particular class more than once in the same scope.
+\end{itemize}
+
+Examples of \mbox{\tt instance} declarations may be found in the next section on
+derived instances.  
+
+\subsubsection{Derived Instances}
+\index{derived instance}
+\label{derived-decls}
+
+As mentioned in Section~\ref{datatype-decls}, \mbox{\tt data} declarations
+contain an optional \mbox{\tt deriving} form.  If the form is included, then
+{\em derived instance declarations} are automatically generated for
+the datatype in each of the named classes.
+If a derived instance of a subclass is asked
+for, then each of the superclasses\index{superclass} must either be asked for or an
+explicit instance declaration must be given for it.
+
+Derived instances provide convenient commonly-used operations for
+user-de\-fined da\-ta\-types.  For example, derived instances for datatypes
+in the class \mbox{\tt Eq} define the operations \mbox{\tt ==} and \mbox{\tt /=}, freeing the
+programmer from the need to define them.
+%and taking advantage of
+%\Haskell{}'s class mechanism to overload these operations.
+
+The only classes for which derived instances are allowed are
+\mbox{\tt Eq}\index{Eq@{\ptt Eq}!derived instance},
+\mbox{\tt Ord}\index{Ord@{\ptt Ord}!derived instance}, 
+\mbox{\tt Ix}\index{Ix@{\ptt Ix}!derived instance}, 
+\mbox{\tt Enum}\index{Enum@{\ptt Enum}!derived instance}, 
+\mbox{\tt Text}\index{Text@{\ptt Text}!derived instance}, and 
+\mbox{\tt Binary}\index{Binary@{\ptt Binary}!derived instance},
+all defined in Figure~\ref{standard-classes}, page~\pageref{standard-classes}.
+The
+precise details of how the derived instances are generated for each of
+these classes are provided in Appendix~\ref{derived-appendix}, including
+a specification of when such derived instances are possible. 
+%(which is important for the following discussion).
+
+If it is not possible to derive an \mbox{\tt instance} declaration over a class
+named in a \mbox{\tt deriving} form, then a static error results.  For example,
+not all datatypes can properly support operations in \mbox{\tt Enum}.\indextt{Enum}  It is
+also a static error to give an explicit \mbox{\tt instance} declaration for
+one that is also derived.
+%These rules also apply to the superclasses
+%of the class in question.
+
+If the \mbox{\tt deriving} form is omitted from a \mbox{\tt data}
+declaration, then {\em no} instance declarations will be derived for
+that datatype; that is, omitting a \mbox{\tt deriving} form is equivalent to
+including an empty deriving form: \mbox{\tt deriving\ ()}.
+
+% OLD:
+%On the other hand, if the \mbox{\tt deriving} form is omitted from a \mbox{\tt data}
+%declaration, then \mbox{\tt instance} declarations are derived for the datatype
+%in as many of the six classes mentioned above as is possible (see
+%Appendix~\ref{derived-appendix}); that is, no
+%static error will result if the \mbox{\tt instance} declarations cannot be generated.
+
+%OLD:
+%If {\em no} derived \mbox{\tt instance} declarations for a datatype
+%are wanted, then the empty deriving form \mbox{\tt deriving\ ()} must be given
+%in the \mbox{\tt data} declaration for that type.
+
+\subsubsection{Defaults for Overloaded Operations}
+\label{default-decls}
+\index{default declaration@{\ptt default} declaration}
+\index{overloading!defaults}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it topdecl$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt default}\ (type\ |\ \makebox{\tt (}type_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ type_n\makebox{\tt )})$\>\makebox[3em]{}$\it \qquad\ (n\geq 0)$
+\end{tabbing}\end{flushleft}
+\index{topdecl@{\em topdecl} (\mbox{\tt default})}
+
+\noindent
+A problem inherent with overloading is the possibility of an ambiguous type.
+\index{ambiguous type}
+For example, using the
+\mbox{\tt read} and \mbox{\tt show} functions defined in Appendix~\ref{derived-appendix},
+and supposing that just \mbox{\tt Int} and \mbox{\tt Bool} are members of \mbox{\tt Text}, then
+the expression
+\bprog
+\mbox{\tt let\ x\ =\ read\ "..."\ in\ show\ x\ \ \ \ --\ ILLEGAL}
+\eprog
+is ambiguous, because the types for \mbox{\tt show} and \mbox{\tt read},
+\[\begin{array}{ll}
+\mbox{\tt show} & \mbox{$\it ::\ \forall\ a.~\makebox{\tt Text}~\ a\ \Rightarrow\ a\ \rightarrow\ \makebox{\tt String}$} \\
+\mbox{\tt read} & \mbox{$\it ::\ \forall\ a.~\makebox{\tt Text}~\ a\ \Rightarrow\ \makebox{\tt String}\ \rightarrow\ a$}
+\end{array}\]
+could be satisfied by instantiating \mbox{\tt a} as either \mbox{\tt Int}
+in both cases, or \mbox{\tt Bool}.  Such expressions
+are considered ill-typed, a static error.
+
+We say that an expression \mbox{\tt e} is {\em ambiguously
+overloaded}
+\index{overloading!ambiguous}
+if, in its type \mbox{$\it \forall\ \overline{u}.~c\ \Rightarrow\ t$}, 
+there is a type variable $u$ in $\overline{u}$ which occurs in \mbox{$\it c$} 
+but not in \mbox{$\it t$}.  Such types are illegal.
+
+For example, the earlier expression involving \mbox{\tt show} and \mbox{\tt read} is
+ambiguously overloaded since its type is 
+$\forall a.~ \mbox{\tt Text}~ a \Rightarrow \mbox{\tt String}$.
+
+Overloading ambiguity, although rare, can only be circumvented by
+input from the user.  One way is through the use of {\em expression
+type-signatures}
+\index{expression type-signature}
+as described in Section~\ref{expression-type-sigs}.
+For example, for the ambiguous expression given earlier, one could
+write:
+\bprog
+\mbox{\tt let\ x\ =\ read\ "..."\ in\ show\ (x::Bool)}
+\eprog
+which disambiguates the type.
+
+Occasionally, an otherwise ambiguous expression needs to be made
+the same type as some variable, rather than being given a fixed
+type with an expression type-signature.  This is the purpose
+of the function \mbox{\tt asTypeOf} (Appendix~\ref{stdprelude}):
+\mbox{$\it x$} \mbox{\tt asTypeOf} \mbox{$\it y$} has the value of \mbox{$\it x$}, but \mbox{$\it x$} and \mbox{$\it y$} are
+forced to have the same type.  For example,
+\bprog
+\mbox{\tt approxSqrt\ x\ =\ encodeFloat\ 1\ (exponent\ x\ `div`\ 2)\ `asTypeOf`\ x}
+\eprog
+(See Section~\ref{coercion}.)
+
+Ambiguities in the class \mbox{\tt Num}\indextt{Num}
+are most common, so \Haskell{}
+provides another way to resolve them---with a {\em
+default declaration}:
+\[
+\mbox{$\it \makebox{\tt default\ (}t_1\ \makebox{\tt ,}\ \ldots \ \makebox{\tt ,}\ t_n\makebox{\tt )}$}
+\]
+where \mbox{$\it n\geq0$} (the parentheses may be omitted when \mbox{$\it n=1$}), and each
+\mbox{$\it t_i$} must be a monotype for which \mbox{$\it \makebox{\tt Num\ }t_i$} holds.
+In situations where an ambiguous type is discovered, an
+ambiguous type variable is defaultable if at least one
+of its classes is a numeric class and if all of its classes
+are either numeric classes or standard classes.
+(Figures~\ref{basic-numeric-1}--\ref{basic-numeric-3},
+pages~\pageref{basic-numeric-1}--\pageref{basic-numeric-3},
+show the numeric classes, and
+Figure~\ref{standard-classes}, page~\pageref{standard-classes},
+shows the standard classes.)
+Each defaultable variable is replaced by the first type in the
+default list that is an instance of all the ambiguous variable's classes.
+It is a static error if no such type is found.
+
+Only one default declaration is permitted per module, and its effect
+is limited to that module.  If no default declaration is given in a
+module then it defaults to:
+\bprog
+\mbox{\tt default\ (Int,\ Double)}
+\eprog
+The empty default declaration \mbox{\tt default\ ()} must be given to turn off
+all defaults in a module.
+
+\subsection{Nested Declarations}
+\label{nested}
+
+The following declarations may be used in any declaration list,
+including the top level of a module.
+
+\subsubsection{Type Signatures}
+\index{type signature}
+\label{type-signatures}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it decl$\>\makebox[3.5em]{$\rightarrow$}$\it vars\ \makebox{\tt ::}\ [context\ \makebox{\tt =>}]\ type$\\ 
+$\it vars$\>\makebox[3.5em]{$\rightarrow$}$\it var_1\ \makebox{\tt ,}\ \ldots \makebox{\tt ,}\ var_n$\>\makebox[3em]{}$\it (n\geq 1)$
+\end{tabbing}\end{flushleft}
+\indexsyn{decl}%
+\indexsyn{vars}%
+A type signature specifies types for variables, possibly with respect
+to a context.  A type signature has the form:
+\[
+\mbox{$\it x_1,\ \ldots ,\ x_n\ \makebox{\tt ::}\ c\ \makebox{\tt =>}\ t$}
+\]
+which is equivalent to asserting
+\mbox{$\it x_i\ \makebox{\tt ::}\ c\ \makebox{\tt =>}\ t$}
+for each \mbox{$\it i$} from \mbox{$\it 1$} to \mbox{$\it n$}.  Each \mbox{$\it x_i$} must have a value binding in
+the same declaration list that contains the type signature; i.e.~it is
+illegal to give a type signature for a variable bound in an
+outer scope.
+Moreover, it is illegal to give more than one type
+signature for one variable.
+
+As mentioned in Section~\ref{type-syntax},
+every type variable appearing in a signature
+is universally quantified over that signature, and hence
+the scope of a type variable is limited to the type
+signature that contains it.  For example, in the following
+declarations
+\bprog
+\mbox{\tt f\ ::\ a\ ->\ a}\\
+\mbox{\tt f\ x\ =\ x::a\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ --\ ILLEGAL}
+\eprog
+the \mbox{\tt a}'s in the two type signatures are quite distinct.  Indeed,
+these declarations contain a static error, since \mbox{\tt x} does not have
+type $\forall a.~a$.
+
+A type signature for \mbox{$\it x$} may be more specific than the principal
+type derivable from the value binding of \mbox{$\it x$} (see
+Section~\ref{type-semantics}), but it is an error to give a type
+that is more
+general than, or incomparable to, the principal type.
+\index{principal type}
+If a more specific type is given then all occurrences of the
+variable must be used at the more specific type or at a more
+specific type still.
+%
+For example, if we define\nopagebreak[4]
+\bprog
+\mbox{\tt sqr\ x\ \ =\ \ x*x}
+\eprog
+then the principal type is 
+$\mbox{\tt sqr} :: \forall a.~ \mbox{\tt Num}~ a \Rightarrow a \rightarrow a$, 
+which allows
+applications such as \mbox{\tt sqr\ 5} or \mbox{\tt sqr\ 0.1}.  It is also legal to declare
+a more specific type, such as
+\bprog
+\mbox{\tt sqr\ ::\ Int\ ->\ Int}
+\eprog
+but now applications such as \mbox{\tt sqr\ 0.1} are illegal.  Type signatures such as
+\bprog
+\mbox{\tt sqr\ ::\ (Num\ a,\ Num\ b)\ =>\ a\ ->\ b\ \ \ \ \ --\ ILLEGAL}\\
+\mbox{\tt sqr\ ::\ a\ ->\ a\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ --\ ILLEGAL}
+\eprog
+are illegal, as they are more general than the principal type of \mbox{\tt sqr}.
+
+\subsubsection{Function and Pattern Bindings}
+\label{function-bindings}\label{pattern-bindings}
+\index{function binding}\index{pattern binding}
+
+\begin{flushleft}\it\begin{tabbing}
+\hspace{0.5in}\=\hspace{3.0in}\=\kill
+$\it decl$\>\makebox[3.5em]{$\rightarrow$}$\it valdef$\\ 
+$\it $\\ 
+$\it valdef$\>\makebox[3.5em]{$\rightarrow$}$\it lhs\ \makebox{\tt =}\ exp\ [\makebox{\tt where}\ \makebox{\tt {\char'173}}\ decls\ [\makebox{\tt ;}]\ \makebox{\tt {\char'175}}]$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it lhs\ gdrhs\ [\makebox{\tt where}\ \makebox{\tt {\char'173}}\ decls\ [\makebox{\tt ;}]\ \makebox{\tt {\char'175}}]$\\ 
+$\it $\\ 
+$\it lhs$\>\makebox[3.5em]{$\rightarrow$}$\it apat$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it funlhs$\\ 
+$\it funlhs$\>\makebox[3.5em]{$\rightarrow$}$\it afunlhs$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it pat^{i+1}_1\ varop^{({\rm\ n},i)}\ pat^{i+1}_2$\>\makebox[3em]{}$\it (0\leq i\leq 9)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it lpat^i\ varop^{({\rm\ l},i)}\ pat^{i+1}$\>\makebox[3em]{}$\it (0\leq i\leq 9)$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it pat^{i+1}\ varop^{({\rm\ r},i)}\ rpat^i$\>\makebox[3em]{}$\it (0\leq i\leq 9)$\\ 
+$\it afunlhs$\>\makebox[3.5em]{$\rightarrow$}$\it var\ apat$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it \makebox{\tt (}\ funlhs\ \makebox{\tt )}\ apat$\\ 
+$\it $\>\makebox[3.5em]{$|$}$\it afunlhs\ apat$\\ 
+$\it $\\ 
+$\it gdrhs$\>\makebox[3.5em]{$\rightarrow$}$\it gd\ \makebox{\tt =}\ exp\ [gdrhs]$\\ 
+$\it $\\ 
+$\it gd$\>\makebox[3.5em]{$\rightarrow$}$\it \makebox{\tt |}\ exp$
+\end{tabbing}\end{flushleft}
+\indexsyn{decl}%
+\indexsyn{valdef}%
+\indexsyn{lhs}%
+\indexsyn{funlhs}%
+\indexsyn{afunlhs}%
+\indexsyn{gdrhs}%
+\indexsyn{gd}%
+We distinguish two cases within this syntax: a {\em pattern binding}
+occurs when \mbox{$\it lhs$} is \mbox{$\it apat$}; otherwise, the binding is called a {\em function
+binding}.  Either binding may appear at the top-level of a module or
+within a \mbox{\tt where} or \mbox{\tt let} construct.  The use of the nonterminal \mbox{$\it apat$}
+(rather than \mbox{$\it pat$}) in the production for \mbox{$\it lhs$} 
+disallows top level $n\mbox{\tt +}k$ pattern bindings;
+\index{n+k pattern@\mbox{$\it n\makebox{\tt +}k$} pattern}
+otherwise, programs such as \mbox{\tt x\ +\ 2\ =\ 3} could be parsed either as a
+definition of \mbox{\tt +} or as a pattern binding.
+
+\paragraph*{Function bindings.}
+\index{function binding}
+A function binding binds a variable to a function value.  The general
+form of a function binding for variable \mbox{$\it x$} is:
+\[\ba{lll}
+\mbox{$\it x$} & \mbox{$\it p_{11}\ \ldots \ p_{1k}$} & \mbox{$\it match_1$}\\
+\mbox{$\it \ldots $} \\
+\mbox{$\it x$} & \mbox{$\it p_{n1}\ \ldots \ p_{nk}$} & \mbox{$\it match_n$}
+\ea\]
+where each \mbox{$\it p_{ij}$} is a pattern, and where each \mbox{$\it match_i$} is of the
+general form:
+\[\ba{l}
+\mbox{$\it \makebox{\tt =}\ e\ \makebox{\tt where\ {\char'173}}\ decls\ \makebox{\tt {\char'175}}$}
+\ea\]
+or
+\[\ba{lll}
+\mbox{$\it \makebox{\tt |}\ g_{i1}$}   & \mbox{$\it \makebox{\tt =}\ e_{i1}$} \\
+\mbox{$\it \ldots $} \\
+\mbox{$\it \makebox{\tt |}\ g_{im_i}$} & \mbox{$\it \makebox{\tt =}\ e_{im_i}$} \\
+               & \multicolumn{2}{l}{\mbox{$\it \makebox{\tt where\ {\char'173}}\ decls_i\ \makebox{\tt {\char'175}}$}}
+\ea\]
+and where \mbox{$\it n\geq 1$}, \mbox{$\it 1\leq i\leq n$}, \mbox{$\it m_i\geq 1$}.  The former is treated
+as shorthand for a particular case of the latter, namely:
+\[\ba{l}
+\mbox{$\it \makebox{\tt |\ True\ =}\ e\ \makebox{\tt where\ {\char'173}}\ decls\ \makebox{\tt {\char'175}}$}
+\ea\]
+
+The set of patterns corresponding to each match must be {\em
+linear}\index{linearity}\index{linear pattern}---no variable is allowed
+to appear more than once in the entire set.
+
+Alternative syntax is provided for binding functional values to infix
+operators.  For example, these two function
+definitions are equivalent:
+\bprog
+\mbox{\tt plus\ x\ y\ z\ =\ x+y+z}\\
+\mbox{\tt (x\ }\bkqB\mbox{\tt plus}\bkqA\mbox{\tt \ y)\ z\ =\ x+y+z}
+\eprogNoSkip
+
+\outline{
+\paragraph*{Translation:}
+The general binding form for functions is semantically
+equivalent to the equation (i.e.~simple pattern binding):
+\[
+x\ x_1\ x_2\ ...\ x_k\mbox{\tt \ =\ case\ (}x_1\mbox{\tt ,\ }...\mbox{\tt ,\ }x_k\mbox{\tt )\ of}
+\ba[t]{lcl}
+\mbox{$\it \makebox{\tt (}p_{11},\ \ldots ,\ p_{1k}\makebox{\tt )}\ match_1$}  \\
+\mbox{$\it \ldots $} \\
+\mbox{$\it \makebox{\tt (}p_{m1},\ \ldots ,\ p_{mk}\makebox{\tt )}\ match_m$}
+\ea\]
+where the \mbox{$\it x_i$} are new identifiers.
+}
+
+\paragraph*{Pattern bindings.}
+\index{pattern binding}
+A pattern binding binds variables to values.  A {\em simple} pattern
+binding has form \mbox{$\it p\ =\ e$}.
+\index{simple pattern binding}
+In both a \mbox{\tt where} or \mbox{\tt let} clause
+and at the top level of a module, the pattern \mbox{$\it p$} is
+matched ``lazily'' as an irrefutable pattern
+\index{irrefutable pattern}
+by default (as if there
+were an implicit \mbox{\tt {\char'176}} in front of it).  See the translation in
+Section~\ref{let-expressions}.
+
+The {\em general} form of a pattern binding is \mbox{$\it p\ match$}, where a
+\mbox{$\it match$} is the same structure as for function bindings above; in other
+words, a pattern binding is:
+\[\ba{rcl}
+\mbox{$\it p$} & \mbox{$\it \makebox{\tt |}\ g_{1}$}   & \mbox{$\it \makebox{\tt =}\ e_{1}$} \\
+    & \mbox{$\it \makebox{\tt |}\ g_{2}$}   & \mbox{$\it \makebox{\tt =}\ e_{2}$} \\
+    & \mbox{$\it \ldots $} \\
+    & \mbox{$\it \makebox{\tt |}\ g_{m}$}   & \mbox{$\it \makebox{\tt =}\ e_{m}$} \\
+    & \multicolumn{2}{l}{\mbox{$\it \makebox{\tt where\ {\char'173}}\ decls\ \makebox{\tt {\char'175}}$}}
+\ea\]
+
+%{\em Note}: the simple form
+%\WeSay{Yes}
+%\mbox{$\it p\ \makebox{\tt =}\ e$} is equivalent to \mbox{$\it p\ \makebox{\tt |\ True\ =}\ e$}.
+
+\outline{
+\paragraph*{Translation:}
+The pattern binding above is semantically equivalent to this
+simple pattern binding:
+\[\ba{lcl}
+\mbox{$\it p$} &\mbox{\tt =}& \mbox{$\it \makebox{\tt let}\ decls\ \makebox{\tt in}$} \\
+    &   & \mbox{$\it \makebox{\tt if\ }g_1\makebox{\tt \ then\ }e_1\makebox{\tt \ else}$} \\
+    &   & \mbox{$\it \makebox{\tt if\ }g_2\makebox{\tt \ then\ }e_2\makebox{\tt \ else}$} \\
+    &   & ...                          \\
+    &   & \mbox{$\it \makebox{\tt if\ }g_m\makebox{\tt \ then\ }e_m\makebox{\tt \ else\ error\ "Unmatched\ pattern"}$}
+\ea\]
+}
+
+\subsection{Static semantics of function and pattern bindings}
+
+The static semantics of the function and pattern bindings of
+a \mbox{\tt let} expression or \mbox{\tt where} clause
+% (including that of the top-level of
+% a program that has been translated into a \mbox{\tt let} expression as
+% described at the beginning of Section~\ref{modules})
+is discussed in this section.
+
+\subsubsection{Dependency analysis}
+
+In general the static semantics is given by the
+normal Hindley-Milner\index{Hindley-Milner type system} inference rules,
+% as described in Appendix~\ref{static-semantics},
+except that a {\em dependency
+analysis\index{dependency analysis} transformation} is first performed
+to enhance polymorphism, as follows.
+Two variables bound by value declarations are in the
+same {\em declaration group} if either
+\index{declaration group}
+\begin{enumerate}
+\item
+they are bound by the same pattern binding, or
+\item
+their bindings are mutually recursive (perhaps via some
+other declarations which are also part of the group).
+\end{enumerate}
+Careful application of the following 
+rules causes each \mbox{\tt let} or \mbox{\tt where} construct to bind only the
+variables of a single declaration group, thus capturing the required
+dependency analysis:\footnote{%
+A similar transformation is described in 
+Peyton Jones' book \cite{peyton-jones:book}.}
+\begin{center}
+\bt{l}
+(1)~The order of declarations in \mbox{\tt where}/\mbox{\tt let} constructs is irrelevant. \\
+(2)~\mbox{\tt let\ {\char'173}}$d_1$\mbox{\tt ;\ }$d_2$\mbox{\tt {\char'175}\ in\ }$e$ = \mbox{\tt let\ {\char'173}}$d_1$\mbox{\tt {\char'175}\ in\ (let\ {\char'173}}$d_2$\mbox{\tt {\char'175}\ in\ }$e$\mbox{\tt )} \\
+\ \ \ \ (when no identifier bound in $d_2$ appears free in $d_1$)
+\et
+\end{center}
+
+%----------------
+
+\subsubsection{Generalisation}
+\label{generalisation}
+
+The Hindley-Milner type system assigns types to a \mbox{\tt let}-expression
+in two stages.
+First, the right-hand side of the declaration is typed, giving a type with
+no universal quantification.  Second, all type variables which occur in this
+type are universally quantified unless they are associated with
+bound variables in the type environment;
+this is called {\em generalisation}.\index{generalisation}
+Finally, the body of the \mbox{\tt let}-expression is typed.
+
+For example, consider the declaration
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ f\ x\ =\ let\ g\ y\ =\ (y,y)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ in\ ...}\\
+\mbox{\tt }
+\eprog
+The type of \mbox{\tt g}'s definition is 
+$a \rightarrow (a,a)$.  The generalisation step
+attributes to \mbox{\tt g} the polymorphic type 
+$\forall a.~ a \rightarrow (a,a)$,
+after which the typing of the ``\mbox{\tt ...}'' part can proceed.
+
+When typing overloaded definitions, all the overloading 
+constraints from a single declaration group are collected together, 
+to form the context for the type of each variable declared in the group.
+For example, in the definition:
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ f\ x\ =\ let\ g1\ x\ y\ =\ if\ x>y\ then\ show\ x\ else\ g2\ y\ x}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ g2\ p\ q\ =\ g1\ q\ p}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ in\ ...}
+\eprog
+The types of the definitions of \mbox{\tt g1} and \mbox{\tt g2} are both
+$a \rightarrow a \rightarrow \mbox{\tt String}$, and the accumulated constraints are
+$\mbox{\tt Ord}~a$ (arising from the use of \mbox{\tt >}), and $\mbox{\tt Text}~a$ (arising from the
+use of \mbox{\tt show}).
+The type variables appearing in this collection of constraints are
+called the {\em constrained type variables}.
+
+The generalisation step attributes to both \mbox{\tt g1} and \mbox{\tt g2} the type
+$\forall a.~(\mbox{\tt Ord}~a,~\mbox{\tt Text}~a) \Rightarrow 
+a \rightarrow a \rightarrow \mbox{\tt String}$.
+Notice that \mbox{\tt g2} is overloaded in the same way as \mbox{\tt g1} even though the
+occurrences of \mbox{\tt >} and \mbox{\tt show} are in the definition of \mbox{\tt g1}.
+
+If the programmer supplies explicit type signatures for more than one variable
+in a declaration group, the contexts of these signatures must be 
+identical up to renaming of the type variables.
+
+\subsubsection{Monomorphism}
+
+Sometimes it is not possible to generalise over all the type variables
+used in the type of the definition.
+For example, consider the declaration\nopagebreak[4]
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ f\ x\ =\ let\ g\ y\ z\ =\ ([x,y],\ z)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ in\ ...}
+\eprog
+In an environment where \mbox{\tt x} has type $a$,
+the type of \mbox{\tt g}'s definition is 
+$a \rightarrow b \rightarrow \mbox{\tt ([}a\mbox{\tt ]},b\mbox{\tt )}$.
+The generalisation step attributes to \mbox{\tt g} the type 
+$\forall b.~ a \rightarrow b \rightarrow \mbox{\tt ([}a\mbox{\tt ]},b\mbox{\tt )}$;
+only $b$ can be universally quantified because $a$ occurs in the
+type environment.
+We say that the type of \mbox{\tt g} is {\em monomorphic in the type variable $a$}.
+\index{monomorphic type variable}
+
+The effect of such monomorphism is that the first argument of all 
+applications of \mbox{\tt g} must be of a single type.  
+For example, it would be legal for
+the ``\mbox{\tt ...}'' to be
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ (g\ True,\ g\ False)}
+\eprog
+(which would, incidentally, force \mbox{\tt x} to have type \mbox{\tt Bool}) but illegal for it to be
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ (g\ True,\ g\ 'c')}
+\eprog
+In general, a type $\forall \overline{u}.~c \Rightarrow t$
+is said to be {\em monomorphic}
+\index{monomorphic type variable}
+in the type variable \mbox{$\it a$} if \mbox{$\it a$} is free in
+$\forall \overline{u}.~c \Rightarrow t$.
+
+It is worth noting that the explicit type signatures provided by \Haskell{}
+are not powerful enough to express types which include monomorphic type
+variables.  For example, we cannot write
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ f\ x\ =\ let\ }\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ g\ ::\ a\ ->\ b\ ->\ ([a],b)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ g\ y\ z\ =\ ([x,y],\ z)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ in\ ...}
+\eprog
+because that would claim that \mbox{\tt g} was polymorphic in both \mbox{\tt a} and \mbox{\tt b}
+(Section~\ref{type-signatures}).  In this program, \mbox{\tt g} can only be given
+a type signature if its first argument is restricted to a type not involving
+type variables; for example
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ g\ ::\ Int\ ->\ b\ ->\ ([Int],b)}
+\eprog
+This signature would also cause \mbox{\tt x} to have type \mbox{\tt Int}.
+
+\subsubsection{The monomorphism restriction}
+\index{monomorphism restriction}
+\label{sect:monomorphism-restriction}
+
+\Haskell{} places certain extra restrictions on the generalisation
+step, beyond the standard Hindley-Milner restriction described above,
+which further reduce polymorphism in particular cases.
+
+The monomorphism restriction uses the binding syntax of a
+variable.  Recall that a variable is bound by either a {\em function
+binding} or a {\em pattern binding}, and that a {\em simple} pattern
+binding is a pattern binding in which the pattern consists of only a
+single variable (Section~\ref{pattern-bindings}).
+
+Two rules define the monomorphism restriction:
+\begin{description}
+\item[Rule 1.]
+We say that a given declaration group is {\em unrestricted} if and only if:
+\begin{description}
+\item[(a):]
+every variable in the group is bound by a function binding or a simple
+pattern binding, {\em and}
+\item[(b):]
+an explicit type signature is given for every variable in the group
+which is bound by simple pattern binding.
+\end{description}
+The usual Hindley-Milner restriction on polymorphism is that
+only type variables free in the environment may be generalised.
+In addition, {\em the constrained type variables of a
+a restricted declaration group may not be generalised}.
+(Recall that a type variable is constrained if it must belong
+to some type class; see Section~\ref{generalisation}.)
+% 
+% \item[Rule 1.]
+% The variables of a given declaration group are monomorphic in
+% all their constrained type variables if and only if:
+% \begin{description}
+% \item[either (a):]
+% one or more variables in the declaration group 
+% is bound by a non-simple pattern binding.
+% \item[or (b):]
+% one or more variables in the declaration group is bound 
+% by a simple pattern binding, and
+% no type signature is given for any of the variables in the group.
+% \end{description}
+
+\item[Rule 2.]
+The type of a variable exported from a module must be completely polymorphic;
+that is, it must not have any free type variables.
+It follows from Rule~1 that if all top-level declaration groups are
+unrestricted, then Rule~2 is automatically satisfied.
+\end{description}
+
+% When all variables in a declaration group are declared using function
+% binding the monomorphism restriction will not apply.  Any variable
+% declared in a non-simple pattern binding will invoke monomorphism for
+% the entire group containing it.  Simple pattern bindings will be
+% monomorphic unless a type signature is supplied.
+%
+Rule 1 is required for two reasons, both of which are fairly subtle.
+First, it prevents computations from being unexpectedly repeated.
+For example, recall that \mbox{\tt genericLength} is a standard function whose
+type is given by
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ genericLength\ ::\ Num\ a\ =>\ [b]\ ->\ a}
+\eprog
+Now consider the following expression:
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ let\ {\char'173}\ len\ =\ genericLength\ xs\ {\char'175}\ in\ (len,\ len)}
+\eprog
+It looks as if \mbox{\tt len} should be computed only once, but without Rule~1 it might
+be computed twice, once at each of two different overloadings.  If the 
+programmer does actually wish the computation to be repeated, an explicit
+type signature may be added:
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ let\ {\char'173}\ len\ ::\ Num\ a\ =>\ a;\ len\ =\ genericLength\ xs\ {\char'175}\ in\ (len,\ len)}
+\eprog
+When non-simple pattern bindings are used, the types inferred are 
+always monomorphic in their constrained type variables, irrespective of whether
+a type signature is provided.  For example, in
+\bprog
+\mbox{\tt \ \ \ (f,g)\ =\ ((+),(-))}
+\eprog
+both \mbox{\tt f} and \mbox{\tt g} will be monomorphic regardless of any type
+signatures supplied for \mbox{\tt f} or \mbox{\tt g}.
+
+Rule~1 also prevents ambiguity.  For example, consider the declaration
+group
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ [(n,s)]\ =\ reads\ t}
+\eprog
+Recall that \mbox{\tt reads} is a standard function whose type is given by the
+signature
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ reads\ ::\ (Text\ a)\ =>\ String\ ->\ [(a,String)]}
+\eprog
+Without Rule~1, \mbox{\tt n} would be assigned the 
+type $\forall a.~\mbox{\tt Text}~a \Rightarrow a$ 
+and \mbox{\tt s} the type $\forall a.~\mbox{\tt Text}~a \Rightarrow \mbox{\tt String}$.
+The latter is an illegal type, because it is inherently ambiguous.
+It is not possible to determine at what overloading to use \mbox{\tt s}.
+Rule~1 makes \mbox{\tt n} and \mbox{\tt s} monomorphic in $a$.
+
+Lastly, Rule~2 is required because there is no way to enforce monomorphic use
+of an exported binding, except by performing type inference on the entire
+program at once.
+
+The monomorphism rule has a number of consequences for the programmer.
+Anything defined with function syntax will usually
+generalize as a function is expected to.  Thus in
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ f\ x\ y\ =\ x+y}
+\eprog
+the function \mbox{\tt f} may be used at any overloading in class \mbox{\tt Num}.
+There is no danger of recomputation here.  However, the same function
+defined with pattern syntax
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ f\ =\ {\char'134}x\ ->\ {\char'134}y\ ->\ x+y}
+\eprog
+requires a type signature if \mbox{\tt f} is to be fully overloaded.
+Many functions are most naturally defined using simple pattern
+bindings; the user must be careful to affix these with type signatures
+to retain full overloading.  The standard prelude contains many
+examples of this:
+\bprog
+\mbox{\tt \ \ \ \ \ \ \ \ indices\ ::\ (Ix\ a)\ =>\ Array\ a\ b\ ->\ [a]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ indices\ =\ \ range\ .\ bounds}
+\eprog
+
+% Even when a function is defined using a function binding, it may still
+% be made monomorphic by another variable in the same declaration group.
+% Since groups defined through mutually recursive functions need not be
+% syntacticly adjacent, it may be difficult to see where overloading is
+% being lost.  In this example \mbox{\tt fact'} is defined with a pattern binding
+% and forces \mbox{\tt fact} to be monomorphic in the absence of a type signature
+% for either \mbox{\tt fact} or \mbox{\tt fact'}.  This would in turn result in an error as
+% per Rule~2.
+% \bprog
+% 
+% module Mod1(fact)
+% import Mod2
+% fact 0 = 1
+% fact n = n*fact'(n-1)
+% 
+% module Mod2(fact')
+% import Mod1
+% fact' = fact
+% 
+% \eprog
+
+% Local Variables: 
+% mode: latex
+% End:

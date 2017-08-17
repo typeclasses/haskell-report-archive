@@ -1,0 +1,91 @@
+%
+% $Header$
+%
+\subsection{Optional Requests}
+\label{io-options}
+\index{input/output!optional request}
+
+These optional I/O requests may be useful in a \Haskell{}
+implementation.
+
+\begin{itemize}
+\item
+\mbox{\tt ReadChannels\ [cname1,\ ...,\ cnamek]}\\
+\mbox{\tt ReadBinChannels\ [cname1,\ ...,\ cnamek]}
+
+Opens \mbox{\tt cname1} through \mbox{\tt cnamek} for input.  A successful response has
+form \mbox{\tt Tag\ vals} [\mbox{\tt BinTag\ vals}] where \mbox{\tt vals} is a list of values
+tagged with the name of the channel.  These responses require an
+extension to the \mbox{\tt Response} datatype:
+\bprog
+\mbox{\tt data\ \ Response\ =\ ...}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ Tag\ \ \ \ [(String,Char)]}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ BinTag\ [(String,Bin)]}
+\eprog
+The tagged list of values is the non-deterministic merge of the values
+read from the
+individual channels.  If an element of this list has form
+\mbox{\tt (cnamei,val)}, then it came from channel \mbox{\tt cnamei}.
+
+If any \mbox{\tt cnamei} does not exist then the response 
+\mbox{\tt Failure\ (SearchError\ string)} is induced; all other errors induce
+\mbox{\tt Failure\ (ReadError\ string)}.
+
+\item
+\mbox{\tt CreateProcess\ prog}
+
+Introduces a new program \mbox{\tt prog} into the operating
+system.  \mbox{\tt prog} must have type \mbox{\tt [Response]\ ->\ [Request]}.  Either \mbox{\tt Success}
+and \mbox{\tt Failure\ (OtherError\ string)} is induced.
+
+\item
+\mbox{\tt CreateDirectory\ name\ string}\\
+\mbox{\tt DeleteDirectory\ name\ }
+
+Create or delete directory \mbox{\tt name}.  The \mbox{\tt string} argument to
+\mbox{\tt CreateDirectory} is an implementation-dependent specification of the
+initial state of the directory.
+
+\item
+\mbox{\tt OpenFile\ \ \ \ \ name\ inout}\\
+\mbox{\tt OpenBinFile\ \ name\ inout}\\
+\mbox{\tt CloseFile\ \ \ \ file}\\
+\mbox{\tt ReadVal\ \ \ \ \ \ file}\\
+\mbox{\tt ReadBinVal\ \ \ file}\\
+\mbox{\tt WriteVal\ \ \ \ \ file\ char}\\
+\mbox{\tt WriteBinVal\ \ file\ bin}
+
+These requests emulate traditional file I/O in which
+characters are read and written one at a time.
+\bprog
+\mbox{\tt data\ \ Response\ =\ ...}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ |\ Fil\ File}\\
+\mbox{\tt data\ \ File}\\
+\mbox{\tt type\ \ Bins\ \ \ \ \ =\ [Bin]}
+\eprog
+\mbox{\tt OpenFile\ name\ inout} [\mbox{\tt OpenBinFile\ name\ inout}]
+opens the file \mbox{\tt name} in text [binary] mode with
+direction \mbox{\tt inout} (\mbox{\tt True} for input, \mbox{\tt False} for output).
+The response \mbox{\tt Fil\ file} is induced, where \mbox{\tt file} has type \mbox{\tt File}, a
+primitive type that represents a handle to a file.
+Subsequent use of that file by other requests is via this
+handle.
+
+\mbox{\tt CloseFile\ file} closes \mbox{\tt file}.  \mbox{\tt Failure\ (OtherError\ string)} is
+induced if \mbox{\tt file} cannot be closed.
+
+\mbox{\tt ReadVal} [\mbox{\tt ReadBinVal}] \mbox{\tt file} reads \mbox{\tt file}, inducing the response 
+\mbox{\tt Str\ val} [\mbox{\tt Bins\ val}] or \mbox{\tt Failure\ (ReadError\ string)}.
+
+\mbox{\tt WriteVal\ file\ char} [\mbox{\tt WriteBinVal\ file\ bin}] writes \mbox{\tt char} [\mbox{\tt bin}] to
+\mbox{\tt file}.  The response \mbox{\tt Success} or \mbox{\tt Failure\ (WriteError\ string)} is
+induced.
+
+\mbox{\tt Failure\ (SearchError\ string)} is induced for \mbox{\tt ReadVal}, \mbox{\tt ReadBinVal},
+\mbox{\tt WriteVal}, and \mbox{\tt WriteBinVal} if \mbox{\tt file} is not a text or
+binary file, as appropriate.
+\end{itemize}
+
+% Local Variables: 
+% mode: latex
+% End:
