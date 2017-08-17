@@ -1,0 +1,551 @@
+\begin{theindex}
+
+  \item {\tt {\char'041}}, 58, 99
+  \item {\tt {\char'041}{\char'041}}, 94
+  \item {\tt {\char'045}}, 51, 53, 90
+  \item {\tt \&\&}, 48, 74
+  \item {\ptt ( ... )}, 12
+  \item {\ptt *}, 52, 54
+  \item {\ptt **}, 52, 55
+  \item {\ptt +}, 52, 54
+  \item {\tt ++}, 94
+  \item {\ptt -}, 52, 54
+  \item {\tt -} (prefix), 11
+  \item {\ptt .}, 49, 77
+  \item {\ptt /}, 52, 54
+  \item {\ptt //}, 59, 99
+  \item {\ptt /=}, 128
+  \item {\ptt :+}, 54
+  \item {\ptt ::}, 15
+  \item {\ptt :=}, 57
+  \item {\ptt <}, 28, 128
+  \item {\ptt <=}, 28, 128
+  \item {\ptt ==}, 28, 128
+  \item {\ptt >}, 28, 128
+  \item {\ptt >=}, 28, 128
+  \item {\tt {\char'100}}, 16
+  \item {\ptt [ ... ]}, 12
+  \item {\tt {\char'134} ... -> ...}, 11
+  \item {\tt {\char'134}=}, 28
+  \item {\tt {\char'134}{\char'134}}, 96
+  \item {\tt {\char'136}}, 53, 55, 75
+  \item {\tt {\char'136}{\char'136}}, 53, 55, 75
+  \item {\tt {\char'137}}, 17
+  \item {\tt {\char'174}{\char'174}}, 48, 74
+
+  \indexspace
+
+  \item {\ptt abort}, 70, 113
+  \item {\ptt abs}, 52, 55
+  \item abstract data types, 1, 46
+  \item {\ptt accum}, 59, 99
+  \item {\ptt accumArray}, 59, 99
+  \item {\ptt acos}, 52
+  \item {\ptt acosh}, 52
+  \item agent, 62
+  \item algebraic data types, 25
+  \item {\ptt amap}, 59, 60, 99
+  \item {\ptt and}, 97
+  \item {\ptt AppendBinChan}, 62, 68
+  \item {\ptt appendBinChan}, 71, 111
+  \item {\ptt AppendBinFile}, 62, 67
+  \item {\ptt appendBinFile}, 71, 111
+  \item {\ptt AppendChan}, 62, 68
+  \item {\ptt appendChan}, 71, 111
+  \item {\ptt AppendFile}, 62, 67
+  \item {\ptt appendFile}, 71, 111
+  \item application, 11
+  \item {\ptt approximants}, 90
+  \item {\ptt approxRational}, 52, 56
+  \item arctangent, 56
+  \item arithmetic, 54
+  \item arithmetic sequence, 13
+  \item {\ptt Array}, 57
+  \item {\ptt array}, 57, 99
+  \item arrays, 1, 57
+    \subitem accumulated, 59
+    \subitem derived, 59
+  \item as-pattern, 16
+  \item ASCII, 6, 9, 48
+  \item {\ptt asin}, 52
+  \item {\ptt asinh}, 52
+  \item {\ptt Assoc}, 57
+  \item {\ptt assocs}, 58, 99
+  \item {\ptt asTypeOf}, 77
+  \item {\ptt atan}, 52, 56
+  \item {\ptt atan2}, 53, 56, 76
+  \item {\ptt atanh}, 52
+
+  \indexspace
+
+  \item {\ptt Bin}, 49
+  \item {\ptt Binary}, 28
+    \subitem derived instances of, 29, 130
+  \item binary datatype, 49
+  \item {\ptt BinCont}, 69
+  \item bindings, 21
+  \item {\ptt binDispatch}, 70
+  \item {\ptt Bn}, 63
+  \item {\ptt Bool}, 48
+  \item booleans, 48
+  \item {\ptt bounds}, 58, 99
+  \item {\ptt break}, 65, 96
+
+  \indexspace
+
+  \item $C$-$T$ instance declaration, 29
+  \item {\ptt case ... of ...}, 15
+  \item case expression, 15
+    \subitem simple, 19
+  \item {\ptt ceiling}, 53, 56, 75
+  \item channel system requests, 68
+  \item channels, 62
+  \item {\ptt Char}, 48
+  \item characters, 48
+    \subitem literal syntax, 9
+  \item {\ptt chr}, 48, 74
+  \item {\ptt cis}, 54, 76
+  \item {\ptt class}, 26
+  \item class assertions, 23
+  \item class declarations, 26
+  \item classes, 21
+  \item coercions, 56
+  \item comments, 7
+  \item compilation system, 37
+  \item {\ptt Complex}, 51, 54
+  \item {\ptt concat}, 97
+  \item conditional expression, 12
+  \item {\ptt conjugate}, 54, 76
+  \item constructed type, 23
+  \item contexts, 23
+  \item {\ptt cos}, 52
+  \item {\ptt cosh}, 52
+  \item cosine, 56
+  \item Curry, Haskell B., iv
+  \item {\ptt cycle}, 95
+
+  \indexspace
+
+  \item {\ptt data}, 25
+  \item data abstraction, 1
+  \item datatype, 25
+  \item declarations, 21
+    \subitem within {\tt class} declarations, 26
+    \subitem within {\tt instance} declarations, 27
+    \subitem within {\tt where} expressions, 14
+  \item {\ptt decodeFloat}, 53, 56
+  \item {\ptt default}, 30
+  \item {\ptt DeleteFile}, 62, 67
+  \item {\ptt deleteFile}, 71, 111
+  \item {\ptt denominator}, 51, 53, 90
+  \item dependency analysis, 34
+  \item derived instances, 29
+  \item {\ptt Dialogue}, 61, 69
+  \item {\ptt div}, 52, 54
+  \item {\ptt divRem}, 52
+  \item {\ptt done}, 71, 111
+  \item {\ptt Double}, 50, 53
+  \item {\ptt drop}, 95
+  \item {\ptt dropWhile}, 96
+
+  \indexspace
+
+  \item {\ptt Echo}, 68
+  \item {\ptt echo}, 71, 111
+  \item {\ptt elems}, 58, 99
+  \item {\ptt encodeFloat}, 53, 57
+  \item entity, 36
+  \item {\ptt Enum}, 28
+    \subitem derived instances of, 29, 130
+  \item enumeration, 128
+  \item {\ptt enumFrom}, 28, 130
+  \item {\ptt enumFromThen}, 28, 130
+  \item {\ptt enumFromThenTo}, 28, 130
+  \item {\ptt enumFromTo}, 28, 130
+  \item environment requests, 68
+  \item {\ptt Eq}, 28, 50
+    \subitem derived instances of, 29, 128
+  \item {\ptt error}, 60, 77
+  \item errors, 2, 60
+  \item {\ptt even}, 52, 55
+  \item {\ptt exit}, 70, 113
+  \item {\ptt exp}, 52, 55
+  \item {\ptt exponent}, 53, 57
+  \item exponentiation, 55
+  \item export lists, 38
+  \item expression type-signature, 15
+  \item expressions, 2, 10
+
+  \indexspace
+
+  \item {\ptt FailCont}, 69
+  \item {\ptt Failure}, 63
+  \item {\ptt False}, 48
+  \item file system requests, 66
+  \item files, 62
+  \item {\ptt filter}, 95
+  \item fixity, 8
+    \subitem default, 8
+  \item fixity declarations, 47
+  \item {\ptt Float}, 50, 53
+  \item {\ptt floatDigits}, 53, 56
+  \item Floating, 54
+  \item {\ptt Floating}, 50, 52, 54
+  \item floating-point, 50
+  \item {\ptt floatRadix}, 53, 56
+  \item {\ptt floatRange}, 53, 56
+  \item {\ptt floor}, 53, 56, 76
+  \item {\ptt foldl}, 95
+  \item {\ptt foldl1}, 95
+  \item {\ptt foldr}, 95
+  \item {\ptt foldr1}, 95
+  \item formal semantics, 1
+  \item {\ptt FormatError}, 63
+  \item {\ptt Fractional}, 50, 52
+  \item {\ptt fromInteger}, 51, 52
+  \item {\ptt fromIntegral}, 53, 57, 76
+  \item {\ptt fromRational}, 51, 52
+  \item {\ptt fromRealFrac}, 53, 57, 76
+  \item {\ptt fst}, 77
+  \item function application, 11
+  \item function bindings, 32
+  \item function type, 23
+  \item functional languages, iv
+  \item functions, 49
+
+  \indexspace
+
+  \item {\ptt gcd}, 53, 55, 75
+  \item generators, 14
+  \item {\ptt GetArgs}, 62, 69
+  \item {\ptt getArgs}, 71, 111
+  \item {\ptt GetEnv}, 62, 69
+  \item {\ptt getEnv}, 71, 111
+  \item guard, 14, 15, 18
+
+  \indexspace
+
+  \item {\sc Haskell}, iv, 1
+  \item {\sc Haskell} kernel, 2
+  \item {\ptt head}, 94
+  \item Hindley-Milner, 2, 21, 34
+
+  \indexspace
+
+  \item identifiers, 7
+  \item {\ptt if ... then ... else ...}, 12
+  \item {\ptt imagPart}, 54, 76
+  \item implementation, 36, 38
+  \item {\ptt import}, 40
+  \item import declarations, 40
+  \item {\ptt in}, 96
+  \item {\ptt index}, 28, 128, 129
+  \item {\ptt indices}, 58, 99
+  \item {\ptt infix}, 47
+  \item {\ptt infixl}, 47
+  \item {\ptt infixr}, 47
+  \item information hiding, 1
+  \item {\ptt init}, 94
+  \item input/output, 61
+    \subitem acceptance, 66
+    \subitem echoing, 66
+    \subitem mode, 63
+    \subitem optional requests, 125
+    \subitem presentation, 64
+    \subitem semantics, 121
+    \subitem transparency, 63
+  \item {\ptt inRange}, 28, 128, 129
+  \item {\ptt instance}, 27
+  \item instance declarations, 27
+    \subitem with respect to modules, 29
+  \item {\ptt Int}, 50, 53
+  \item {\ptt Integer}, 53
+  \item integer, 50
+  \item {\ptt Integral}, 50, 52
+  \item {\ptt interact}, 70, 113
+  \item interface, 36, 41
+  \item {\ptt interface}, 41
+  \item {\ptt IOError}, 63
+  \item irrefutable pattern, 17
+  \item {\ptt isAlpha}, 74
+  \item {\ptt isAlphanum}, 74
+  \item {\ptt isAscii}, 74
+  \item {\ptt isControl}, 74
+  \item {\ptt isDigit}, 74
+  \item {\ptt isLower}, 74
+  \item {\ptt isNullBin}, 49, 73
+  \item {\ptt isPrint}, 74
+  \item {\ptt isSpace}, 74
+  \item {\ptt isUpper}, 74
+  \item {\ptt iterate}, 95
+  \item {\ptt Ix}, 28, 57, 129
+    \subitem derived instances of, 29, 128
+  \item {\ptt ixmap}, 59, 60, 99
+
+  \indexspace
+
+  \item lambda abstractions, 11
+  \item {\ptt last}, 94
+  \item layout, 3, 115
+  \item {\ptt lcm}, 53, 55, 75
+  \item {\ptt length}, 94
+  \item {\ptt let}, 70, 113
+  \item {\ptt lex}, 102
+  \item lexical structure, 6
+  \item {\ptt lexLitChar}, 103
+  \item {\ptt lines}, 65, 96
+  \item list comprehensions, 13
+  \item list type, 23
+  \item {\ptt listArray}, 99
+  \item lists, 12, 49
+  \item {\ptt log}, 52, 55
+  \item logarithm, 55
+  \item {\ptt logBase}, 52, 55
+
+  \indexspace
+
+  \item magnitude, 55
+  \item {\ptt magnitude}, 54, 76
+  \item {\ptt Main}, 36
+  \item {\ptt main}, 36
+  \item {\ptt map}, 94
+  \item {\ptt max}, 128
+  \item {\ptt maximum}, 97
+  \item {\ptt maxInt}, 50, 53, 75
+  \item {\ptt min}, 128
+  \item {\ptt minimum}, 97
+  \item {\ptt minInt}, 50, 53, 75
+  \item {\ptt mkPolar}, 54, 76
+  \item {\ptt mod}, 52, 54
+  \item module, 36
+    \subitem closure, 37
+    \subitem implementation, 38
+    \subitem interface, 41
+  \item {\ptt module}, 38
+  \item monomorphic, 24
+  \item monotype, 24
+
+  \indexspace
+
+  \item {\ptt Name}, 62
+  \item namespaces, 2, 8
+  \item {\ptt negate}, 11, 52, 54
+  \item negation, 8, 10, 11
+  \item {\ptt not}, 48, 74
+  \item {\ptt nub}, 97
+  \item {\ptt null}, 94
+  \item {\ptt nullBin}, 49, 73
+  \item {\ptt Num}, 52
+  \item numbers, 50
+    \subitem literal syntax, 8
+  \item {\ptt numerator}, 51, 53, 90
+  \item numeric types, 51
+
+  \indexspace
+
+  \item {\ptt odd}, 52, 55
+  \item off-side rule, 3, 116
+  \item operator application, 11
+  \item operators, 7, 11
+  \item {\ptt or}, 97
+  \item {\ptt Ord}, 28, 50
+    \subitem derived instances of, 29, 128
+  \item {\ptt ord}, 48, 74
+  \item original names, 36
+    \subitem in interfaces, 43
+  \item {\ptt OtherError}, 63
+  \item {\ptt otherwise}, 48, 74
+  \item overloading, 1, 26
+    \subitem defaults, 30
+
+  \indexspace
+
+  \item {\ptt partialQuotients}, 90
+  \item {\ptt partition}, 97
+  \item pattern, 15, 16
+  \item pattern bindings, 32
+  \item pattern-matching, 16
+  \item {\ptt phase}, 54, 76
+  \item {\ptt pi}, 52
+  \item {\ptt polar}, 54, 76
+  \item polymorphism, 2
+  \item precedence, 10
+  \item {\ptt Prelude}, 44
+  \item {\ptt PreludeBuiltin}, 44
+  \item {\ptt PreludeCore}, 44
+  \item principal typing, 24
+  \item {\ptt print}, 70, 113
+  \item {\ptt prints}, 70, 113
+  \item {\ptt product}, 97
+  \item program structure, 1
+  \item {\ptt properFraction}, 52, 56
+
+  \indexspace
+
+  \item qualifier, 14
+
+  \indexspace
+
+  \item {\ptt range}, 28, 128, 129
+  \item {\ptt rangeSize}, 129
+  \item {\ptt Ratio}, 51, 53
+  \item {\ptt Rational}, 51, 53
+  \item {\ptt read}, 101
+  \item {\ptt readBin}, 28, 130
+  \item {\ptt ReadBinChan}, 62, 68
+  \item {\ptt readBinChan}, 71, 111
+  \item {\ptt ReadBinFile}, 62, 66
+  \item {\ptt readBinFile}, 71, 111
+  \item {\ptt ReadChan}, 62, 68
+  \item {\ptt readChan}, 71, 111
+  \item {\ptt readDec}, 106
+  \item {\ptt ReadError}, 63
+  \item {\ptt ReadFile}, 62, 66
+  \item {\ptt readFile}, 71, 111
+  \item {\ptt readHex}, 106
+  \item {\ptt readInt}, 107
+  \item {\ptt readList}, 130
+  \item {\ptt readLitChar}, 105
+  \item {\ptt readOct}, 106
+  \item {\ptt readParen}, 102
+  \item {\ptt reads}, 28, 101
+  \item {\ptt readsPrec}, 130, 131
+  \item {\ptt Real}, 50, 52
+  \item {\ptt RealFloat}, 53
+  \item {\ptt RealFrac}, 52, 53
+  \item {\ptt realPart}, 54, 76
+  \item refutable pattern, 17
+  \item {\ptt rem}, 52, 54
+  \item {\ptt remove}, 96
+  \item renaming, 36, 41
+    \subitem with respect to original name, 37
+  \item {\ptt repeat}, 95
+  \item {\ptt Request}, 61, 62
+  \item {\ptt Response}, 61, 63
+  \item {\ptt reverse}, 97
+  \item {\ptt round}, 53, 56, 75
+
+  \indexspace
+
+  \item {\ptt scaleFloat}, 53
+  \item {\ptt scan}, 95
+  \item {\ptt SearchError}, 63
+  \item semantics
+    \subitem formal, 1
+    \subitem input/output, 121
+  \item {\ptt SetEnv}, 62, 69
+  \item {\ptt setEnv}, 71, 111
+  \item {\ptt show}, 101
+  \item {\ptt showBin}, 28, 130
+  \item {\ptt showChar}, 101
+  \item {\ptt showInt}, 107
+  \item {\ptt showList}, 130
+  \item {\ptt showLitChar}, 106
+  \item {\ptt showParen}, 101
+  \item {\ptt shows}, 28, 101
+  \item {\ptt showsPrec}, 130, 131
+  \item {\ptt showString}, 101
+  \item sign, 55
+  \item {\ptt significand}, 53, 57
+  \item {\ptt signum}, 52, 55
+  \item {\ptt sin}, 52
+  \item sine, 56
+  \item {\ptt sinh}, 52
+  \item {\ptt snd}, 77
+  \item {\ptt span}, 65, 96
+  \item {\ptt sqrt}, 52, 55
+  \item standard prelude, 44
+  \item {\ptt StatusChan}, 62, 68
+  \item {\ptt statusChan}, 71
+  \item {\ptt StatusFile}, 62, 67
+  \item {\ptt statusFile}, 71, 111
+  \item {\ptt stdecho}, 62
+  \item {\ptt stderr}, 62
+  \item {\ptt stdin}, 62
+  \item {\ptt stdout}, 62
+  \item {\ptt Str}, 63
+  \item {\ptt StrCont}, 69
+  \item {\ptt strDispatch}, 70
+  \item {\ptt String}, 49
+  \item strings, 48
+    \subitem literal syntax, 9
+  \item {\ptt SuccCont}, 69
+  \item {\ptt succDispatch}, 70
+  \item {\ptt Success}, 63
+  \item {\ptt sum}, 97
+  \item superclass, 26
+  \item syntax, 114
+
+  \indexspace
+
+  \item {\ptt tail}, 94
+  \item {\ptt take}, 95
+  \item {\ptt takeWhile}, 96
+  \item {\ptt tan}, 52
+  \item tangent, 56
+  \item {\ptt tanh}, 52
+  \item {\ptt Text}, 28
+    \subitem derived instances of, 29, 130
+  \item {\ptt toLower}, 74
+  \item {\ptt toRational}, 52, 56
+  \item {\ptt toUpper}, 74
+  \item transaction, 69
+  \item transparent character set, 63
+  \item transparent line, 63
+  \item transparent string, 63
+  \item trigonometric functions, 56
+  \item trivial type, 23
+  \item {\ptt True}, 48
+  \item {\ptt truncate}, 53, 56, 75
+  \item tuple type, 23
+  \item tuples, 12, 49
+  \item {\ptt type}, 26
+  \item type classes, 26
+  \item type expressions, 22
+  \item type signatures, 31
+    \subitem for expressions, 15
+  \item type synonyms, 26
+  \item type system, 1
+  \item types, 2, 22
+  \item typing, 24
+
+  \indexspace
+
+  \item unit, 13
+  \item {\ptt unlines}, 65, 96
+  \item {\ptt until}, 49, 77
+  \item {\ptt unwords}, 65, 96
+
+  \indexspace
+
+  \item values, 2
+
+  \indexspace
+
+  \item well-typing, 24
+  \item {\ptt where}, 14
+  \item where expressions, 14
+  \item wildcard, 17
+  \item {\ptt words}, 65, 96
+  \item {\ptt WriteBinFile}, 62, 67
+  \item {\ptt writeBinFile}, 71, 111
+  \item {\ptt WriteError}, 63
+  \item {\ptt WriteFile}, 62, 67
+  \item {\ptt writeFile}, 71, 111
+
+  \indexspace
+
+  \item {\ptt zip}, 97
+  \item {\ptt zip3}, 97
+  \item {\ptt zip4}, 97
+  \item {\ptt zip5}, 97
+  \item {\ptt zip6}, 97
+  \item {\ptt zip7}, 97
+  \item {\ptt zipWith}, 98
+  \item {\ptt zipWith3}, 98
+  \item {\ptt zipWith4}, 98
+  \item {\ptt zipWith5}, 98
+  \item {\ptt zipWith6}, 98
+  \item {\ptt zipWith7}, 98
+
+\end{theindex}

@@ -1,0 +1,49 @@
+%
+% $Header: /tmp_mnt/local.fp/haskell/report/report-1.0/RCS/layout.verb,v 1.0 90/03/28 14:59:46 partain Exp $
+%
+% partain:
+% in a separate file, because it is included twice (for now);
+%  in intro.verb and syntax.verb
+
+{\sc Haskell} permits the omission of the braces and semicolons by
+using {\em layout} to convey the same information.  This allows both
+layout-sensitive and -insensitive styles of coding, which
+can be freely mixed within one program.  Because layout is
+not required, {\sc Haskell} programs may be mechanically produced by other
+programs.
+% without worrying about deeply nested layout difficulties.
+
+The layout (or ``off-side'') rule\index{off-side rule} takes effect whenever the
+open brace is omitted after the keyword @where@ or @of@.
+When this happens, the indentation of the next lexeme (whether or not
+on a new line) is remembered and the omitted open brace is inserted
+(the whitespace preceding the lexeme may include comments).
+For each subsequent line, if it contains only whitespace or is
+indented more, then the previous item is continued (nothing is
+inserted); if it is indented the same amount, then a new item begins
+(a semicolon is inserted); and if it is indented less, then the
+declaration list ends (a close brace is inserted).  A close brace is
+also inserted whenever the syntactic category containing the
+declaration list ends (i.e.~if an illegal lexeme is encountered at a
+point where a close brace would be legal, a close brace is inserted).
+The layout rule will match only those open braces
+that it has inserted; an
+open brace that the user has inserted must be
+matched by a close brace inserted by the user.
+
+Given these rules, a single newline may actually terminate several
+declaration lists.  Also, these rules permit:
+\bprog
+@
+f x = exp1 where a = 1; b = 2 
+                 g y = exp2
+@
+\eprog
+making @a@, @b@ and @g@ all part of the same declaration
+list.
+
+To facilitate the use of layout at the top level of a module
+(several modules may reside in one file), the keyword
+@module@ and the end-of-file token are assumed to occur in column
+0 (whereas normally the first column is 1).  Otherwise, all
+top-level declarations would have to be indented.

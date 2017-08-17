@@ -1,0 +1,86 @@
+\noindent\bprogB
+\mbox{\tt --\ Standard\ functions\ on\ rational\ numbers}\\
+\mbox{\tt }\\
+\mbox{\tt module\ \ PreludeRatio\ (}\\
+\mbox{\tt \ \ \ \ Ratio,\ Rational,\ ({\char'45}),\ numerator,\ denominator,}\\
+\mbox{\tt \ \ \ \ approximants,\ partialQuotients\ )\ where}
+\eprogB\noindent\bprogB
+\mbox{\tt infix\ \ 7\ \ {\char'45},\ :{\char'45}}
+\eprogB\noindent\bprogB
+\mbox{\tt prec\ =\ 7}
+\eprogB\noindent\bprogB
+\mbox{\tt data\ \ (Integral\ a)\ \ \ \ \ \ =>\ Ratio\ a\ =\ a\ :{\char'45}\ a\ \ deriving\ (Eq,\ Binary)}\\
+\mbox{\tt type\ \ Rational\ \ \ \ \ \ \ \ \ \ =\ \ Ratio\ Integer}
+\eprogB\noindent\bprogB
+\mbox{\tt ({\char'45})\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ (Integral\ a)\ =>\ a\ ->\ a\ ->\ Ratio\ a}\\
+\mbox{\tt numerator,\ denominator\ \ ::\ (Integral\ a)\ =>\ Ratio\ a\ ->\ a}\\
+\mbox{\tt approximants\ \ \ \ \ \ \ \ \ \ \ \ ::\ (Integral\ a)\ =>\ a\ ->\ a\ ->\ [Ratio\ a]}\\
+\mbox{\tt partialQuotients\ \ \ \ \ \ \ \ ::\ (Integral\ a)\ =>\ a\ ->\ a\ ->\ [a]}
+\index{%@{\tt {\char'045}}}%
+\indextt{numerator}%
+\indextt{denominator}%
+\indextt{approximants}%
+\indextt{partialQuotients}%
+\eprogB\noindent\bprogB
+\mbox{\tt reduce\ x\ y\ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ (x\ `div`\ d)\ :{\char'45}\ (y\ `div`\ d)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ d\ =\ gcd\ x\ y}
+\eprogB\noindent\bprogB
+\mbox{\tt x\ {\char'45}\ y\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ =\ \ reduce\ (x\ *\ signum\ y)\ (abs\ y)}
+\eprogB\noindent\bprogB
+\mbox{\tt numerator\ (x:{\char'45}y)\ \ \ \ \ \ \ \ =\ \ x}
+\eprogB\noindent\bprogB
+\mbox{\tt denominator\ (x:{\char'45}y)\ \ \ \ \ \ =\ \ y}
+\eprogB\noindent\bprogB
+\mbox{\tt approximants\ p\ q\ \ \ \ \ \ \ \ =\ \ zipWith\ (:{\char'45})\ ps\ qs}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ps\ =\ gen\ unit\ (unit*a)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ qs\ =\ gen\ 0\ 1}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ unit\ =\ signum\ p\ *\ signum\ q}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ a:as\ =\ partialQuotients\ (abs\ p)\ (abs\ q)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ gen\ x\ x'\ =\ xs}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ xs\ =\ x'\ :\ zipWith3\ next\ as\ (x:xs)\ xs}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ next\ a\ x\ x'\ =\ x'*a\ +\ x}
+\eprogB\noindent\bprogB
+\mbox{\tt partialQuotients\ p\ q\ \ \ \ =\ \ a\ :\ (if\ r==0\ then\ []\ else\ partialQuotients\ q\ r)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (a,r)\ =\ divRem\ p\ q}
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ (Integral\ a)\ \ =>\ Ord\ (Ratio\ a)\ \ where}\\
+\mbox{\tt \ \ \ \ (x:{\char'45}y)\ <=\ (x':{\char'45}y')\ \ =\ \ x\ *\ y'\ <=\ x'\ *\ y}
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ (Integral\ a)\ \ =>\ Num\ (Ratio\ a)\ \ where}\\
+\mbox{\tt \ \ \ \ (x:{\char'45}y)\ +\ (x':{\char'45}y')\ \ \ =\ \ ((x*m)\ `div`\ y\ +\ (x'*m)\ `div`\ y')\ :{\char'45}\ m}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ m\ =\ lcm\ y\ y'}\\
+\mbox{\tt \ \ \ \ (x:{\char'45}y)\ *\ (x':{\char'45}y')\ \ \ =\ \ reduce\ (x\ *\ x')\ (y\ *\ y')}\\
+\mbox{\tt \ \ \ \ negate\ (x:{\char'45}y)\ \ \ \ \ \ \ =\ \ (-x)\ :{\char'45}\ y}\\
+\mbox{\tt \ \ \ \ abs\ (x:{\char'45}y)\ \ \ \ \ \ \ \ \ \ =\ \ abs\ x\ :{\char'45}\ y}\\
+\mbox{\tt \ \ \ \ signum\ (x:{\char'45}y)\ \ \ \ \ \ \ =\ \ signum\ x\ :{\char'45}\ 1}\\
+\mbox{\tt \ \ \ \ fromInteger\ x\ \ \ \ \ \ \ =\ \ fromInteger\ x\ :{\char'45}\ 1}
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ (Integral\ a)\ \ =>\ Real\ (Ratio\ a)\ \ where}\\
+\mbox{\tt \ \ \ \ toRational\ (x:{\char'45}y)\ \ \ =\ \ toInteger\ x\ :{\char'45}\ toInteger\ y}
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ (Integral\ a)\ \ =>\ Fractional\ (Ratio\ a)\ \ where}\\
+\mbox{\tt \ \ \ \ (x:{\char'45}y)\ /\ (x':{\char'45}y')\ \ \ =\ \ (x*y')\ {\char'45}\ (y*x')}\\
+\mbox{\tt \ \ \ \ fromRational\ (x:{\char'45}y)\ =\ \ fromInteger\ x\ :{\char'45}\ fromInteger\ y}
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ (Integral\ a)\ \ =>\ RealFrac\ (Ratio\ a)\ \ where}\\
+\mbox{\tt \ \ \ \ properFraction\ (x:{\char'45}y)\ =\ (toInteger\ q,\ r:{\char'45}y)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ where\ (q,r)\ =\ divRem\ x\ y}\\
+\mbox{\tt }\\
+\mbox{\tt \ \ \ \ approxRational\ x@(p:{\char'45}q)\ eps\ =}\\
+\mbox{\tt \ \ \ \ \ \ \ \ case\ withinEps\ of}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ r:r':{\char'137}\ |\ denominator\ r\ ==\ denominator\ r'\ ->\ r'}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ r:{\char'137}\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ->\ r}\\
+\mbox{\tt \ \ \ \ \ \ \ \ where\ withinEps\ =\ dropWhile\ ({\char'134}r\ ->\ abs\ (r-x)\ >\ eps)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (approximants\ p\ q)}
+\eprogB\noindent\bprogB
+\mbox{\tt instance\ \ (Integral\ a,\ Text\ a)\ =>\ Text\ (Ratio\ a)\ \ where}\\
+\mbox{\tt \ \ \ \ readsPrec\ p\ \ =\ \ readParen\ (p\ >\ prec)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ({\char'134}r\ ->\ [(x{\char'45}y,u)\ |\ (x,s)\ \ \ <-\ reads\ r,}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ("{\char'45}",t)\ <-\ [lex\ s],}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (y,u)\ \ \ <-\ reads\ t\ ])}\\
+\mbox{\tt }\\
+\mbox{\tt \ \ \ \ showsPrec\ p\ (x:{\char'45}y)\ \ =\ \ showParen\ (p\ >\ prec)}\\
+\mbox{\tt \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ (shows\ x\ .\ showString\ "\ {\char'45}\ "\ .\ shows\ y)}
+\eprogB

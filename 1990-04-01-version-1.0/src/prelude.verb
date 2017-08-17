@@ -1,0 +1,47 @@
+%
+% $Header: /tmp_mnt/local.fp/haskell/report/report-1.0/RCS/prelude.verb,v 1.0 90/03/28 15:00:03 partain Exp $
+%
+\section{Standard Prelude}
+\label{stdprelude}
+
+In this appendix the entire {\sc Haskell} prelude is given.  It is
+organised into a root module and eight sub-modules.
+
+\bigskip
+\input{Prelude}\clearpage
+
+\subsection{Prelude {\tt PreludeBuiltin}}
+\label{preludebuiltin}
+\input{PreludeBuiltin}\clearpage
+
+\subsection{Prelude {\tt PreludeCore}}
+\label{preludecore}
+\input{PreludeCore}\clearpage
+
+\subsection{Prelude {\tt PreludeRatio}}
+\label{preluderatio}
+\input{PreludeRatio}\clearpage
+
+\subsection{Prelude {\tt PreludeComplex}}
+\label{preludecomplex}
+\input{PreludeComplex}\clearpage
+
+\subsection{Prelude {\tt PreludeList}}
+\label{preludelist}
+\input{PreludeList}\clearpage
+
+\subsection{Prelude {\tt PreludeArray}}
+\label {preludearray}
+\input{PreludeArray}\clearpage
+
+\subsection{Prelude {\tt PreludeText}}
+\label{preludetext}
+\input{PreludeText}\clearpage
+
+\subsection{Prelude {\tt PreludeIO}}
+\label{preludeio}
+\input{PreludeIO}
+
+% Local Variables: 
+% mode: latex
+% End:

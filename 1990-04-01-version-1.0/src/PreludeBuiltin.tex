@@ -1,0 +1,75 @@
+\noindent\bprogB
+\mbox{\tt interface\ PreludeBuiltin\ \ where}
+\eprogB\noindent\bprogB
+\mbox{\tt data\ Char}\\
+\mbox{\tt data\ Int}\\
+\mbox{\tt data\ Integer}\\
+\mbox{\tt data\ Float}\\
+\mbox{\tt data\ Double}
+\eprogB\noindent\bprogB
+\mbox{\tt data\ Bin}
+\eprogB\noindent\bprogB
+\mbox{\tt --\ data\ ()\ =\ ()\ \ deriving\ (Eq,\ Ord,\ Ix,\ Enum,\ Binary)\ \ \ \ \ \ Trivial\ Type}\\
+\mbox{\tt --\ data\ [a]\ =\ []\ |\ a\ :\ [a]\ \ deriving\ (Eq,\ Ord,\ Binary)\ \ \ \ \ Lists}\\
+\mbox{\tt --\ data\ (a,b)\ =\ (a,b)\ \ deriving\ (Eq,\ Ord,\ Ix,\ Binary)\ \ \ \ \ \ Pairs}\\
+\mbox{\tt --\ data\ (a,b,c)\ =\ (a,b,c)\ \ deriving\ (Eq,\ Ord,\ Ix,\ Binary)\ \ Triples}\\
+\mbox{\tt --\ et\ cetera\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ Other\ Tuples}\\
+\mbox{\tt }\\
+\mbox{\tt primMinInt,\ primMaxInt\ \ \ \ \ \ \ \ \ \ ::\ Int}\\
+\mbox{\tt primCharToInt\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Char\ ->\ Int}\\
+\mbox{\tt primIntToChar\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Int\ ->\ Char}\\
+\mbox{\tt primIntToInteger\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Int\ ->\ Integer}\\
+\mbox{\tt primIntegerToInt\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Integer\ ->\ Int}
+\eprogB\noindent\bprogB
+\mbox{\tt primEqInt,\ primLeInt\ \ \ \ \ \ \ \ \ \ \ \ ::\ Int\ ->\ Int\ ->\ Bool}\\
+\mbox{\tt primPlusInt,\ primMulInt\ \ \ \ \ \ \ \ \ ::\ Int\ ->\ Int\ ->\ Int}\\
+\mbox{\tt primNegInt\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Int\ ->\ Int}\\
+\mbox{\tt primDivRemInt\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Int\ ->\ Int\ ->\ (Int,Int)}
+\eprogB\noindent\bprogB
+\mbox{\tt primEqInteger,\ primLeInteger\ \ \ \ ::\ Integer\ ->\ Integer\ ->\ Bool}\\
+\mbox{\tt primPlusInteger,\ primMulInteger\ ::\ Integer\ ->\ Integer\ ->\ Integer}\\
+\mbox{\tt primNegInteger\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Integer\ ->\ Integer}\\
+\mbox{\tt primDivRemInteger\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Integer\ ->\ Integer\ ->\ (Integer,Integer)}
+\eprogB\noindent\bprogB
+\mbox{\tt primFloatRadix\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Integer}\\
+\mbox{\tt primFloatDigits,\ primFloatMinExp,}\\
+\mbox{\tt \ \ \ \ primFloatMaxExp\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Int}\\
+\mbox{\tt primDecodeFloat\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Float\ ->\ (Integer,Int)}\\
+\mbox{\tt primEncodeFloat\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Integer\ ->\ Int\ ->\ Float}\\
+\mbox{\tt primEqFloat,\ primLeFloat\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Float\ ->\ Float\ ->\ Bool}\\
+\mbox{\tt primPlusFloat,\ primMulFloat,}\\
+\mbox{\tt \ \ \ \ primDivFloat\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Float\ ->\ Float\ ->\ Float}\\
+\mbox{\tt primNegFloat\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Float\ ->\ Float}
+\eprogB\noindent\bprogB
+\mbox{\tt primPiFloat\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Float}\\
+\mbox{\tt primExpFloat,\ primLogFloat,}\\
+\mbox{\tt \ \ \ \ primSqrtFloat,\ primSinFloat,}\\
+\mbox{\tt \ \ \ \ primCosFloat,\ primTanFloat,}\\
+\mbox{\tt \ \ \ \ primAsinFloat,\ primAcosFloat,}\\
+\mbox{\tt \ \ \ \ primAtanFloat,\ primSinhFloat,}\\
+\mbox{\tt \ \ \ \ primCoshFloat,\ primTanhFloat,}\\
+\mbox{\tt \ \ \ \ primAsinhFloat,\ primAcoshFloat,}\\
+\mbox{\tt \ \ \ \ primAtanhFloat\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Float\ ->\ Float}
+\eprogB\noindent\bprogB
+\mbox{\tt primDoubleRadix\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Integer}\\
+\mbox{\tt primDoubleDigits,\ primDoubleMinExp,}\\
+\mbox{\tt \ \ \ \ primDoubleMaxExp\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Int}\\
+\mbox{\tt primDecodeDouble\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Double\ ->\ (Integer,Int)}\\
+\mbox{\tt primEncodeDouble\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Integer\ ->\ Int\ ->\ Double}\\
+\mbox{\tt primEqDouble,\ primLeDouble\ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Double\ ->\ Double\ ->\ Bool}\\
+\mbox{\tt primPlusDouble,\ primMulDouble,}\\
+\mbox{\tt \ \ \ \ primDivDouble\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Double\ ->\ Double\ ->\ Double}\\
+\mbox{\tt primNegDouble\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Double\ ->\ Double}\\
+\mbox{\tt primPiDouble\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Double}\\
+\mbox{\tt primExpDouble,\ primLogDouble,}\\
+\mbox{\tt \ \ \ \ primSqrtDouble,\ primSinDouble,}\\
+\mbox{\tt \ \ \ \ primCosDouble,\ primTanDouble,}\\
+\mbox{\tt \ \ \ \ primAsinDouble,\ primAcosDouble,}\\
+\mbox{\tt \ \ \ \ primAtanDouble,\ primSinhDouble,}\\
+\mbox{\tt \ \ \ \ primCoshDouble,\ primTanhDouble,}\\
+\mbox{\tt \ \ \ \ primAsinhDouble,\ primAcoshDouble,}\\
+\mbox{\tt \ \ \ \ primAtanhDouble\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Double\ ->\ Double}
+\eprogB\noindent\bprogB
+\mbox{\tt primNullBin\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Bin}\\
+\mbox{\tt primIsNullBin\ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \ ::\ Bin\ ->\ Bool}
+\eprogB

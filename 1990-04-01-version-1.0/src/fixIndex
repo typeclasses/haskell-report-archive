@@ -1,0 +1,10 @@
+# an utter and absolute hack to keep "makeindex" and
+# "verbatim" happy with each other
+#
+# Will Partain, partain@cs.glasgow.ac.uk
+#
+s/\\indexentry{\|\|/\\indexentry{"\|"\|/
+s/\\indexentry{!!/\\indexentry{"!"!/
+s/\\indexentry{!/\\indexentry{"!/
+s/\\indexentry{\\%/\\indexentry{%/
+s/\\indexentry{@@/\\indexentry{"@@/

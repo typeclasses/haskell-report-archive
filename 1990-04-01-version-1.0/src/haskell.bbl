@@ -1,0 +1,102 @@
+\begin{thebibliography}{10}
+
+\bibitem{back78}
+J.~Backus.
+\newblock Can programming be liberated from the von {N}eumann style? {A}
+  functional style and its algebra of programs.
+\newblock {\em CACM}, 21(8):613--641, August 1978.
+
+\bibitem{burs80}
+R.M. Burstall, D.B. MacQueen, and D.T. Sannella.
+\newblock {HOPE}: An experimental applicative language.
+\newblock In {\em The 1980 LISP Conference}, pages 136--143, Stanford
+  University, August 1980.
+
+\bibitem{curry&feys:book}
+H.K. Curry and R.~Feys.
+\newblock {\em Combinatory Logic}.
+\newblock North-Holland Pub. Co., Amsterdam, 1958.
+
+\bibitem{gordonetal78}
+M.~Gordon, R.~Milner, L.~Morris, M.~Newey, and C.~Wadsworth.
+\newblock A metalanguage for interactive proof in {LCF}.
+\newblock In {\em Proceedings of 5th ACM Symposium on Principles of Programming
+  Languages}, pages 119--130, 1978.
+
+\bibitem{hindley69}
+R.~Hindley.
+\newblock The principal type scheme of an object in combinatory logic.
+\newblock {\em Transactions of the American Mathematical Society}, 146:29--60,
+  December 1969.
+
+\bibitem{hudak:io}
+P.~Hudak and R.~Sundaresh.
+\newblock On the expressiveness of purely functional {I/O} systems.
+\newblock Technical Report YALEU/DCS/RR665, Yale University, Department of
+  Computer Science, December 1988.
+
+\bibitem{landin66}
+P.J. Landin.
+\newblock The next 700 programming languages.
+\newblock {\em CACM}, 9(3):157--166, March 1966.
+
+\bibitem{mcca60}
+J.~McCarthy.
+\newblock Recursive functions of symbolic expressions and their computation by
+  machine, {P}art {I}.
+\newblock {\em CACM}, 3(4):184--195, April 1960.
+
+\bibitem{milner78}
+R.A. Milner.
+\newblock A theory of type polymorphism in programming.
+\newblock {\em Journal of Computer and System Sciences}, 17(3):348--375,
+  December 1978.
+
+\bibitem{nikhil:id-nouveau}
+R.S. Nikhil.
+\newblock {Id-Nouveau} (version 88.0) reference manual.
+\newblock Technical report, MIT Laboratory for Computer Science, Cambridge,
+  Mass., March 1988.
+
+\bibitem{penfield:complex-apl}
+P.~Penfield, Jr.
+\newblock Principal values and branch cuts in complex {APL}.
+\newblock In {\em APL '81 Conference Proceedings}, pages 248--256, San
+  Francisco, September 1981.
+
+\bibitem{peyton-jones:book}
+S.~Peyton~Jones.
+\newblock {\em The Implementation of Functional Programming Languages}.
+\newblock Prentice-Hall International, Englewood Cliffs, New Jersey, 1987.
+
+\bibitem{RRRRS}
+J.~Rees and W.~Clinger~(eds.).
+\newblock The revised$^3$ report on the algorithmic language {S}cheme.
+\newblock {\em SIGPLAN Notices}, 21(12):37--79, December 1986.
+
+\bibitem{steele:common-lisp}
+G.L. {Steele Jr.}
+\newblock {\em {Common} {Lisp}: The Language}.
+\newblock Digital Press, Burlington, Mass., 1984.
+
+\bibitem{turn85}
+D.A. Turner.
+\newblock Miranda: a non-strict functional language with polymorphic types.
+\newblock In {\em Functional Programming Languages and Computer Architecture},
+  volume 201 of {\em Lecture Notes in Computer Science}, pages 1--16, Nancy,
+  France, September 1985. Springer-Verlag.
+
+\bibitem{wadler:array-primitive}
+P.~Wadler.
+\newblock A new array operation.
+\newblock In J.H. Fasel and R.M. Keller, editors, {\em Graph Reduction}, volume
+  279 of {\em Lecture Notes in Computer Science}, pages 328--335, Heidelberg,
+  1987. Springer-Verlag.
+
+\bibitem{wadler:classes}
+P.~Wadler and S.~Blott.
+\newblock How to make {\em ad hoc} polymorphism less {\em ad hoc}.
+\newblock In {\em Proceedings of 16th ACM Symposium on Principles of
+  Programming Languages}, pages 60--76, Austin, Texas, January 1989.
+
+\end{thebibliography}

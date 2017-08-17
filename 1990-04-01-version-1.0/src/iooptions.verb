@@ -1,0 +1,103 @@
+%
+% $Header: /tmp_mnt/local.fp/haskell/report/report-1.0/RCS/iooptions.verb,v 1.0 90/03/28 14:59:36 partain Exp $
+%
+\subsection{Optional Requests}
+\label{io-options}
+\index{input/output!optional requests}
+
+These optional I/O requests may be useful in a {\sc Haskell}
+implementation.
+
+\begin{itemize}
+\item
+@
+ReadChannels [cname1, ..., cnamek]
+ReadBinChannels [cname1, ..., cnamek]
+@
+
+Opens @cname1@ through @cnamek@ for input.  A successful response has
+form @Tag vals@ [@BinTag vals@] where @vals@ is a list of values
+tagged with the name of the channel.  These responses require an
+extension to the @Response@ datatype:
+\bprog
+@
+data  Response = ...
+               | Tag    [(Name,Char)]
+               | BinTag [(Name,Bin)]
+@
+\eprog
+The tagged list of values is the non-deterministic merge of the values
+read from the
+individual channels.  If an element of this list has form
+@(cnamei,val)@, then it came from channel @cnamei@.
+
+If any @cnamei@ does not exist then the response 
+@Failure (SearchError string)@ is induced; all other errors induce
+@Failure (ReadError string)@.
+
+\item
+@
+CreateProcess prog
+@
+
+Introduces a new program @prog@ into the operating
+system.  @prog@ must have type @[Response] -> [Request]@.  Either @Success@
+and @Failure (OtherError string)@ is induced.
+
+\item
+@
+CreateDirectory name string
+DeleteDirectory name 
+@
+
+Create or delete directory @name@.  The @string@ argument to
+@CreateDirectory@ is an implementation-dependent specification of the
+initial state of the directory.
+
+\item
+@
+OpenFile     name inout
+OpenBinFile  name inout
+CloseFile    file
+ReadVal      file
+ReadBinVal   file
+WriteVal     file char
+WriteBinVal  file bin
+@
+
+These requests emulate traditional file I/O in which
+characters are read and written one at a time.
+\bprog
+@
+data  Response = ...
+               | Fil File
+data  File
+type  Bins     = [Bin]
+@
+\eprog
+@OpenFile name inout@ [@OpenBinFile name inout@]
+opens the file @name@ in text [binary] mode with
+direction @inout@ (@True@ for input, @False@ for output).
+The response @Fil file@ is induced, where @file@ has type @File@, a
+primitive type that represents a handle to a file.
+Subsequent use of that file by other requests is via this
+handle.
+
+@CloseFile file@ closes @file@.  @Failure (OtherError string)@ is
+induced if @file@ cannot be closed.
+
+@ReadVal@ [@ReadBinVal@] @file@ reads @file@, inducing the response 
+@Str val@ [@Bins val@] or @Failure (ReadError string)@.
+
+@WriteVal file char@ [@WriteBinVal file bin@] writes @char@ [@bin@] to
+@file@.  The response @Success@ or @Failure (WriteError string)@ is
+induced.
+
+@Failure (SearchError string)@ is induced for @ReadVal@, @ReadBinVal@,
+@WriteVal@, and @WriteBinVal@ if @file@ is not a text or
+binary file, as appropriate.
+\end{itemize}
+
+% Local Variables: 
+% mode: latex
+% End:

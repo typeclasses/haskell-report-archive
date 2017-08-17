@@ -1,0 +1,224 @@
+%
+% $Header: /tmp_mnt/local.fp/haskell/report/report-1.0/RCS/iosemant.verb,v 1.0 90/03/28 14:59:40 partain Exp $
+%
+\section{Input/Output Semantics}
+\label{io-semantics}
+\index{input/output!semantics}
+\index{semantics!input/output}
+
+The behaviour of a {\sc Haskell} program performing I/O is given within
+the environment in which it is running.  That environment will be described
+using standard {\sc Haskell} code augmented with a non-deterministic
+merge operator.
+
+The state of the operating system (OS state) that is relevant to {\sc
+Haskell} programs is completely described by the file system and the
+channel system.  The channel system is split into two subsystems, the
+input channel system and the output channel system.
+\bprog
+@
+type State = (FileSystem, ChannelSystem)
+type FileSystem    = Name -> Response
+type ChannelSystem = (ICs, OCs)
+type ICs   = Name -> (Agent, Open)
+type OCs   = Name -> Response
+type Agent = (FileSystem, OCs) -> Response
+type Open  = PId -> Bool
+type PId   = Int
+type PList = [(PId,[Request->Response])]
+type Name = String
+@
+\eprog
+An agent maps a list of OS states to responses.  Those
+responses will be used as the contents of input channels, and
+thus can depend on output channels, other input channels, files, or
+any combination thereof.  For example, a valid implementation must
+allow the user to act as agent between the standard output
+channel and standard input channel.
+
+Each running process (i.e.~program) has a unique @PId@.
+Elements of @PList@ are lists of running programs.
+
+\bprog
+@
+os :: TagReqList -> State -> (TagRespList, State)
+type TagRespList = [(PId,Response)]
+type TagReqList  = [(PId,Request)]
+@
+\eprog
+The operating system is modeled as a (non-deterministic) function
+@os@. The @os@ takes a tagged request list and an initial state, and
+returns a tagged response list and a final state.  Given a list of
+programs @pList@, @os@ must exhibit this behaviour:
+\bprog
+@
+(tagRespList, state') = os tagReqList state
+tagReqList = merge [ zip [pId,pId..] (proc (untag pId tagRespList))
+                      | (pId, proc) <- pList ]
+@
+\eprog
+where @merge@ is a non-deterministic merge of a list of lists, and
+@untag@ is:
+\bprog
+@
+untag n []               = []
+untag n ((m,resp):resps) = if n==m then resp:(untag n resps)
+                                   else untag n resps
+@
+\eprog
+This relationship can be generalised to
+include requests such as @CreateProcess@.
+
+A valid implementation must ensure that the input channel
+system is defined at @stdin@ and the output channel system is
+defined at @stdout@, @stderr@, and @stdecho@.  If the agent
+attached to standard input is called @user@ (i.e.~@ics stdin@ has
+form @(user, open)@), then @user@ must depend at least on
+standard output.  In other words, this constraint must hold:
+\bprog
+@
+user [..., (fs,(ics,ocs)), ...] = ... user' (ocs stdout) ...
+@
+\eprog
+where @user'@ is a {\em strict}, but otherwise arbitrary, function
+modelling the user.  Its strictness corresponds to the user's
+consumption of standard output whilst determining
+standard input.
+
+The rest of this section specifies the required behaviour of @os@ in
+response to each kind of request.  This semantics is relatively
+abstract and omits any reference to hardware errors (e.g.~``bad
+sector on disk'') and system dependent errors (e.g.~``access rights
+violation'').  Implementation-specific requests (for example the
+environment requests) are not shown here.  We describe only
+the text version of the requests: the binary version differs
+trivially. @os@ is defined by:
+\bprog
+@
+os :: TagReqList -> State -> (TagRespList,State)
+
+os [] state = ([], state)
+os ((n, ReadChan name):es) state@@(fs,(ics,ocs)) =
+    (alist',state') where
+          (agent,open) = ics name
+          alist' = (n, (if open n
+                        then fail
+                        else (agent (fs,ocs)) )) : alist
+          fail = Failure (OtherError "Channel already open\n")
+          (alist,state') = os es (fs, (update ics name
+                                         (agent, update open n true),
+                                       ocs))
+@
+\eprog
+where the auxiliary function @update@ is defined by:
+\bprog
+@
+update f x v x' = if x==x' then v else f x
+@
+\eprogNoSkip
+
+If an attempt is made to read a non-existent channel, @ics@
+returns an agent that gives the appropriate error message when
+applied to its arguments.  This definition is generalised in the
+obvious way for the behaviour of @ReadChannels@.  In particular, @ack@
+must be created by non-deterministically merging the result of applying
+each agent to the stream of future states.
+%Applying
+%agents to the entire system state is simply meant to capture the most
+%general situation where an adept agent might be able to
+%observe the entire state of the system.
+\bprog
+@
+os ((n, AppendChan name contents):es) state@@(fs,(ics,ocs)) =
+    (alist',state') where
+          alist' = ack:alist
+          ack =
+           (n,
+            case (ocs name) of
+             Failure msg -> Failure (SearchError "Nonexistent Channel")
+             Str ochan -> Success
+             Bn ochan -> Failure (FormatError "format error")
+            )
+          (alist,state') = os es (fs,(ics,
+                                      case (ocs name) of
+                                        Failure msg -> ocs
+                                        Str ochan -> update ocs name
+                                              (Str (ochan ++ contents))
+                                        Bn ochan -> ocs
+                                     ))
+@
+\eprogNoSkip
+\bprog
+@
+os ((n, ReadFile name):es) state@@(fs,(ics,ocs)) =
+    (alist',state') where
+          alist' = ack : alist
+          ack = (n,
+                 case (fs name) of
+                  Failure msg -> Failure (SearchError "File not found")
+                  Str string -> Str string
+                  Bn binary -> Failure (FormatError "")
+                )
+          (alist,state') = os es state
+
+os ((n, WriteFile name contents):es) state@@(fs,(ics,ocs)) =
+    (alist',state') where
+          alist' = (n, Success):alist
+          (alist,state') = os es (update fs name (Str contents),
+                                  (ics,ocs))
+@
+\eprogNoSkip
+\bprog
+@
+os ((n, AppendFile name contents):es) state@@(fs,(ics,ocs)) =
+    (alist',state') where
+          alist' = ack:alist
+          ack = (n, 
+                case (fs name) of
+                 Failure msg -> Failure (SearchError "file not found")
+                 Str s -> Success
+                 Bn  b -> Failure (FormatError "")
+                )
+          (alist,state') = os es (newfs, (ics,ocs))  where
+                           newfs = case (fs name) of
+                                    Failure msg -> fs
+                                    Str s ->
+                                     update fs name (Str (s++contents))
+                                    Bn  b -> fs
+@
+\eprogNoSkip
+\bprog
+@
+os ((n, DeleteFile name):es) state@@(fs,(ics,ocs)) =
+    (alist',state') where
+          alist' = ack : alist
+          ack = (n,
+                 case (fs name) of
+                  Failure msg -> Failure (SearchError "file not found")
+                  Str s -> Success
+                  Bn b -> Success
+                )
+          (alist,state') = os es (case (fs name) of
+                                    Failure msg -> fs
+                                    Str s -> update fs name fail
+                                    Bn b -> update fs name fail,
+                                  (ics,ocs))
+          fail = Failure (SearchError "file not found")
+
+os ((n,StatusFile name):es) state@@(fs,(ics,ocs)) = (alist',state') where
+          alist' = ack : alist
+          ack = (n,
+                 case (fs name) of
+                  Failure msg -> Failure (SearchError "File not found")
+                  Str string -> Str "t"++(rw n fs name)
+                  Bn binary -> Str "b"++(rw n fs name)
+                )
+          (alist, state') = os es state
+@
+\eprog
+where @rw@ is a function that determines the read and write status
+of a file for this particular process.
+
+% Local Variables: 
+% mode: latex
+% End:

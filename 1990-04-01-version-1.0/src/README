@@ -1,0 +1,47 @@
+This directory contains the Haskell Report, version 1.0.
+
+The .verb files are the Report proper, written as souped-up LaTeX
+files; "haskell.verb" is the top-level file.  The .verb files are
+pre-processed into .tex (ordinary LaTeX) files by "verbatim".  The .hs
+files are the Haskell source for the standard prelude.
+
+TO PRINT THE REPORT
+
+You must have a "big" TeX/LaTeX to produce the Report from its
+sources.  Alternatively, you may grab the file "report-1.0.dvi.Z"
+(compressed DVI file) or "report-1.0.ps.Z" (compressed PostScript file)
+from wherever you got this distribution, and print directly.
+
+If you have a "big" TeX/LaTeX and the program "makeindex", type "make"
+and then print "haskell.dvi" in your favo[u]rite way.
+
+"makeindex" is in the Unix TeX distribution; you can also get it by
+anonymous FTP from ucbarpa.berkeley.edu.  Otherwise, you must:
+
+    * If you messed up your "haskell.ind" file, restore it with 
+      "cp haskell.ind.bak haskell.ind".
+    * Remove the makeindex-using rule in the "makefile.real"
+    * In "haskell.verb":
+    	- remove the "makeidx" style option
+	- remove the "\makeindex" command
+    	- replace the "\printindex" command with "\input{haskell.ind}"
+    * Type "make"
+    * Be prepared for the page numbers in the index to be wrong if,
+      for some reason, your LaTeX breaks pages at different places
+      from our LaTeX (shouldn't happen, but...).
+
+If you are going to be noodling around with this distribution and
+don't want "make -f makefile.real" to be run three times every time
+you type "make", do "mv makefile.real makefile" and resume normal life.
+
+Don't delete the TeXified standard prelude files (Prelude*.tex) unless
+you can run "splitAndIndexPgm" with which to re-make from the
+Prelude*.hs files.  You must have "perl" to run "splitAndIndexPgm".
+"perl" is available by anonymous FTP from many sites, including
+comp.sources.unix archives, jpl-devvax.jpl.nasa.gov and
+tut.cis.ohio-state.edu.
+
+Please send comments about this distribution to Will Partain,
+partain@cs.glasgow.ac.uk.  Weightier matters about Haskell should be
+directed to the Haskell mailing list discussed in the Preface.  Happy
+Haskell hacking!

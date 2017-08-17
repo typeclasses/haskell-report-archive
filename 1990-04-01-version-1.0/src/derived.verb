@@ -1,0 +1,571 @@
+%
+% $Header: /tmp_mnt/local.fp/haskell/report/report-1.0/RCS/derived.verb,v 1.0 90/03/28 14:59:06 partain Exp $
+%
+% The paragraph describing the formats of standard representations might
+% be deleted, since the info is already in the Prelude.  
+% Note that there is a difference in the way readsPrec and showsPrec are defined.
+% showsPrec is exact Haskell text, readsPrec uses an auxiliary function which
+% isn't quite Haskell.  
+
+\section{Specification of Derived Instances}
+\label{derived-appendix}
+
+If "T" is an algebraic data type declared by:
+\[\begin{array}{lcl}
+"@data @c@ =>@ T u_1 ... u_k"&@=@&"K_1 t_{11} ... t_{1k_1} @|@ \cdots @|@ K_n t_{n1} ... t_{nk_n}"\\
+& & "@deriving (@C_1@,@ ...@,@ C_m@)@"
+\end{array}\]
+(where "m\geq0" and the parentheses may be omitted if "m=1") then
+{\em a derived instance declaration is possible} for a class "C" 
+if and only if these conditions hold:
+\begin{enumerate}
+\item
+"C" is one of @Eq@, @Ord@, @Enum@, @Ix@, @Text@, or @Binary@.
+
+\item
+There is a context "c'" such that "c' \Rightarrow C t_{ij}"
+holds for each of the constituent types "t_{ij}".
+
+\item
+If "C" is either @Ix@ or @Enum@, then further constraints must be
+satisfied as described under the paragraphs for @Ix@ and @Enum@
+later in this section.
+
+\item
+There must be no explicit instance declaration elsewhere in the module which
+makes "T u_1 ... u_k" an instance of "C" or of any of "C"'s superclasses.
+\end{enumerate}
+
+If the @deriving@ form is present (as in the above 
+general @data@ declaration),
+an instance declaration is automatically generated for "T u_1 ... u_k"
+over each class "C_i" and each of "C_i"'s superclasses.
+If the derived instance declaration is impossible for any of the "C_i"
+then a static error results.
+If no derived instances are required, the form @deriving ()@ must be used.
+
+If the @deriving@ form is omitted then instance
+declarations are derived for the datatype in as many of the six
+classes mentioned above as is possible; that is, no static error can occur.
+Since datatypes may be recursive, the implied inclusion in
+these classes may also be recursive, and the largest
+possible set of derived instances is generated.  For example,
+\bprog
+@
+data  T1 a = C1 (T2 a) | Nil1
+data  T2 a = C2 (T1 a) | Nil2
+@
+\eprog
+Because the @deriving@ form is omitted, we would expect derived
+instances for @Eq@ (for example).  But @T1@ is in @Eq@ only if @T2@
+is, and @T2@ is in @Eq@ only if @T1@ is.  The largest solution has
+both types in @Eq@, and thus both derived instances are generated.
+
+Each derived instance declaration will have the form:
+\[
+"@instance (@c@,@ C'_1 u'_1@,@ ...@,@ C'_j u'_j @) =>@ C_i (T u_1 ... u_k) @where@ @{@ d @}@"
+\]
+where "d" is derived automatically depending on "C_i" and the data
+type declaration for "T" (as will be described in the remainder of
+this section), and "u'_1" through "u'_j" form a subset of "u_1"
+through "u_k".  The class assertions "C' u'" are constraints on "T"'s
+type variables that are inferred from the instance declarations of the
+constituent types "t_{ij}".  For example, consider:
+\bprog
+@
+data  T1 a = C1 (T2 a) deriving Eq
+data  T2 a = C2 a      deriving ()
+@
+\eprog
+And consider these three different instances for @T2@ in @Eq@:\nopagebreak
+\bprog
+@
+instance            Eq (T2 a) where C2 x == C2 y  =  True
+
+instance (Eq  a) => Eq (T2 a) where C2 x == C2 y  =  x == y
+
+instance (Ord a) => Eq (T2 a) where C2 x == C2 y  =  x > y
+@
+\eprog
+The corresponding derived instances for @T1@ in @Eq@ are:
+\bprog
+@
+instance            Eq (T1 a) where C1 x == C1 y  =  x == y
+
+instance (Eq  a) => Eq (T1 a) where C1 x == C1 y  =  x == y
+
+instance (Ord a) => Eq (T1 a) where C1 x == C1 y  =  x == y
+@
+\eprog
+When inferring the context for the derived instances, type synonyms
+must be expanded out first.
+The remaining details of the derived
+instances for each of the six classes are now given.
+
+\paragraph*{Derived instances of @Eq@ and @Ord@.}
+\index{Eq@@{\ptt Eq}!derived instances of}
+\index{Ord@@{\ptt Ord}!derived instances of}
+The operations automatically introduced by derived instances
+of @Eq@ and @Ord@ are @(==)@\indextt{==}, @(/=)@\indextt{/=},
+@(<)@\indextt{<}, @(<=)@\indextt{<=}, @(>)@\indextt{>},
+@(>=)@\indextt{>=}, @max@\indextt{max}, and 
+@min@\indextt{min}.  The latter six operators are defined so
+as to compare their arguments lexicographically with respect to
+the constructor set given, with earlier constructors in the data type
+declaration counting as smaller than later ones.  For example, for the
+@Bool@ datatype, we have that @True > False == True@.
+
+\paragraph*{Derived instances of @Ix@.}
+\index{Ix@@{\ptt Ix}!derived instances of}
+The derived instance declarations for the class @Ix@ are only possible
+for integers, enumerations\index{enumeration} (i.e.~datatypes having
+only nullary constructors), and single-constructor datatypes
+(including tuples) whose constituent types are instances of @Ix@.  
+They introduce the overloaded functions
+@range@\indextt{range}, @index@\indextt{index}, and
+@inRange@\indextt{inRange}.  The operation @range@ takes a (lower,
+upper) bound pair, and returns a list of all indices in this range, in
+ascending order.  The operation @inRange@ is a predicate taking a
+(lower, upper) bound pair and an index and returning @True@ if the
+index is contained within the specified range.  The operation @index@
+takes a (lower, upper) bound pair and an index and returns an integer,
+the position of the index within the range.
+
+For an enumeration, the nullary constructors are assumed to be
+numbered left-to-right with the indices 0 through $n-1\/$.  For example,
+given the datatype:
+\bprog
+@
+data  Colour = Red | Orange | Yellow | Green | Blue | Indigo | Violet
+@
+\eprog
+we would have:
+\bprog
+@
+range   (Yellow,Blue)        ==  [Yellow,Green,Blue]
+index   (Yellow,Blue) Green  ==  1
+inRange (Yellow,Blue) Red    ==  False
+@
+\eprog
+For single-constructor datatypes, the derived instance declarations
+are created as shown for tuples in
+Figure~\ref{prelude-index}.
+
+%Instances of the class @Ix@\indextt{Ix} are typically used as
+%indices of arrays; a one-dimensional array might have index type
+%@Int@, a two-dimensional array, @(Int,Char)@, and so forth.  (See
+%Section~\ref{arrays}.)
+
+\begin{figure}
+\outline{
+@
+class  (Ord a) => Ix a where
+	range		:: (a,a) -> [a]
+	index		:: (a,a) -> a -> Int
+	inRange		:: (a,a) -> a -> Bool
+
+rangeSize               :: (Ix a) => (a,a) -> Int
+rangeSize (l,u)         =  index (l,u) u + 1
+
+instance  Ix Int  where
+	range (l,u)	=  [l..u]
+	index (l,u) i	=  i - l
+	inRange (l,u) i	=  i >= l && i <= u
+
+instance  Ix Integer  where
+	range (l,u)	=  [l..u]
+	index (l,u) i	=  fromInteger (i - l)
+	inRange (l,u) i	=  i >= l && i <= u
+
+instance  (Ix a, Ix b)  => Ix (a,b) where
+	range ((l,l'),(u,u'))
+		= [(i,i') | i <- range (l,u), i' <- range (l',u')]
+	index ((l,l'),(u,u')) (i,i')
+		=  index (l,u) i * rangeSize (l',u') + index (l',u') i'
+	inRange ((l,l'),(u,u')) (i,i')
+		= inRange (l,u) i && inRange (l',u') i'
+
+-- Instances for other tuples are obtained from this scheme:
+--
+--  instance  (Ix a1, Ix a2, ... , Ix ak) => Ix (a1,a2,...,ak)  where
+--	range ((l1,l2,...,lk),(u1,u2,...,uk)) =
+--	    [(i1,i2,...,in) | i1 <- range (l1,u1),
+--			      i2 <- range (l2,u2),
+--			      ...
+--			      ik <- range (lk,uk)]
+--	index ((l1,l2,...,lk),(u1,u2,...,uk)) (i1,i2,...,ik) =
+--	      index (l1,u1) i1 * rangeSize ((l2,...,lk),(u2,...,uk))
+--	    + index (l2,u2) i2 * rangeSize ((l3,...,lk),(u3,...,uk))
+--	      ...
+--	    + index (lk,uk) ik
+--	inRange ((l1,u2,...lk),(u1,u2,...,uk)) (i1,i2,...,ik) =
+--	    inRange (l1,u1) i1 && inRange (l2,u2) i2 &&
+--		... && inRange (lk,uk) ik
+@
+}
+\ecaption{Index classes and instances}
+\label{prelude-index}
+\indextt{Ix}                                                
+\indextt{range}\indextt{index}\indextt{inRange}   
+\indextt{rangeSize}                                         
+\end{figure}
+
+\paragraph*{Derived instances of @Enum@.}
+\index{Enum@@{\ptt Enum}!derived instances of}
+Derived instance declarations for the class @Enum@ are only
+possible for enumerations, using the same ordering assumptions made
+for @Ix@.  They introduce the operations
+@enumFrom@\indextt{enumFrom},
+@enumFromThen@\indextt{enumFromThen}, @enumFromTo@\indextt{enumFromTo}, and
+@enumFromThenTo@\indextt{enumFromThenTo},
+which are used to define arithmetic sequences as described
+in Section~\ref{arithmetic-sequences}.
+
+@enumFrom n@ returns a list corresponding to the complete enumeration
+of @n@'s type starting at the value @n@.
+Similarly, @enumFromThen n n'@ is the enumeration starting at @n@, but
+with second element @n'@, and with subsequent elements generated at a
+spacing equal to the difference between @n@ and @n'@.
+@enumFromTo@ and @enumFromThenTo@ are as defined by the
+default-methods for @Enum@ (see Figure~\ref{standard-classes},
+page~\pageref{standard-classes}).
+
+\paragraph*{Derived instances of @Binary@.}
+\index{Binary@@{\ptt Binary}!derived instances of}
+The @Binary@ class is used primarily for transparent I/O (see
+Section~\ref{io-modes}).  The operations automatically introduced
+by derived instances of @Binary@ are @readBin@\indextt{readBin} and
+@showBin@\indextt{showBin}.  They coerce values to and
+from the primitive abstract type @Bin@ (see Section~\ref{bin-type}).
+An implementation must be able to create derived instances of @Binary@
+for any type "t" not containing a function type.
+
+@showBin@ is analogous to @shows@, taking two arguments: the first
+is the value to be coerced, and the second is a @Bin@ value to which
+the result is to be concatenated.  @readBin@ is analogous to @reads@,
+``parsing'' its argument and returning a pair consisting of the
+coerced value and any remaining @Bin@ value.  
+
+Derived versions of @showBin@ and @readBin@ must obey this
+property:
+\[
+"@readBin (showBin @v b@) == (@v@,@b@)@"
+\]
+for any @Bin@ value "b" and value "v" whose type is an instance of the
+class @Binary@.
+
+\paragraph*{Derived instances of @Text@.}
+\index{Text@@{\ptt Text}!derived instances of}
+The operations automatically introduced by derived instances
+of @Text@ are @showsPrec@\indextt{showsPrec}, @readsPrec@\indextt{readsPrec},
+@showList@\indextt{showList} and @readList@\indextt{readList}.
+They are used to coerce values into strings and parse strings into
+values.
+
+The function @showsPrec d x r@ accepts a precedence level @d@
+(a number from @0@ to @10@), a value @x@, and a string @r@.
+It returns a string representing @x@ concatenated to @r@.
+@showsPrec@ satisfies the law:
+\[
+"@showsPrec d x r ++ s  ==  showsPrec d x (r ++ s)@"
+\]
+The representation will be enclosed in parentheses if the precedence
+of the top-level constructor operator in @x@ is less than @d@.  Thus,
+if @d@ is @0@ then the result is never surrounded in parentheses; if
+@d@ is @10@ it is always surrounded in parentheses, unless it is an
+atomic expression.  The extra parameter @r@ is essential if tree-like
+structures are to be printed in linear time rather than time quadratic
+in the size of the tree.
+
+The function @readsPrec d s@ accepts a precedence level @d@ (a number
+from @0@ to @10@) and a string @s@, and returns a list of pairs
+@(x,r)@ such that @showsPrec d x r == s@.  @readsPrec@ is a parse
+function, returning a list of (parsed value, remaining string) pairs.
+If there is no successful parse, the returned list is empty.
+
+@showList@ and @readList@ allow lists of objects to be represented
+using non-standard denotations.  This is especially useful for strings
+(list s of @Char@).
+
+%Because a string is a list of characters, @showsPrec@ of a string
+%such as @"abc"@ will result in the string 
+%@"[@\fwq@a@\fwq @,@ \fwq@b@\fwq @,@ \fwq@c@\fwq @]"@.  Because
+%@"\"abc\""@ would be a better representation,
+%the operators @showList@
+%and @readList@ are provided in the class @Text@ for coercing {\em
+%lists} of values to and from strings.  In particular, @showsPrec@ of a
+%string will yield the verbose form above, and @showList@ will yield
+%the compact version.  For most other datatypes, @showList@ and
+%@readList@ will yield the same result as @showsPrec@ and @readsPrec@.
+
+For convenience, the standard prelude provides the following auxiliary functions:
+\bprog
+@
+shows    =  showsPrec 0
+reads    =  readsPrec 0
+show x   =  shows x ""
+read s   =  x  where [(x,"")] = reads s
+@
+\eprog
+@shows@ and @reads@ use a default precedence of 0, and @show@ and @read@
+assume that the result is not being appended to an initial string.
+
+The instances of @Text@ for the standard types @Int@, @Integer@, @Float@,
+@Double@, @Char@, lists, tuples, and rational and complex numbers are defined in the 
+standard prelude (see Appendix~\ref{stdprelude}).
+For characters and strings, the control characters that have special
+representations (@\n@ etc.) are shown as such by @showsPrec@; otherwise decimal
+escapes are used.
+Floating-point numbers for which $-1 \leq \log_{10} |f| \leq @sf@(f)$
+where
+\bprog
+@
+sf f = (floatDigits f * floatRadix f) `div` 10 + 1
+@
+\eprog
+are represented by @showsPrec@ in non-exponential format; otherwise they are in
+exponential format with one digit before the decimal point.  
+Unnecessary trailing zeroes are suppressed
+(but at least one digit must follow the decimal point).
+
+@readsPrec@ will parse any valid representation of the standard types 
+apart from lists, for
+which only the bracketted form @[@\ldots@]@ is accepted. See
+Appendix~\ref{stdprelude} for full details.
+
+%Figure~\ref{derived-text} gives the general form of a derived instance
+%of @Text@ for a user-defined datatype:
+%\[
+%"@data@ c @=>@ T u_1 ... u_k @=@ ... "
+%\]
+%@showsPrec@ and @readsPrec@ are as
+%in Appendices~\ref{showsPrec-spec} and \ref{readsPrec-spec}.  The omitted
+%definitions of @readList@ and @showList@ in
+%Figure~\ref{standard-classes} (page~\pageref{standard-classes})
+%are:
+%\bprog
+%@@
+%readList:: ReadS [a]
+%readList r = [pr | ("[",s) <- [lex r],
+%		  pr	  <- readl s	]
+%	    where readl s = [([],t) | ("]",t) <- [lex s]] ++
+%			   [(x:xs,v) |	(x,t) <- reads s,
+%					(",",u) <- [lex t],
+%					(xs,v) <- readl u	]
+%
+%showList:: [a] -> ShowS
+%showList xs = showChar '[' . showl xs
+%	     where
+%	     showl [] = showChar ']'
+%	     showl (x:xs) = shows x . showChar ',' . showl xs
+%@@
+%\eprog
+%\begin{figure}
+%\outline{
+%@@
+%instance (C, Text u1, ..., Text uk) => Text (T u1 ... uk) where
+%	showsPrec = ...
+%	readsPrec = ...
+%@@
+%}
+%\caption{General form of a derived instance of @Text@}
+%\label{derived-text}
+%\end{figure}
+
+\subsection{Specification of @showsPrec@}
+\label{showsPrec-spec}
+\indextt{showsPrec}
+
+As described in Section~\ref{derived-decls}, @showsPrec@ has the typing 
+\[
+"@(Text a) => Int -> a -> String -> String@"
+\]
+The first parameter is a
+precedence in the range 0 to 10, the second is the value to be
+converted into a string, and the third is the string
+to append to the end of the result.
+
+For all constructors @Con@ defined by some @data@ declaration
+such as:
+\[
+"@data@ c @=>@ T u_1 ... u_k @=@ ... @| Con@ t_1 ... t_n @|@ ..."
+\]
+the corresponding definition of @showsPrec@ for @Con@ is shown in 
+Figure~\ref{showsPrec-infix} for binary infix constructors and
+Figure~\ref{showsPrec-fig} for all other constructors.  
+See Appendix~\ref{stdprelude} for details of @showParen@, @showChar@, etc.
+
+\begin{figure}
+\outline{
+@
+    showsPrec d (e1 `Con` e2) =
+	showParen (d > p) showStr	where
+	      p = `the precedence of Con'
+	      lp = if `Con is left associative' then p else p+1
+	      rp = if `Con is right associative' then p else p+1
+	      cn = `the original name of Con'
+
+              showStr = showsPrec lp e1 .
+                        showChar ' ' . showString cn . showChar ' ' .
+                        showsPrec rp e2
+@
+}
+\caption{Specification of @showsPrec@ for Infix Constructors of arity 2}
+\label{showsPrec-infix}
+\end{figure}
+
+\begin{figure}
+\outline{
+@
+    showsPrec d (Con e1 ... en) =
+	showParen (d >= 10) showStr where
+              showStr = showString cn . showChar ' ' .
+                        showsPrec 10 e1 . showChar ' ' .
+                        ...
+                        showsPrec 10 en
+	      cn = `the original name of Con'
+@
+}
+\caption{General Specification of @showsPrec@ for User-Defined Constructors}
+\label{showsPrec-fig}
+\end{figure}
+
+\subsection{Specification of @readsPrec@}
+\label{readsPrec-spec}
+\indextt{readsPrec}
+
+A {\em lexeme} is exactly as in Section~\ref{lexical-structure}.
+@lex :: String -> (String, String)@ parses a string into two
+parts: (1)~a string representing the first lexeme or @""@ if the input
+is @""@ or consists entirely of white space, and (2)~the remainder of
+the input after the first lexeme is extracted.  Whitespace (again
+refer to Section~\ref{lexical-structure}) is ignored except within
+strings.  An error results if no proper lexeme can be parsed (such as
+in the case of an unrecognised control character).  
+A full definition is provided in Appendix~\ref{preludetext}.
+
+As described in Section~\ref{derived-decls}, @readsPrec@ has the typing 
+\[
+"@Text a => Int -> String -> [(a,String)]@"
+\]
+Its first parameter is a
+precedence in the range 0 to 10, its second is the string to be
+parsed.  
+Figure~\ref{readsPrec-fig} shows the specification of @readsPrec@ for user-defined 
+datatypes of the form:
+\[
+"@data@ c @=>@ T u_1 ... u_k @=@ K_1 t_{11} ... t_{1k_1} @|@ ... @|@ K_n t_{n1} ... t_{nk_n}"
+\]
+
+\begin{figure}
+\outline{
+@
+readsPrec d r = readCon K1 k1 `the original name of K1' r ++
+	   ... 
+	   readCon Kn kn `the original name of Kn' r
+
+readCon con n cn =			-- if con is infix and n == 2
+	readParen (d > p) readVal 
+	    where
+		readVal r =  [(u `con` v, s2) |
+	 		     (u,s0)   <- readsPrec lp r,
+			     (tok,s1) <- [lex s0], tok == cn,
+			     (v,s2)   <- readsPrec rp s1]
+		p = `the precedence of con'
+	        lp = if `con is left associative' then p else p+1
+	        rp = if `con is right associative' then p else p+1
+
+readCon con n cn =			-- if con is not infix or n /= 2
+	readParen (d > 9) readVal
+	    where
+		 readVal r = [(con t1 ... tn, sn) |
+		       	     (t0,s0) <- [lex r], t0 == cn,
+		             (t1,s1) <- readsPrec 10 s0,
+		             ...
+		             (tn,sn) <- readsPrec 10 s(n-1)]
+@
+}
+\caption{Definition of @readsPrec@ for User-Defined Types}
+\label{readsPrec-fig}
+\end{figure}
+
+\pagebreak
+\subsection{An example}
+
+As a complete example, consider a tree datatype:\nopagebreak
+\bprog
+@
+data Tree a = Leaf a | Tree a :^: Tree a
+@
+\eprog\nopagebreak
+Since there is no @deriving@ clause, this is shorthand for:\nopagebreak
+\bprog
+@
+data Tree a = Leaf a | Tree a :^: Tree a
+instance (Eq a) => Eq (Tree a)
+  where ...
+instance (Ord a) => Ord (Tree a)
+  where ...
+instance (Text a) => Text (Tree a)
+  where ...
+instance (Binary a) => Binary (Tree a)
+  where ...
+@
+\eprog
+Note the recursive context; the components of the datatype must
+themselves be instances of the class.  Instance
+declarations for @Ix@ and @Enum@ are not present, as @Tree@ is not
+an enumeration or single-constructor datatype.  Except for @Binary@, the complete
+instance declarations for @Tree@ are shown in Figure~\ref{tree-inst},
+Note the implicit use of default-method definitions---for
+example, only @<=@ is defined for @Ord@, with the other
+operations (@<@, @>@, @>=@, @max@, and @min@) being defined by the defaults given in
+the class declaration shown in Figure~\ref{standard-classes}
+(page~\pageref{standard-classes}).
+
+\begin{figure}
+\outline{
+@
+infix 4 :^:
+data Tree a =  Leaf a  |  Tree a :^: Tree a
+
+instance (Eq a) => Eq (Tree a) where
+	Leaf m == Leaf n  =  m==n
+	u:^:v  == x:^:y	  =  u==x && v==y
+             _ == _       =  False
+
+instance (Ord a) => Ord (Tree a) where
+	Leaf m <= Leaf n  =  m<=n
+	Leaf m <= x:^:y	  =  True
+	u:^:v  <= Leaf n  =  False
+	u:^:v  <= x:^:y	  =  u<x || u==x && v<=y
+
+instance (Text a) => Text (Tree a) where
+
+        showsPrec d (Leaf m) = showParen (d >= 10) showStr where
+             showStr = showString "Leaf" . showChar ' ' . showsPrec 10 m
+
+        showsPrec d (u :^: v) = showParen (d > 4) showStr where
+             showStr = showsPrec 5 u . 
+                       showChar ' ' . showString ":^:" . showChar ' ' .
+                       showsPrec 5 v
+
+	readsPrec d r =  readParen (d > 4)
+			 (\r -> [(u:^:v,w) |
+				 (u,s) <- readsPrec 5 r,
+				 (":^:",t) <- [lex s],
+				 (v,w) <- readsPrec 5 t]) r
+
+		      ++ readParen (d > 9)
+			 (\r -> [(Leaf m,t) |
+				 ("Leaf",t) <- [lex r],
+				 (m,t) <- readsPrec 10 t]) r
+@
+}
+\ecaption{Example of Derived Instances}
+\label{tree-inst}
+\end{figure}
+
+% Local Variables: 
+% mode: latex
+% End:

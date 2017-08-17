@@ -1,0 +1,273 @@
+%
+% $Header: /tmp_mnt/local.fp/haskell/report/report-1.0/RCS/preface.verb,v 1.0 90/03/28 15:00:00 partain Exp $
+%
+\begin{center}
+\Large\bf Preface
+\end{center}
+
+\vspace{.2in}
+
+\begin{quote}
+``{\em Some half dozen persons have written technically on combinatory
+logic, and most of these, including ourselves, have published
+something erroneous.  Since some of our fellow sinners are among the
+most careful and competent logicians on the contemporary scene, we
+regard this as evidence that the subject is refractory.  Thus fullness
+of exposition is necessary for accuracy; and excessive condensation
+would be false economy here, even more than it is ordinarily.}''
+\begin{flushright}
+Haskell B. Curry and Robert Feys \\
+in the Preface to {\em Combinatory Logic} \cite{curry&feys:book}, May 31, 1956
+\end{flushright}
+\end{quote}
+
+\vspace{.2in}
+
+In September of 1987 a meeting was held at the conference on
+Functional Programming
+Languages and Computer Architecture in
+Portland, Oregon, to discuss an unfortunate situation
+in the functional programming community: there had come into being
+more than a dozen non-strict, purely functional programming languages,
+all similar in expressive power and semantic underpinnings.  There
+was a strong consensus at this meeting that more widespread use of
+this class of functional languages\index{functional languages} was
+being hampered by the lack of a common language.  It was decided
+that a committee should be formed to design such a language, providing
+faster communication of new ideas, a stable foundation for real
+applications development, and a vehicle through which others
+would be encouraged to use functional languages.  This
+document describes the result of that committee's efforts: a purely
+functional programming language called {\sc Haskell},
+\index{Haskell@@{\sc Haskell}}
+named after the logician Haskell B. Curry\index{Curry, Haskell B.}
+whose work provides the logical basis for much of ours.
+
+\subsection*{Goals}
+
+The committee's primary goal was to design a language that
+satisfied these constraints:
+\begin{enumerate}
+\item It should be suitable for teaching, research, and applications,
+      including building large systems.
+\item It should be completely described via the publication of a formal
+      syntax and semantics.
+\item It should be freely available.  Anyone should be permitted to
+      implement the language and distribute it to whomever they please.
+\item It should be based on ideas that enjoy a wide consensus.  
+\item It should reduce unnecessary diversity in functional 
+      programming languages.
+\end{enumerate}
+The committee hopes that {\sc Haskell} can serve as a
+basis for future research in language design.
+We hope that extensions or
+variants of the language may appear, incorporating experimental
+features.
+
+\subsection*{This Report}
+
+This report is the official specification of the {\sc Haskell}
+language and should be suitable for writing programs and building
+implementations.  It is {\em not} a tutorial on programming in {\sc
+Haskell}, so some familiarity with functional languages is assumed.
+Being the first edition of the specification, there may be some errors
+and inconsistencies; beware.
+
+\subsection*{The Next Stage}
+
+{\sc Haskell} is a large and complex language, because it is designed
+for a wide spectrum of purposes.  It also introduces a major new 
+technical innovation, namely using type classes to handle overloading in
+a systematic way.  This innovation permeates every aspect of the language.
+
+{\sc Haskell} is bound to contain infelicities and
+errors of judgement.   During the forthcoming year we welcome your
+comments, suggestions and criticisms on the language, or its presentation in
+the report.  Together with your input and our own experience of using
+the language, we plan to meet in about a year's time to resolve
+difficulties and further stabilise the design.
+
+A common mailing list for technical discussion of {\sc Haskell} can be
+reached at either @haskell@@cs.yale.edu@ or @haskell@@cs.glasgow.ac.uk@.
+Errata sheets for this report will be posted there.
+To subscribe, send a request to 
+@haskell-request@@cs.glasgow.ac.uk@ (European residents) or
+@haskell-request@@cs.yale.edu@ (residents elsewhere).
+
+We thought it would be helpful to identify the aspects of the language
+design that seem to be most finely balanced, and hence are the
+most likely candidates for change when we review the language.
+The following list summarises these areas.  It will only be fully
+comprehensible after you have read the report.
+
+\paragraph*{Mutually recursive modules.}
+Mutual recursion among modules is unrestricted at pre\-sent, which is
+obviously desirable from the programmer's point of view, but which poses
+significant challenges to the compilation system.  In particular, it is
+{\em not} sufficient to start with trivial interfaces for each module and
+iterate to a fixpoint, as this example shows:
+\bprog
+@
+module F( f ) where
+	import G
+	f [x] = g x
+
+module G( g ) where
+	import F
+	g = f
+@
+\eprog
+If a compilation system starts off by giving @F@ and @G@ interfaces
+that give the type signatures @f::a@ and @g::b@ respectively, then
+compiling the two modules alternately will not reach a fixed point.
+In general, a compiler may need to analyse a set of mutually recursive
+modules as a whole, rather than separately.  This only happens if
+there is a type error, but it is obviously undesirable behaviour.
+
+\paragraph*{Default methods.}
+Section~\ref{class-decls} describes how a class declaration may
+include default methods for some of its operations.  We considered extending
+this so that a class declaration could include default methods {\em for
+operations of its superclasses}, which override the superclass's default
+method.  This looks like an attractive idea, which will certainly
+be considered for a future revision.
+
+\paragraph*{Defaults for ambiguous types.}
+Section~\ref{defaults}
+describes how ambiguous typings, which arise due to the type-class system,
+are resolved.  Ideally, the choice made should not matter. For example,
+consider the expression @if (length xs > 3) then E1 else E2@.  It should
+not matter whether the length is computed in @Int@ or @Integer@ or 
+even @Float@; a bad choice could result in a program becoming undefined
+due to overflow, or a less efficient program, but if a result is produced
+it will be correct.  
+
+Our resolution rules strive only to resolve ambiguous
+types where the type chosen does not ``matter'' in this sense, but we have
+not been entirely successful, for example where floating point is concerned.
+Further research and practical experience may suggest a better set of rules.
+
+\paragraph*{Static semantics of where bindings.}
+In {\sc Haskell} variables not bound to lambda abstractions
+are not allowed to be overloaded in more than one way
+(Section~\ref{pattern-bindings}).  This solves two problems, which
+are summarised below, but at the cost of restricting expressiveness.
+Only experience will tell how much of a problem this is for
+the programmer.
+
+These are the two problems.  First, the expression
+@(x,x) where x = factorial 1000@ looks as though 
+@x@ should only be computed once, and this is the case.  If @x@ were used
+at different overloadings, however, @factorial 1000@ would be computed 
+twice, once at each type.  We have found examples where the loss of efficiency
+is exponential in the size of the program.  
+Modest compiler optimisations can often eliminate
+the problem, but we have found no simple scheme that can guarantee to do so.
+The restriction solves the problem by ensuring that all uses of @x@ are
+at the same overloading, and its evaluation can be shared as usual.
+
+Second, a rather subtle form of type 
+ambiguity (Section~\ref{defaults}) 
+is eliminated by the restriction to non-overloaded pattern bindings.
+An example is:
+\bprog
+@
+readNum s r = (n*r,s') where [(n,s')] = reads s
+@
+\eprog
+Here @n::(Num a, Binary a) => a@, @s'::Binary a => Bin@.  If the
+definition of @[(n,s')]@ is polymorphic, the @a@'s may be resolved as
+different types.
+
+\paragraph*{Overloaded constants.}
+Overloaded constants (e.g.~@1@, which has type @Num a => a@) are
+extraordinarily convenient when programming, but are the source of
+several serious technical problems, including both of those mentioned
+in the two preceding items.  One could eliminate overloaded
+constants altogether; we considered this at length, and we are sure to
+reconsider it when we review the language.
+
+\paragraph*{Polymorphism in @case@ expressions.}
+
+The type of a variables bound by a Standard ML case-expression is monomorphic;
+we have made the same decision in {\sc Haskell}
+(Section~\ref{type-semantics}).  There is no technical reason why
+the type of such a variable should not be polymorphic; in such a case,
+the translation between @where@ expressions and
+@case@ expressions would preserve the static semantics.
+
+We have erred on the side of conservatism, but this
+decision will be reviewed.  If implemented, such a change would be
+upward-compatible.
+
+\subsection*{Acknowledgements}
+
+We heartily thank these people for their useful contributions
+to this report:
+Lennart Augustsson,
+Richard Bird,
+Stephen Blott,
+Tom Blenko,
+Duke Briscoe,
+Chris Clack,
+Guy Cousineau,
+Tony Davie,
+Chris Fasel,
+Pat Fasel, 
+Bob Hiromoto,
+Nic Holt,
+Simon B. Jones, 
+Stef Joosten, 
+Mike Joy,
+Richard Kelsey,
+Siau-Cheng Khoo, 
+Amir Kishon, 
+John Launchbury,
+Olaf Lubeck, 
+Randy Michelsen, 
+Rick Mohr, 
+Arthur Norman,
+Paul Otto, 
+Larne Pekowsky,
+John Peterson,
+Rinus Plasmeijer,  
+John Robson, 
+Colin Runciman, 
+Lauren Smith, 
+Raman Sundaresh,
+Tom Thomson,
+Pradeep Varma,
+Tony Warnock,
+Stuart Wray,
+and Bonnie Yantis.
+We also thank those who participated in the lively discussions
+about {\sc Haskell} on the FP mailing list during an interim period of
+the design.
+
+We owe a particular debt to Mar{\'\i}a Guzm{\'a}n at Yale and Will Partain
+at Glasgow, who have spent many hours working on the details
+and typography of the report.
+
+Finally, aside from the important foundational work laid by Church,
+Rosser, Curry, and others on the lambda calculus, we wish to
+acknowledge the influence of many noteworthy programming languages
+developed over the years.  Although it is difficult to pinpoint the
+origin of many ideas, we particularly wish to acknowledge the
+influence of McCarthy's Lisp \cite{mcca60} (and its modern-day
+incarnation, Scheme \cite{RRRRS}); Landin's ISWIM \cite{landin66};
+Backus' FP \cite{back78}; Gordon, Milner, and Wadsworth's ML
+\cite{gordonetal78}; Burstall, MacQueen, and Sannella's Hope
+\cite{burs80}; and Turner's series of languages culminating in
+Miranda \cite{turn85}.\footnote{{\rm Miranda} is a trademark of
+Research Software Ltd.} Without these forerunners {\sc Haskell} would
+not have been possible.
+
+\begin{flushright}
+The {\sc Haskell} Committee\\
+1 April 1990
+\end{flushright}
+
+% Local Variables: 
+% mode: latex
+% End:
+

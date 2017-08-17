@@ -1,0 +1,836 @@
+%
+% $Header: /tmp_mnt/local.fp/haskell/report/report-1.0/RCS/modules.verb,v 1.0 90/03/28 14:59:56 partain Exp $
+%
+\section{Modules} 
+\label{modules} 
+\index{module}
+
+A module defines a collection of values, data types, type synonyms,
+classes, etc.~(see Section~\ref{declarations}), and {\em exports} some of
+these resources, making them available to other modules.
+We use the term {\em entity}\index{entity} to refer to the
+values, types, and classes defined in and perhaps exported from
+a module.
+
+A {\sc Haskell} {\em program} is a collection of modules, one of which
+must be called @Main@\indextt{Main} and must export the value
+@main@\indextt{main}.  The {\em value} of the program is the value
+of the identifier @main@ in module @Main@, and @main@ must have type
+@Dialogue@ (see Section~\ref{io}).
+% More precisely, if all
+% importations, renamings, etc. as described in this section are
+% eliminated, and the original declarations (with suitable renamings 
+% to prevent name clashes) are collected together into one set of
+% declarations called "decls", then the value of the program is 
+% "@main where @decls".  The semantics of a @where@ clause is defined
+% in Section~\ref{where-expressions}.
+
+Modules may reference other modules via explicit
+@import@ declarations, each giving the name of a module to be
+imported, specifying its entities to be imported, and
+optionally renaming some or all of them.  Modules may be mutually
+recursive.
+
+The name-space for modules is flat, with each module being associated
+with a unique module name (which are {\sc Haskell} identifiers
+beginning with a capital letter; i.e.~$aconid$).  There are two
+distinguished modules, @PreludeCore@ and @Prelude@, both
+discussed in Section~\ref{standard-prelude}.
+
+\subsection{Overview}
+\label{module-structure}
+
+\subsubsection{Interfaces and Implementations}
+
+A module consists of an {\em interface}\index{interface} and an
+{\em implementation}\index{implementation} of that interface.
+
+The interface of a module provides complete information about the
+static semantics of that module, including type signatures, class
+definitions, and type declarations for the various entities made
+available by the module.  This information is complete in this
+sense:  If a module $M$ imports modules $M_1, \ldots, M_n$,
+then only the interfaces of $M_1, \ldots, M_n$ need be examined in
+order to perform static checking on the implementation of {\it M.}  No
+implementations of $M_1, \ldots, M_n$ need to exist, nor need any
+further interfaces be consulted.  Interfaces are discussed
+in Section~\ref{module-interfaces}.
+
+An implementation ``fills in'' the information about a module missing
+from the interface.  For example, for each value given a type
+signature in the interface the implementation either imports a module
+that defines the value or defines the value itself.  Implementations
+are discussed in Section~\ref{module-implementations}.
+
+\subsubsection{Original Names}
+\label{original-names}
+\index{original names}
+\index{renaming}
+
+It may be that a particular entity is imported into a module by more
+than one route---for example, because it is exported by two modules
+both of which are imported by a third module.  It is important that
+benign name-clashes of this form are allowed, but that accidental
+name-clashes are detected and reported as errors.  This is done as
+follows.
+
+Each entity (class, type constructor, value, etc.) has an {\em
+original name} that is a pair consisting of the name of the module in
+which it was originally declared, and the name it was given in that
+declaration.  The original name is carried with the entity wherever it
+is exported.  Two entities are the same if and only if they have the
+same original name.
+
+\index{renaming!with respect to original name}
+Renaming does {\em not} affect the original name; it is a purely
+syntactic operation that affects only the name by which the entity is
+currently known.  For example, if a class is renamed and a type is
+declared to be an instance of the newly-named class, then it is also
+an instance of the original class---there is just one class, which
+happens to be known by different names in different parts of the
+program.  Also, fixity is a property of the original name of an
+identifier or operator and is not affected by renaming; the new
+name has the same fixity as the old one.
+
+\subsubsection{Closure}
+\label{closure}
+\index{module!closure}
+
+The implementation together with the interfaces of
+the modules it imports must be {\em statically closed} according to
+this rule: {\em every value, type, or class referred to
+in the text of 
+an implementation together with the
+interfaces that it imports, must be 
+declared in the implementation or in one of the
+imported interfaces}.
+
+It is an error for a module to export a collection of entities that
+cannot possibly become closed.  For example, if a module @A@ declares
+both the type @T@ and a value @t@ of type @T@, it may not export @t@
+without also exporting @T@.
+
+However, the closure condition applies on {\em import},
+not on {\em export}.  For example, if another module @B@ imported @T@
+from module @A@, and declared another value @s@ of type @T@, it may
+export @s@ without exporting @T@---but any module importing @B@ must
+also import the type @T@ by some other route, for example by also
+importing @A@.
+
+%There is one important exception to the closure rule: {\em instance
+%declarations in imported interfaces are not subject to it, and are
+%ignored if they refer to a class or type constructor which is not in
+%scope}.  This allows an interface to export a C-T instance declaration
+%(see Section~\ref{instance-decls}) which takes effect when both C and T
+%are in scope, but does no harm if one or the other (or both) is not.
+%
+\subsubsection{The Compilation System}
+
+The task of checking consistency between interfaces and
+implementations must be done by the {\em compilation
+system}\index{compilation system}.
+
+{\sc Haskell} does not specify any particular association between
+implementations and interfaces on the one hand, and {\em files} on the
+other; nor does it specify how implementations and interfaces are
+produced.  These matters are determined by the compilation system, and
+many variations are possible, depending on the programming
+environment.  For example, a compilation system could insist that each
+implementation and each interface reside alone in a file, and that the
+module name is the same as that of the file, with the implementation
+and interface distinguished by a suffix.
+%Alternatively, if no such
+%restrictions are made, then the compilation system has
+%to map module names onto file names.
+
+Similarly, a compilation system may require the programmer to write
+the interface, or it may derive the interface from examination of the
+implementation, or some hybrid of the two.  {\sc Haskell} is defined so
+that, given the interfaces of all imported modules, it is always
+possible to perform a complete static check on the implementation,
+and, if it is well-typed, to derive its unique
+interface automatically.  However, given a set of mutually recursive
+implementations, the compilation system may have to examine several
+modules at once to derive the interfaces, which will still be unique
+with one exception: because of the shorthand for exporting all
+entities from an imported module, the set of exports may not be
+unique.  Any set satisfying the consistency constraints is a valid
+solution for a well-typed {\sc Haskell} program, but if an
+implementation automatically derives the interface it must derive the
+smallest set of exports.
+
+For optimisation across module boundaries, a compilation system may
+need more information than is
+provided by the standard interface as defined in this report.
+
+\subsection{Module Implementations} 
+\label{module-implementations}
+\index{module!implementation}
+
+A module implementation\index{implementation} defines a mutually
+recursive scope containing declarations for value bindings, data
+types, type synonyms, classes, etc. (see Section~\ref{declarations}).
+
+@@@ 
+module -> @module@ modid [exports] @where@ body
+       | body
+body   -> @{@ [impdecls @;@] [fixdecls @;@] topdecls @}@
+       |  @{@ impdecls @}@
+
+modid	     -> aconid
+impdecls     -> impdecl_1 @;@ ... @;@ impdecl_n	& \qquad (n>=1)
+topdecls     -> topdecl_1 @;@ ... @;@ topdecl_n	& \qquad (n>=1) 
+@@@ 
+
+% [:: [context =>] type]		TYPE SIGS NOT ALLOWED NOW
+% EXPOSE IS OUT
+% topdecl	 -> expose [modid] entities where {topdecls }
+%         |  \ldots \tr{(see Section~\ref{declarations})}
+
+\indextt{module}
+A module implementation begins with a header: the keyword
+@module@, the module name, and a list of entities (enclosed in round
+parentheses) to be exported.  The header is followed by an optional
+list of @import@ declarations that specify modules to be imported,
+optionally restricting and renaming the imported bindings.  This is
+followed by an optional list of fixity declarations and the module
+body.  The module body is simply a list of top-level declarations
+($topdecls$), as described in Section~\ref{declarations}.  
+
+An abbreviated form of module is permitted, which consists only of
+the module body.  If this is used, the header is assumed to be
+@module Main where@.
+It is inadvisable
+for a compilation system to permit 
+an abbreviated module to appear in the same file as some
+unabbreviated modules.
+
+\subsubsection{Export Lists}
+\label{export}
+\index{export lists}
+
+@@@
+exports	     -> @(@ export_1 @,@ ... @,@ export_n @)@ & \qquad (n>=1)
+export   -> varid
+         |  tycon
+	 |  tycon @(..)@
+         |  tycon @(@ conid_1 @,@ ... @,@ conid_n @)@	& \qquad (n>=1)
+	 |  tycls @(..)@
+	 |  tycls @(@ varid_1 @,@ ... @,@ varid_n @)@	& \qquad (n>=0)
+         |  modid @..@
+@@@
+% [@::@ [context @=>@] type]		TYPE SIGS NOT ALLOWED NOW
+
+An {\em export list} identifies the entities to be exported by a
+module declaration.  A module implementation may only export an entity
+that it declares, or that it imports from some other module.  If the
+export list is omitted, all values, types and classes defined in the
+module are exported, {\em but not those that are imported}.
+
+Entities in an export list may be named as follows:
+\begin{enumerate}
+\item
+Ordinary values, whether declared in the implementation
+body or imported,
+% (including within a named @expose@ declaration) 
+may be named by giving the name of the value as a $varid$.
+Operators should be enclosed in parentheses to turn them into
+$varid$'s.
+% Such a name may be annotated with a type signature if it designates an
+% ordinary value.
+\item
+A type synonym $T$ declared by a @type@ declaration
+may be named by simply giving the name of the type.
+\item
+An algebraic data type $T$ with constructors $K_1,\ldots,K_n$
+declared by a @data@ declaration may be named in one of three ways:
+\begin{itemize}
+\item
+The form $T$ names the type {\em but not the constructors}.
+The ability to export a type without its constructors allows the
+construction of abstract data types (see Section~\ref{abstract-types}).
+\item
+The form $T@(@K_1@,@\ldots@,@K_n@)@$, where
+all and only the constructors are listed without duplications,
+names the type and all its constructors.  
+\item
+The abbreviated form $T@(..)@$ also names the type 
+and all its constructors.
+\end{itemize}
+Data constructors may not be named in export lists in any other way.
+\item
+A class $C$ with operations $f_1,\ldots,f_n$
+declared in a @class@ declaration may be named in one of two ways, both of which
+name the class together with all its operations:
+\begin{itemize}
+\item
+The form $C@(@f_1@,@\ldots@,@f_n@)@$, where
+all and only the operations in that class are listed without duplications.
+\item
+The abbreviated form $C@(..)@$.
+\end{itemize}
+Operators in a class may not be named in export lists in any other way.
+\item
+The set of all entities brought into scope (after renaming) from a
+module $m$ by one or more @import@ declarations may be named by the
+form $m@..@$, which is equivalent to listing all of the entities
+imported from the module.  For example,
+\bprog
+@
+      module Queue( Stack.., enqueue, dequeue ) where
+          import Stack
+          ...
+@
+\eprog
+Here the module @Queue@ uses the module name @Stack@ in its export
+list to abbreviate all the entities imported from @Stack@.  It is a
+static error to have circular dependencies between imports/exports
+using this naming convention.  For example, the following is
+not allowed:
+\bprog
+@
+module X( Y.. )     -- ILLEGAL
+import Y            --
+x = 1               --
+
+module Y( X.. )     --
+import X            --
+y = 1               --
+@
+\eprogNoSkip
+\end{enumerate}
+
+\subsubsection{Import Declarations}
+\label{import}
+\index{import declarations}
+
+@@@
+impdecl   -> @import@ modid [impspec] [@renaming@ renamings] 
+impspec   -> @(@ import_1 @,@ ... @,@ import_n @)@ & \qquad (n>=0)
+             |  @hiding@ @(@ import_1 @,@ ... @,@ import_n @)@ & \qquad (n>=1)
+import   -> varid 
+         |  tycon
+	 |  tycon @(..)@
+         |  tycon @(@ conid_1 @,@ ... @,@ conid_n @)@	& \qquad (n>=1)
+	 |  tycls @(..)@
+	 |  tycls @(@ varid_1 @,@ ... @,@ varid_n @)@	& \qquad (n>=0)
+renamings -> @(@ renaming_1 @,@ ... @,@ renaming_n @)@	& \qquad (n>=1)
+renaming -> name_1 @to@ name_2
+name     -> varid | conid
+@@@
+% [@::@ [context @=>@] type]		TYPE SIGS NOT ALLOWED NOW
+
+The entities exported by a module may be brought into scope in
+another module with
+an @import@\indextt{import} declaration at the beginning
+of the module.  
+The @import@ declaration names the module to be
+imported, optionally specifies the entities to be imported,
+and optionally provides renamings for imported entities.
+A single module may be imported by more
+than one @import@ declaration.
+
+Exactly which entities are to be imported can be specified in one
+of three ways:
+\begin{enumerate}
+\item
+The set of entities to be imported can be specified explicitly
+by listing them in parentheses.
+Items in the list have the same form as those in export lists, except
+that the $modid$ abbreviation is not permitted.
+
+The list must name a subset of the 
+entities exported by the imported module.
+The list may be empty, in which case nothing is imported;
+this is especially useful in the case of the module @Prelude@ (see
+Section~\ref{std-prel-shadowing}).
+\item
+Specific entities can be excluded by 
+using the form @hiding(@ $import_1 @,@ ... @,@ import_n$ @)@, which
+specifies that all entities exported by the named module should
+be imported apart from those named in the list.
+\item
+Finally, if $impspec$ is omitted then 
+all the entities exported by the specified module are imported.
+\end{enumerate}
+
+Some or all of the imported entities may be renamed,\index{renaming}
+thus allowing them to be known by a new name in the importing scope
+(see Section~\ref{original-names}).  This is done using the
+@renaming@ keyword, with a renaming of the form $oldname@ to @newname$.
+All renaming is subject to the constraint that each name in a scope
+must refer to exactly one entity; however, a single entity may be given
+more than one name.
+
+\subsection{Module Interfaces}
+\label{module-interfaces}
+\index{module!interface}
+
+Every module has an {\em interface}\index{interface}
+containing all the information needed to do static checks on any
+importing module.  All static checks on a module implementation can be
+done by inspecting its text and the interfaces of the modules
+it imports.
+
+@@@
+interface -> @interface@ modid @where@ ibody
+ibody -> @{@ [iimpdecls @;@] [fixes @;@] itopdecls @}@
+      | @{@ iimpdecls @}@
+iimpdecls -> iimpdecl_1 @;@ ... @;@ iimpdecl_n	& \qquad (n>=1) 
+iimpdecl   -> @import@ modid @(@ import_1 @,@ ... @,@ import_n @)@ 
+	& [@renaming@ renamings] & \qquad (n>=1)
+itopdecls -> itopdecl_1 @;@ ... @;@ itopdecl_n	& \qquad (n>=1) 
+itopdecl  -> @type@ [context @=>@] simple @=@ type
+	| @data@ [context @=>@] simple [@=@ constrs] [@deriving@ (tycls | @(@tyclses@)@)]
+	| @class@ [context @=>@] class [@where@ @{@ icdecls @}@]
+     	| @instance@ [context @=>@] tycls inst
+     	| vars @::@ [context @=>@] type
+icdecls	-> icdecl_1 @;@ ... @;@ icdecl_n	& (n>=1)
+icdecl	-> vars @::@ type
+@@@
+\indextt{interface}
+
+The syntax of @interface@ is similar to that of @module@, except:
+\begin{itemize}
+\item
+There is no export list: everything in the interface is exported.
+\item
+@import@ declarations have a
+slightly different purpose from those
+in implementations (see Section~\ref{interface-imports}).
+The list of entities to be imported is always specified explicitly.
+\item
+@data@ declarations appear without their constructors if these
+are not exported.
+\item
+There is no implementation part to @instance@ declarations.
+\item
+Value declarations do not appear at all; for exported values, type signatures
+take their place.
+\end{itemize}
+
+\subsubsection{Consistency}
+\label{consistency}
+
+The interface and implementation of a module must obey certain
+constraints.
+(In the following,
+the phrase ``in the implementation'' refers to something
+either declared within the implementation or imported by it.)
+\begin{enumerate}
+\item
+Every entity given a declaration in an interface must either have an
+import declaration for the entity in the interface (the import
+specifies the module that defines it) or have a definition of the
+entity in the implementation.  Furthermore, if an interface A imports
+an entity X from module B (perhaps renaming it), then the interface
+for B must define X but not import it.
+
+\item
+A class, type synonym, algebraic data type, or value appears in the
+interface exactly when its name appears in the implementation's export
+list or, if the export list is omitted, when it is {\em declared} in
+the implementation.
+
+\item
+A type signature appears in the interface for every value that the
+implementation exports.  This type signature must be the same as that
+in the implementation (see Section~\ref{type-semantics}), where
+the latter is obtained from the explicit type signature in the
+implementation (when present) or is the most general type
+inferred from the declaration of the value.
+
+\item
+A @type@ declaration in an interface must be identical to
+that in the implementation.
+
+\item
+A @class@ declaration in an interface must be identical to
+that in the implementation, except that default-method declarations
+are omitted.
+
+\item
+If the constructors of a @data@ type are {\em not} to be exported,
+then the @data@ declaration in the interface differs from that in the
+implementation by omitting everything after (and including) the @=@
+sign.  If the @data@ declaration in the implementation uses the
+@deriving@ mechanism to derive instance declarations for the type, a
+separate @instance@ declaration must appear in the interface for each
+class of which the type is made an instance of.  However, the
+information that certain instances are derived is hidden when the
+constructors are hidden, since in this case the type is abstract (see
+Section~\ref{abstract-types}).
+% The interface 
+% should not change in any way if the implementation were to change an
+% instance from being derived to being explicit, or vice versa.
+
+\item
+If the constructors of a @data@ declaration are to be exported, then
+the @data@ declaration in the interface is identical to that in the
+implementation including the @deriving@ part.\footnote{ It is important
+to retain the information about which instances are derived and which
+are not, because the importing module ``knows'' more about derived
+instances.}
+
+\item
+If a $C$-$T$ instance is declared in a module or imported by it, then the
+instance declaration appears in the interface (omitting the @where@
+part) if {\em either} $C$ is exported {\em or} $T$ is exported.
+Instance declarations are not named explicitly in export or
+import lists.  This rule ensures that, if $C$ and $T$ are both in
+scope, then the (unique) $C$-$T$ instance declaration will also be in
+scope.\footnote{The reverse also applies.  For example,
+suppose that a new type $T$ is declared and made an instance of an
+imported class $C$.  The instance declaration will be exported along
+with $T$, and so the closure rule (Section~\ref{closure}) will require
+that $C$ is also in scope in every importing scope.}
+
+No explicit instance declaration should appear in the interface for
+instances that are specified by the @deriving@ part of a @data@
+declaration in the interface.
+
+\item
+A fixity declaration appears in an interface exactly when (a)~a type
+signature for the value is also given in the interface
+(either by itself or as part of
+a class declaration) and 
+(b)~the identical fixity declaration appears
+either in the implementation or in an imported interface.
+
+\end{enumerate}
+
+This example illustrates most of these constraints; first, the
+interface:
+\bprog
+@
+interface A where
+infixr 4 @\bkqB@sameShape@\bkqA@        
+data  BinTree a = Empty | Branch a (BinTree a) (BinTree a)	
+class Tree a where 
+	sameShape :: a -> a -> Bool
+instance Tree (BinTree a)
+sum :: Num a => BinTree a -> a
+@
+\eprog
+Now the implementation:
+\bprog
+@
+module A( BinTree(..), Tree(..), sum ) where
+infixr 4 @\bkqB@sameShape@\bkqA@
+	-- @\bkqB@sameShape@\bkqA@ is an operation of class C below
+
+data BinTree a = Empty | Branch a (BinTree a) (BinTree a)
+
+class Tree a where 
+      sameShape :: a -> a -> Bool
+      t1 @\bkqB@sameShape@\bkqA@ t2 = False	-- Default method
+	
+instance Tree (BinTree a) where 
+         Empty @\bkqB@sameShape@\bkqA@ Empty  =  True
+         (Branch _ t1 t2) @\bkqB@sameShape@\bkqA@ (Branch _ t1' t2')  
+	    =  (t1 @\bkqB@sameShape@\bkqA@ t1') && (t2 @\bkqB@sameShape@\bkqA@ t2')
+	 t1 @\bkqB@sameShape@\bkqA@ t2 = False
+	
+sum  Empty           = 0
+sum (Branch n t1 t2) = n + sum t1 + sum t2
+@
+\eprogNoSkip
+
+\subsubsection{Imports and Original Names}
+\label{interface-imports}
+\index{original names!in interfaces}
+
+The original-name information is carried in the interface file using
+@import@ declarations in a special way.
+
+Suppose that a module @A@ exports an entity @x@; the
+interface for @A@ will contain static information about @x@.  
+If @x@ was originally defined in @A@, then this is
+all that appears.
+But, suppose that @x@ was imported by @A@ from some other module @B@
+and that @x@ was originally defined in module @C@
+with name @y@; this declaration must appear in the interface for @A@:
+\bprog
+@
+import C(y) renaming ( y to x )
+@
+\eprog
+No reference to @B@ remains in the interface.  {\em The
+@import@ declaration in the interface serves only to convey to the
+importing module the original name of @x@}, and does {\em not} imply
+that module @B@'s interface must be consulted when reading module @A@'s
+interface.  Multiple imports from a single original module may
+optionally be grouped in a single import declaration in the interface.
+
+A module may export a value whose typing involves a type and/or class
+that is not exported.
+(Any importing module would have to import the type or class by some
+other route.)
+{\em Nevertheless, it is still required that the interface contain the
+import declaration required to give the original name of the type or class.}
+
+In summary, for every entity @e1@ mentioned in the interface 
+of a module @M@ whose original name is @e2@ in module @N@,
+@M@'s interface must
+contain the @import@ declaration
+\bprog
+@
+      import N(e2) renaming ( e2 to e1 )
+@
+\eprog
+The word ``mentioned'' includes mention in the type signature
+of an exported value, as discussed above.
+
+\subsection{Standard Prelude}
+\label{standard-prelude}
+\index{standard prelude}
+
+Many of the features of {\sc Haskell} are defined in {\sc Haskell}
+itself, as a large library of standard data types, classes and
+functions, called the ``standard prelude.''  In {\sc
+Haskell}, the standard prelude is specified as two distinct modules
+(in the technical sense of this chapter), @PreludeCore@ and
+@Prelude@\indextt{Prelude}.
+
+@PreludeCore@ and @Prelude@ differ from other modules in that
+{\em their interfaces,
+and the semantics of the entities defined by those interfaces, are
+part of the {\sc Haskell} language definition.} This means, for example, that a
+compiler may optimise calls to functions in the
+standard prelude, because it knows their semantics as well as their
+interface.
+
+Each of these modules are structured into sub-modules.
+To avoid name-clashes with these sub-modules,
+user-defined module names must not begin with the prefix @Prelude@.
+
+\subsubsection{The @PreludeCore@ Module}
+\indextt{PreludeCore}
+
+The @PreludeCore@ module contains {\em all the algebraic data types,
+type synonyms, classes and instance declarations} specified by the
+standard prelude.
+
+@PreludeCore@ is {\em always implicitly imported}, so it
+is not possible to import only part of it or to rename any of the
+entities that it defines.
+
+The semantics of the entities defined by @PreludeCore@ is specified by
+an implementation written in {\sc Haskell}, in
+Appendix~\ref{preludecore}.
+A {\sc Haskell} system need not implement @PreludeCore@ in this way.
+The interface for @PreludeCore@ may
+be inferred from the implementation in
+Appendix~\ref{preludecore}.
+
+Some data types (such as @Int@) and functions (such as addition of
+@Int@s) cannot be specified directly in {\sc Haskell}.  This is
+expressed in the @PreludeCore@ implementation by importing these
+built-in types and values from
+@PreludeBuiltin@\indextt{PreludeBuiltin}.
+The semantics of the built-in data types and
+functions is given as English text in
+Appendix~\ref{preludebuiltin}.
+
+The implementation for @PreludeCore@ is incomplete in its
+treatment of tuples: there should be an infinite family of instance
+declarations for tuples, but the implementation only gives a scheme.
+
+The alert reader may notice that the implementation of
+@PreludeCore@ given in Appendix~\ref{preludecore} uses
+some functions defined in @Prelude@ (see next section).  There is no
+conflict, @PreludeCore@ and @Prelude@ are mutually
+recursive.
+
+\subsubsection{The @Prelude@ Module}
+
+The @Prelude@ module contains all the {\em value} declarations
+in the standard prelude.
+
+The @Prelude@ module is imported automatically if and only if it is
+not imported with an explicit @import@ declaration.  This provision
+for explicit import allows values defined in the standard prelude to
+be renamed or not imported at all.
+
+The semantics of the entities in @Prelude@ is specified by
+an implementation of @Prelude@ written in {\sc Haskell}, given in
+Appendix~\ref{stdprelude}.  As for @PreludeCore@,
+a {\sc Haskell} system may implement the @Prelude@ module
+as it pleases, provided it maintains the semantics in
+Appendix~\ref{stdprelude}.  The interface can be inferred
+from this implementation.
+
+\subsubsection{Shadowing Prelude Names and Non-Standard Preludes}
+\label{std-prel-shadowing}
+
+The rules about the standard prelude have been cast so that it is
+possible to use standard prelude names for non-standard purposes; however,
+every module that does so will have an @import@ declaration
+that makes this non-standard usage explicit.  For example:
+\bprog
+@
+     module A where
+     import Prelude hiding (map)
+     map f x = x f
+@
+\eprog
+Module @A@ redefines @map@, but it must indicate this by
+importing @Prelude@ without @map@.  Furthermore, @A@ exports @map@,
+but every module that imports @map@ from @A@ must also hide
+@map@ from @Prelude@ just as @A@ does.  Thus there is little danger of accidentally
+shadowing standard prelude names.
+
+It is possible to construct and use a different @Prelude@ module:
+\bprog
+@
+      module B where
+      import Prelude()
+      import MyPrelude
+      ...
+@
+\eprog
+@B@ imports nothing from @Prelude@, but the
+explicit @import Prelude@ declaration prevents the automatic import of
+@Prelude@.  @import MyPrelude@ brings the
+non-standard prelude into scope.  As before, the
+standard prelude names are hidden explicitly.
+
+%It is not possible to rename or hide the entities imported
+%from @PreludeCore@.
+
+\subsection{Example}
+
+As an example, here are two small modules:\nopagebreak
+\bprog
+@
+module A( Tree(..), depth ) where
+data Tree a = Leaf a | Branch (Tree a) (Tree a)
+depth (Leaf a)        =  0
+depth (Branch xt yt)  =  (depth xt @\bkqB@max@\bkqA@ depth yt) + 1
+
+module B( leaves ) where
+import A
+leaves (Leaf a)        =  [a]
+leaves (Branch xt yt)  =  leaves xt ++ leaves yt
+@
+\eprog
+Module @A@ must export @Tree@ because it exports @depth@, and @Tree@
+could not be made visible in any other way.  However, @B@ is not
+required to export @Tree@, since a module importing @B@ could import
+@A@ in order to satisfy the closure constraints.
+
+Modules may be used to combine the resources of other modules.  For
+example, one might use renaming to make trees available to
+French speakers:
+\bprog
+@
+module C( Arbre(..), fond, feuilles ) where
+import A renaming ( Tree to Arbre, Leaf to Feuille, Branch to Branche,
+		    depth to fond )
+import B renaming ( leaves to feuilles )
+@
+\eprogNoSkip
+
+\subsection{Abstract Data Types}
+\label{abstract-types}
+
+\index{abstract data types}
+The ability to export a data type without its constructors
+allows the construction of abstract data types (ADTs).  For example,
+an ADT for stacks could be defined as:
+\bprog
+@
+module Stack( StkType, push, pop, empty ) where
+	data StkType a = EmptyStk | Stk a (StkType a)
+	push x s = Stk x s
+	pop (Stk _ s) = s
+	empty = EmptyStk
+@
+\eprog
+Modules importing @Stack@ cannot construct values of type @StkType@
+because they do not have access to the constructors of the type.
+
+It is also possible to build an ADT on top of an existing type by
+using a @data@ declaration with a single constructor with only one
+field.  For example, stacks can be defined with lists:
+\bprog
+@
+module Stack( StkType, push, pop, empty ) where
+	data StkType a = Stk [a]
+	push x (Stk s) = Stk (x:s)
+	pop (Stk (x:s)) = Stk s
+	empty = Stk []
+@
+\eprogNoSkip
+
+{\em Note 1.} Every ADT must be a module (but a
+{\sc Haskell} compilation system may allow multiple modules in a single file).
+
+%Arguably there should be a separate scope-limiting construct to allow
+%constructors to be hidden within modules.  This was considered but
+%finally discarded on grounds of simplicity.  Remember that
+
+{\em Note 2.} Using a single-constructor single-field @data@
+declaration to create an isomorphic type introduces an unwanted extra
+element to the new type, namely \mbox{@(Stk @$\perp$@)@}, with the
+risk of an accompanying small inefficiency in the implementation.  
+
+%It would be possible to introduce a variant of @data@ to avoid this
+%problem, but this was omitted on grounds of simplicity.
+
+\subsection{Fixity Declarations}
+\index{fixity declarations}
+\label{fixity}
+
+@@@
+fixdecls -> fix_1 @;@ ... @;@ fix_n		& \qquad (n>=1)
+fix	-> @infixl@ [digit] ops 
+ 	 | @infixr@ [digit] ops
+  	 | @infix @ [digit] ops 
+ops	-> op_1 @,@ ... @,@ op_n		& \qquad (n>=1)
+op	-> varop | conop 
+@@@
+\indextt{infixl}\indextt{infixr}\indextt{infix}
+A fixity declaration gives the fixity and binding
+precedence of a set of operators.  Fixity declarations must appear only
+at the start of a
+module\footnote{This is to avoid parsing problems that arise when
+fixity declarations appear lexically after the operators to which they
+refer.} and may only be given for identifiers defined in that module.
+Fixity declarations cannot subsequently be overridden, and an
+identifier can only have one fixity definition.
+
+There are three kinds of fixity, non-, left- and right-associativity
+(@infix@, @infixl@, and @infixr@, respectively), and ten precedence
+levels, 0 through 9 (level 0 binds least tightly, and level 9
+binds most tightly).  If the "digit" is omitted, level 9 is assumed.
+Any operator lacking a fixity declaration
+% , including ones obtained(?) from identifiers,
+is assumed to be @infixl 9@.
+
+Fixity declarations allow parentheses to be dropped
+in these expressions when the associated conditions are
+satisfied (in this table @infix@ stands for any @infix@, @infixl@, or
+@infixr@ declaration):
+\[\bt{|l|lll|}
+\hline 
+"(x op_1 y) op_2 z" 	& "@infix@ d_1 op_1",
+		 	& "@infix@ d_2 op_2", 	& "d_1 > d_2" \\ 
+"(x op_1 y) op_2 z" 	& "@infixl@ d_1 op_1", 	
+			& "@infixl@ d_2 op_2", 	& "d_1 = d_2" \\ 
+"x op_1 (y op_2 z)" 	& "@infix@ d_1 op_1", 	
+			& "@infix@ d_2 op_2",   & "d_1 < d_2" \\ 
+"x op_1 (y op_2 z)" 	& "@infixr@ d_1 op_1", 	&
+			"@infixr@ d_2 op_2", 	& "d_1 = d_2" \\
+\hline\et\] 
+The phrase ``"x op_1 y op_2 z"'', where we have "@infixl@ d_1
+op_1", "@infixr@ d_2 op_2", and "d_1 = d_2", is ambiguous and
+generates a parsing error.
+
+Fixity is a property of the original name of an identifier or operator
+(see Section~\ref{original-names}).  Fixity is not affected
+by renaming; the new name has the same fixity as the old one.
+
+% Local Variables: 
+% mode: latex
+% End:

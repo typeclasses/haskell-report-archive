@@ -1,0 +1,733 @@
+%
+% $Header: /tmp_mnt/local.fp/haskell/report/report-1.0/RCS/exps.verb,v 1.0 90/03/28 14:59:13 partain Exp $
+%
+\section{Expressions}\index{expressions}
+\label{expressions}
+
+In this section, we describe the syntax and informal semantics of {\sc Haskell}
+{\em expressions}, including their translations into the
+{\sc Haskell} kernel where appropriate.
+% (see Appendix~\ref{formal-semantics} for a formal syntax and
+% semantics of the kernel).
+
+@@@
+exp	->  aexp				
+	|   exp aexp				& (\tr{function application})
+	|   exp_1 op exp_2			& (\tr{operator application})
+	|   @-@ aexp				& (\prefix{@-@}) 
+        | @\@ apat_1 ... apat_n [gd] @->@ exp & (\tr{lambda abstraction}, n>=1)
+	|   @if@ exp_1 @then@ exp_2 @else@ exp_3 & (\tr{conditional})
+	|   exp @where@ @{@ decls @}@           & (\tr{where expression})
+	|  @case@ exp @of@ @{@ alts @}@         & (\tr{case expression})
+        |   exp @::@ [context @=>@] atype  & (\tr{expression type signature})
+
+aexp	->  var				        & (\tr{variable})
+	|   con					& (\tr{constructor})
+	|   literal				
+        |   @()@                                & (\tr{unit})
+        |   @(@ exp @)@                       & (\tr{parenthesised expression})
+	|   @(@ exp_1 @,@ ... @,@ exp_k @)@	& (\tr{tuple}, k>=2)
+	|   @[@ exp_1 @,@ ... @,@ exp_k @]@	& (\tr{list}, k>=0)
+	|   @[@ exp_1 [@,@ exp_2] @..@ [exp_3] @]@ & (\tr{arithmetic sequence})
+	|   @[@ exp @|@ [qual] @]@		& (\tr{list comprehension})
+
+op	->  varop | conop
+@@@
+
+To disambiguate expressions, this precedence
+\index{precedence} is established, from strongest to weakest:
+
+\begin{tabular}{ll}
+%\hspace{\parindent}
+& function application \\
+& operator application (broken down into ten precedence levels---see Section~\ref{fixity})\\
+& conditional expression \\
+& @where@ expression \\
+& lambda abstraction
+\end{tabular}
+
+\noindent
+Expression type signatures are parsed as if @::@ were a
+left-associative infix operator with precedence lower than any other
+operator.  Negation\index{negation} is the only prefix operator in
+{\sc Haskell}; it has the same precedence as function application.
+Sample parses using these rules are shown below.
+
+\[\bt{|l|l|}\hline
+This                           	    & Parses as                             \\
+\hline
+@f x + g y@                         & @(f x) + (g y)@                       \\
+@- x + y@		            & @(-x) + y@		            \\
+@x + y where {...}@                 & @(x + y) where {...}@                 \\
+@if e1 then e2 else e3 where {...}@ & @(if e1 then e2 else e3) where {...}@ \\
+@\ x -> e1 where {...}@             & @\ x -> (e1 where {...})@             \\
+@f x y :: Int@                      & @(f x y) :: Int@                      \\
+@\ x -> a+b :: Int@                 & @\ x -> ((a+b) :: Int@)               \\
+\hline\et\]
+
+\subsection{Curried Applications and Lambda Abstractions}
+\label{applications}
+\label{lambda-abstractions}
+\index{lambda abstractions}
+
+@@@
+exp	->  exp aexp
+	|   @\@ apat_1 ... apat_n [gd] @->@ exp   & (n>=1)
+gd	->  @|@ exp 
+@@@
+\index{\ ...@@{\tt {\char'134} ... -> ...}}
+\index{application}
+{\em Function application}\index{function application} is written 
+"e_1 e_2".  Application associates to the left, so the
+parentheses may be omitted in @(f x) y@, for example.  Because "e_1" could
+be a constructor, partial applications of constructors are allowed.
+
+{\em Lambda abstractions} are written 
+"@\@ p_1 ... p_n @|@ g @->@ e", where the "p_i" are {\em patterns} and "g"
+is an optional {\em guard} (an expression whose type must be @Bool@).
+An expression such as @\x:xs->x@ is syntactically incorrect,
+and must be rewritten as @\(x:xs)->x@.
+
+\outline{
+\paragraph*{Translation:}
+The lambda abstraction "@\@ p_1 ... p_n @|@ g @->@ e" is equivalent to
+\[
+"@\@ x_1 ... x_n @-> case (@x_1@,@ ...@,@ x_n@) of (@p_1@,@ ...@,@ p_n@) |@ g @->@ e"
+\]
+where the "x_i" are new identifiers.
+Given this translation combined with the semantics of case
+expressions and pattern-matching described in
+Section~\ref{case}, if the
+pattern fails to match then the result is "\bot".
+}
+             
+The type of a variable bound by a lambda abstraction is monomorphic, as
+is always the case in the Hindley-Milner type system.
+
+\subsection{Operator Applications}
+\index{operator application}
+\label{operators}
+
+@@@
+exp	->  exp_1 op exp_2
+	|   @-@ aexp				& (\prefix{@-@}) 
+@@@
+\index{- (prefix)@@{\tt -} (prefix)}
+The form "e_1 op e_2" is the obvious infix application of binary
+operator\index{operators} "op" to expressions "e_1" and "e_2".  
+
+Although there are no prefix operators in {\sc Haskell}, the special
+form "@-@e" denotes prefix negation\index{negation}, and is simply
+syntax for "@ negate @e",\indextt{negate} where @negate@ is as
+defined in the standard prelude (see
+Table~\ref{standard-numeric-types},
+page~\pageref{standard-numeric-types}).  Because @e1-e2@ parses as an
+infix application of the binary operator @-@, one must write @e1(-e2)@ for
+the alternative parsing.  Similarly, @(-)@ is syntax for 
+@(\ x y -> x-y)@, as with any infix operator, and does not denote 
+@(\ x -> -x)@---one must use @negate@ for that.
+
+\outline{
+\paragraph*{Translation:}
+"e_1 op e_2" is equivalent to "@(@op@)@ e_1 e_2".  "@-@e" is
+equivalent to "@ negate@ e" where @negate@, an operator in the class
+@Num@, is as defined in the standard prelude.
+}
+
+\subsection{Conditionals}
+\label{conditionals}\index{conditional expression}
+
+@@@
+exp	->  @if@ exp_1 @then@ exp_2 @else@ exp_3
+@@@
+\indextt{if ... then ... else ...}
+A conditional expression\index{conditional expression} has form 
+"@if@ e_1 @then@ e_2 @else@ e_3" and returns the value of "e_2" if the
+value of "e_1" is @True@, "e_3" if "e_1" is @False@, and "\bot"
+otherwise.
+
+\outline{
+\paragraph*{Translation:}
+"@if@ e_1 @then@ e_2 @else@ e_3" is equivalent to:
+\[
+"@case@ e_1 @of { True ->@ e_2 @; False ->@ e_3 @}@"
+\]
+where @True@ and @False@ are the two nullary constructors from the
+type @Bool@, as defined in the standard prelude.
+}
+
+\subsection{Lists}
+\label{lists}
+
+@@@
+aexp	->  @[@ exp_1 @,@ ... @,@ exp_k @]@	& (k>=0)
+@@@
+\indextt{[ ... ]}
+
+Lists\index{lists} are written "@[@e_1@,@ ...@,@ e_k@]@", where
+"k>=0"; the empty list is written @[]@.  Standard operations on
+lists are given in the standard prelude (see Appendix~\ref{stdprelude}).
+
+\outline{
+\paragraph*{Translation:}  
+"@[@e_1@,@ ...@,@ e_k@]@" is equivalent to
+\[
+"e_1 @: (@e_2 @: (@ ... @(@e_k @: [])))@"
+\]
+where @:@ and @[]@ are constructors for lists, as defined in
+the standard prelude (see Section~\ref{basic-lists}).  The types
+of "e_1" through "e_k" must all be the same (call it "t\/"), and the
+type of the overall expression is @[@"t"@]@ (see Section~\ref{type-syntax}).
+}
+
+\subsection{Tuples}
+\label{tuples}
+
+@@@
+aexp	->  @(@ exp_1 @,@ ... @,@ exp_k @)@	& (k>=2)
+@@@
+\indextt{( ... )}
+
+Tuples\index{tuples} are written "@(@e_1@,@ ...@,@ e_k@)@", and may be
+of arbitrary length "k>=2".  Standard operations on tuples are given
+in the standard prelude (see Appendix~\ref{stdprelude}).
+
+\outline{
+\paragraph*{Translation:}  
+"@(@e_1@,@ ...@,@ e_k@)@" for "k\geq2" is an instance of a k-tuple as
+defined in the standard prelude, and requires no translation.  If
+"t_1" through "t_k" are the types of "e_1" through "e_k",
+respectively, then the type of the resulting tuple is 
+"@(@t_1@,@ ...@,@ t_k@)@" (see Section~\ref{type-syntax}).
+}
+
+\subsection{Unit Expressions and Parenthesised Expressions}
+\label{unit-expression}
+\index{unit}
+
+@@@
+aexp	->  @()@ 
+         |  @(@ exp @)@
+@@@
+
+The form "@(@e@)@" is simply a parenthesised expression, and is
+equivalent to "e".  The form @()@ has type @()@ (see
+Section~\ref{type-syntax}); it is the only member of that type (it can
+be thought of as the ``nullary tuple'')---see Section~\ref{basic-trivial}.
+
+\outline{
+\paragraph{Translation:}  
+"@(@e@)@" is equivalent to "e".
+}
+
+\subsection{Arithmetic Sequences}
+\label{arithmetic-sequences}
+
+@@@
+aexp	->  @[@ exp_1 [@,@ exp_2] @..@ [exp_3] @]@	
+@@@
+The form "@[@e_1@,@ e_2 @..@ e_3@]@" denotes an arithmetic
+sequence\index{arithmetic sequence} from "e_1" in increments of
+"e_2-e_1" up to "e_3" (if the increment is positive) or down to "e_3"
+(if the increment is negative).  An infinite list of "e_1"'s results
+if the increment is zero, and the empty list results if "e_3" is less
+than "e_1" and the increment is positive, or if "e_3" is greater than
+"e_1" and the increment is negative.  If the comma and "e_2" are
+omitted, then the increment is 1; if "e_3" is omitted, then
+the sequence is infinite.
+
+Arithmetic sequences may be defined over any type in class @Enum@,
+including @Int@, @Integer@, and @Char@ (see
+Section~\ref{derived-decls}).  For example, @['a'..'z']@ denotes
+the list of lower-case letters in alphabetical order.
+
+\outline{
+\paragraph{Translation:}
+Arithmetic sequences satisfy these identities:
+\begin{center}
+\begin{tabular}{lcl}%
+\struthack{17pt}%
+@[ @$e_1$@.. ]@		& $=$ 
+                        & @enumFrom@ $e_1$ \\
+@[ @$e_1$@,@$e_2$@.. ]@	& $=$ 
+                        & @enumFromThen@ $e_1$ $e_2$ \\
+@[ @$e_1$@..@$e_3$@ ]@	& $=$ 
+                        & @enumFromTo@ $e_1$ $e_3$ \\
+@[ @$e_1$@,@$e_2$@..@$e_3$@ ]@ 
+                        & $=$ 
+                        & @enumFromThenTo@ $e_1$ $e_2$ $e_3$
+\end{tabular}
+\end{center}
+where @enumFrom@, @enumFromThen@, @enumFromTo@, and @enumFromThenTo@
+are operations in the class @Enum@ as defined in the standard prelude
+(see Section~\ref{class-decls}).
+}
+
+\subsection{List Comprehensions}
+\index{list comprehensions}
+\label{list-comprehensions}
+
+@@@ 
+aexp	-> @[@ exp @|@ [qual] @]@ 
+qual	-> qual_1 @,@ qual_2 
+         | pat @<-@ exp 
+         | exp 
+@@@ 
+Qualifiers\index{qualifier} ("qual") are either {\em
+generators}\index{generators} of the form "p @<-@ e", where "p" is a
+pattern (see Section~\ref{pattern-matching}) of type "t" and "e" is an
+expression of type "@[@t@]@"; or {\em guards},\index{guard} which are
+arbitrary expressions of type @Bool@.
+
+A list comprehension has the form
+"@[@ e @|@ q_1@,@ ...@,@ q_n @]@" and returns the list of elements
+produced by evaluating "e" in the successive environments
+created by the nested, depth-first evaluation of the generators in the
+qualifier list.  Binding of variables occurs according to the normal
+pattern-matching rules (see Section~\ref{pattern-matching}), and if a
+match fails then that element of the list is simply skipped over.  Thus:
+\bprog
+@
+[ x |  xs   <- [ [(1,2),(3,4)], [(5,4),(3,2)] ], 
+      (3,x) <- xs ]
+@
+\eprog
+yields the list @[4,2]@.  If a qualifier is a guard, it must evaluate
+to @True@ for the previous pattern-match to succeed.  
+\outline{
+\paragraph{Translation:}
+List comprehensions satisfy these identities, which may be
+used as a translation into the kernel:
+\begin{center}
+\bt{lcl}%
+\struthack{17pt}%
+@[ @$e$@ | @$p$@ <- @$l$@ ]@   &=& @map (\@$p$@ -> @$e$@) @$l$ \\
+@[ @$e$@ | @$b$@ ]@            &=& @if @$b$@ then [@$e$@] else []@ \\
+@[ @$e$@ | @$q_1$@, @$q_2$@ ]@ &=& @concat [ [ @$e$@ | @$q_2$@ ] | @$q_1$@ ]@
+\et
+\end{center}
+where "e" ranges over expressions, "p" ranges over irrefutable
+patterns, "l" ranges over list-valued expressions, "b" ranges over
+boolean expressions, and "q_1" and "q_2" range over non-empty lists of
+qualifiers.  If "p" is a refutable pattern then the identity:
+\begin{center}
+\bt{lcl}
+\struthack{17pt}
+@[ @$e$@ | @$p$@ <- @$l$@ ]@ &=& @[ @$e$@ | ~@$p$@ <- [ x | x <- @$l$@, ok x] ]@ \\
+                         & & @where  ok p  =  True@ \\
+                         & & @       ok _  =  False@
+\et
+\end{center}
+where @x@ and @ok@ are new identifiers not appearing in "e", "p", or
+"l".  These four equations uniquely define list comprehensions.
+}
+
+\subsection{Where Expressions}
+\index{where expressions}
+\label{where-expressions}
+
+@@@
+exp	->  exp @where@ @{@ decls @}@
+@@@
+\index{declarations!within {\tt where} expressions}
+Where expressions have the general form 
+"e @where {@ d_1 @;@ ...  @;@ d_n @}@"\indextt{where}, and
+introduce a nested, lexically-scoped, mutually-recursive list of
+declarations.  The scope of the declarations is the expression "e" and
+the right hand side of the declarations.  Declarations are described
+in Section~\ref{declarations}.  Pattern bindings are matched lazily as
+irrefutable patterns.
+
+\outline{
+\paragraph*{Translation:} The dynamic semantics of the expression 
+"e_0 @where {@ d_1 @;@ ...  @;@ d_n @}@" is captured by this
+translation: After removing all type signatures, each
+declaration "d_i" is translated into an equation of the form 
+"p_i @=@ e_i", where "p_i" and "e_i" are patterns and expressions
+respectively, using the translation given in
+Section~\ref{function-bindings}.  Once done, these identities
+hold, which may be used as a translation into the kernel:
+\begin{center}
+\bt{lcl}%
+\struthack{17pt}%
+$e_0$@ where {@$p_1$@ = @$e_1$@; @...@; @$p_n$@ = @$e_n$@}@
+      &=& $e_0$@ where (~@$p_1$@,@...@,~@$p_n$@) = (@$e_0$@,@...@,@$e_n$@)@ \\
+$e_0$@ where @$p$@ = @$e_1$
+	&=& @case @$e_1$@ of ~@$p$@ -> @$e_0$	\\
+	& & {\rm when no variable in $p$ appears free in $e_1$} \\
+$e_0$@ where @$p$@ = @$e_1$
+      &=& $e_0$@ where @$p$@ = fix (\~@$p$@ -> @$e_1$@)@
+\et
+\end{center}
+where @fix@ is the least fixpoint operator.  Note the use of the
+irrefutable patterns in the second and third rules.  
+This same semantics applies to the top-level of
+a program that has been translated into a @where@ expression as
+described in Section~\ref{modules}.
+The static semantics of @where@ expressions is described in 
+Section~\ref{pattern-bindings}.
+}
+
+\subsection{Case Expressions}
+\label{case}
+
+@@@
+exp	->  @case@ exp @of@ @{@ alts @}@
+alts	->  alt_1 @;@ ... @;@ alt_n		& (n>=1)
+alt	->  pat [gd] @->@ exp
+gd	->  @|@ exp 
+@@@
+\indextt{case ... of ...}
+A case expression\index{case expression} has the form
+\[
+"@case@ e @of {@ p_1 @|@ g_1 @->@ e_1 @; ... ;@ p_n @|@ g_n @->@ e_n @}@"
+\]
+where each {\em clause} "p_i @|@ g_i @->@ e_i" consists of a {\em
+pattern}\index{pattern} "p_i", an optional {\em guard}\index{guard}
+"g_i", and a {\em body} "e_i" (an expression).  There must be at least
+one clause, and each pattern must be {\em linear}---no variable is
+allowed to appear more than once.  Each body must have the same type,
+and the type of the whole expression is that type.
+
+A case expression is evaluated by pattern-matching the expression "e"
+against the individual clauses.  The matches are tried
+sequentially, from top to bottom.  The first successful match causes
+evaluation of the corresponding clause body, in the environment of
+the case expression extended by the bindings created during the
+matching of that clause.  If no match succeeds, the result is "\bot".
+Pattern matching is described in Section~\ref{pattern-matching}.
+
+\subsection{Expression Type-Signatures}
+\index{expression type-signature}
+\label{expression-type-sigs}
+
+@@@
+exp ->  aexp @::@ [context @=>@] atype
+@@@
+\indextt{::}
+\index{type signatures!for expressions}
+Expression type-signatures are used to type an expression explicitly
+and may be used to resolve ambiguous typings due to overloading (see
+Section~\ref{defaults}).  The value of the expression is just that of
+"aexp".  As with normal type signatures (see
+Section~\ref{type-signatures}), the declared type may be more specific than 
+the principal typing derivable from "aexp", but it is an error to give
+a typing that is more general than, or not comparable to, the
+principal typing.  Also, every type variable appearing in a signature
+is universally quantified only over that signature.  This last
+constraint implies that signatures such as:
+\bprog
+@
+\ x -> ([x] :: [a])
+@
+\eprog
+are not valid, since this declares @[x]@ to be of type 
+"(\forall a)@[@a@]@", which is not a valid polymorphic type (it
+contains only "\bot", the empty list, and lists just containing
+"\bot").  In contrast, this is valid:
+\bprog
+@
+(\ x -> [x]) :: a -> [a]
+@
+\eprogNoSkip
+
+\subsection{Pattern-Matching}
+\index{pattern-matching}
+\label{pattern-matching}
+\label{patterns}
+
+Patterns appear in lambda abstractions, function definitions, pattern
+bindings, list comprehensions, and case expressions.  However, the
+first four of these ultimately translate into case expressions, so
+it suffices to restrict the definition of the semantics of
+pattern-matching to case expressions.
+
+\subsubsection{Patterns}
+
+Patterns\index{pattern} have this syntax:
+@@@
+pat -> apat
+	|   con apat_1 ... apat_k		& (\arity{con}=k>=1)
+	|   pat_1 conop pat_2                   & (\tr{infix constructor})
+	|   var @+@ integer			& (\tr{successor pattern})
+        |   [ @-@ ] integer                       
+
+apat -> var [{\tt @@}  apat]			& (\tr{as pattern})
+	|   con					& (\arity{con}=0) 
+	|   integer | float | char | string 	& (\tr{literals})
+	|   @_@					& (\tr{wildcard})
+        |   @()@                                & (\tr{unit pattern})
+        |   @(@ pat @)@                         & (\tr{parenthesised pattern})
+	|   @(@ pat_1 @,@ ... @,@ pat_k @)@	& (\tr{tuple patterns}, k>=2)
+	|   @[@ pat_1 @,@ ... @,@ pat_k @]@	& (\tr{list patterns}, k>=0) 
+	|   @~@ apat				& (\tr{irrefutable pattern})
+@@@
+The arity of a constructor must match the number of
+sub-patterns associated with it; one cannot match against a
+partially-applied constructor.
+
+Patterns of the form "var"{\tt @@}"pat"\index{@@@@{\tt {\char'100}}} are
+called {\em as-patterns}\index{as-pattern}, and allow one to use "var"
+as a name for the value being matched by "pat".  For example,
+\bprog
+@
+case e of
+  xs@@(x:rest) -> if x==0 then rest else xs
+@
+\eprog
+is equivalent to:
+\bprog
+@
+case e of
+  xs -> if x == 0 then rest else xs
+        where (x:rest) = xs
+@
+\eprog
+This transformation of a case expression is always valid, and
+is assumed done prior to the pattern-matching semantics given below.
+
+Patterns of the form @_@\index{_@@{\tt {\char'137}}} are {\em
+wildcards}\index{wildcard} and are useful when some part of a pattern
+is not referenced on the right-hand-side.  It is as if an
+identifier not used elsewhere were put in its place.  For example,
+\bprog
+@
+case e of
+  [x,_,_]  ->  if x==0 then True else False
+@
+\eprog
+is equivalent to:
+\bprog
+@
+case e of
+  [x,y,z]  ->  if x==0 then True else False
+@
+\eprog
+where @y@ and @z@ are identifiers not used elsewhere.  This translation is also 
+assumed prior to the semantics given below.
+
+In the pattern-matching rules given below we distinguish two kinds of
+patterns: an {\em irrefutable pattern}\index{irrefutable pattern} is
+either a variable, a wildcard, or a pattern of form "@~@apat"; all
+other patterns are {\em refutable}.\index{refutable pattern}
+
+\subsubsection{Informal semantics of pattern-matching}
+
+Patterns are matched against values.  Attempting to match a pattern
+can have one of three results: it may {\em fail\/}; it may {\em
+succeed}, returning a binding for each variable in the pattern; or it
+may {\em diverge} (i.e.~return "\bot").  Pattern-matching proceeds
+from left to right, and outside in, according to these rules:
+\begin{enumerate}
+\item Matching a value "v" against the irrefutable pattern "var"
+always succeeds and binds "var" to "v".  Similarly, matching "v"
+against the irrefutable pattern "@~@apat" always succeeds.  The free
+variables in "apat" are bound to the appropriate values if matching
+"v" against "apat" would otherwise succeed, and to "\bot" if matching
+"v" against "apat" fails or diverges.  (Binding does {\em
+not} imply evaluation.)
+
+Operationally, this means that no matching is done on an
+irrefutable pattern until one of the variables in the pattern is used.
+At that point the entire pattern is matched against the value, and if
+the match fails or diverges, so does the overall computation.
+
+\item Matching "\bot" against a refutable pattern always diverges.
+
+\item Matching a non-"\bot" value can occur against two kinds of
+refutable patterns:
+\begin{enumerate}
+\item Matching a non-"\bot" value against a constructed pattern fails
+if the outermost constructors are different.  If the constructors are
+the same, the result of the match is the result of matching the
+sub-patterns left-to-right: if all matches succeed, the overall match
+succeeds; the first to fail or diverge causes the overall match to
+fail or diverge, respectively.  
+
+Constructed values consist of those created by prefix or infix
+constructors, tuple or list patterns, and strings (which are
+lists of characters).  Also, literals (characters, positive and
+negative integers, and the unit value @()@) are treated as nullary
+constructors.
+
+\item Matching a non-"\bot" value "n" against a pattern of the form
+"x@+@k" (where "x" is a variable and "k" is a positive integer
+literal) succeeds if "n>=k", resulting in the binding of "x" to "n-k",
+and fails if "n<k".  For example, the Fibonacci function may be
+defined as follows:
+
+\bprog
+@
+fib n = case n of 
+          0   -> 1
+          1   -> 1
+          n+2 -> fib n + fib (n+1)
+@
+\eprog
+Since @n@ must be bound to a positive value, @fib@ diverges for a
+negative argument, and exactly one of the equations matches any
+non-negative argument.
+\end{enumerate}
+\end{enumerate}
+
+Aside from the obvious static type constraints (for
+example, it is a static error to match a character against an
+integer), these static class constraints hold: an integer
+literal pattern can only be matched against a value in the class
+@Num@; a floating literal pattern can only be matched against a value
+in the class @Fractional@; and a "n@+@k" pattern can only be matched
+against a value in the class @Integral@.
+
+Here are some simple examples:
+\begin{enumerate}
+\item If the pattern @[1,2]@ is matched against "@[0,@\bot@]@", then @1@
+"fails" to match against @0@, and the result is a failed match.  But
+if @[1,2]@ is matched against "@[@\bot@,0]@", then attempting to match
+@1@ against "\bot" causes the match to "diverge".
+
+\item These examples demonstrate refutable vs.~irrefutable
+matching:
+
+\bprog
+@
+(\ ~(x,y) -> 0) @"\bot"@    @"\Rightarrow"@    0
+(\  (x,y) -> 0) @"\bot"@    @"\Rightarrow"@    @"\bot"@
+
+(\ ~[x] -> 0) []    @"\Rightarrow"@    0
+(\ ~[x] -> x) []    @"\Rightarrow"@    @"\bot"@
+
+(\ ~[x,~(a,b)] -> x) [0,@"\bot"@]    @"\Rightarrow"@    0
+(\ ~[x, (a,b)] -> x) [0,@"\bot"@]    @"\Rightarrow"@    @"\bot"@
+
+(\  (x:xs) -> x:x:xs) @"\bot"@   @"\Rightarrow"@   @"\bot"@
+(\ ~(x:xs) -> x:x:xs) @"\bot"@   @"\Rightarrow"@   @"\bot"@:@"\bot"@:@"\bot"@
+@
+\eprogNoSkip
+\end{enumerate}
+
+Top level patterns in lambda expressions and case
+expressions, and the set of top level patterns in function or operator
+bindings, may have an associated {\em guard}\index{guard}.  A guard is
+a boolean expression that is evaluated only after all of the
+arguments have been successfully matched, and it must be true for the
+overall pattern-match to succeed.  The scope of the guard is the same
+as the right-hand-side of the lambda expression, case expression
+clause, or function definition to which it is attached.
+
+The guard semantics has an obvious influence on the
+strictness characteristics of a function or case expression.  In
+particular, an otherwise irrefutable pattern may be
+evaluated due to the presence of a guard.  For example, in
+\bprog
+@
+f ~(x,y,z) [a] | a==y = 1
+@
+\eprog
+both @a@ and @y@ will be evaluated.
+
+\subsubsection{Formal semantics of pattern-matching}
+
+The semantics of all other constructs which use
+pattern-matching is defined by giving identities that relate them to
+@case@ expressions.
+
+The semantics of @case@ expressions are given as a series of
+identities that they satisfy. Figure~\ref{simple-case-expr} shows the
+identities: $e$, $e'$ and $e_i$ are arbitrary expressions; 
+$g$ and $g_i$ are boolean-valued expressions; 
+$p$ and $p_i$ are patterns; 
+$x$ and $x_i$ are variables; 
+$K$ and $K'$ are constructors (including tuple constructors); 
+and $k$ is an integer literal.
+
+\begin{figure}
+\outline{
+\begin{flushleft}
+@case @$e_0$@ of {@$p_1$@ | @$g_1$@ -> @$e_1$@;  @$\ldots{}$@; @$p_n$@ | @$g_n$@ -> @$e_n$@}@\\
+@        @$=$@  case @$e_0$@ of@\\
+@             @$p_1$@ | @$g_1$@ -> @$e_1$\\
+@             _       -> @$\ldots{}$@ case @$e_0$@ of@\\
+%\\
+@                              @$p_n$@ | @$g_n$@ -> @$e_n$\\
+@                              _       -> error "Unexpected case"@\\
+%\\
+@case @$e_0$@ of {@$p$@ | @$g$@ -> @$e$@; _ -> @$e'$@}@\\
+@        @$=$@  case @$e_0$@ of {@$p$@ -> if @$g$@ then @$e$@ else @$e'$@; _ -> @$e'$@}@\\
+%\\
+@case @$e_0$@ of {~@$p$@ -> @$e$@; _ -> @$e'$@}@\\
+@        @$=$@  case @$e_0$@ of@\\
+@                @$x_0$@ -> case (case @$x_0$@ of @$p$@ -> @$x_1$@) of@\\
+@                        @$x_1$@ -> @$\ldots$@ case (case @$x_n$@ of @$p$@ -> @$x_n$@) of@\\
+@                                        @$x_n$@ -> @$e$\\
+@        @{\rm (when $x_1, \ldots, x_n$ are all the variables in $p$, and}\\
+@         @{\rm $x_0$ is a new variable not free in $e\/$)}\\
+%\\
+@case @$e_0$@ of {@$x${\tt @@}$p$@ -> @$e$@; _ -> @$e'$@}@\\
+@        @$=$@ case @$e_0$@ of {@$x$@ -> case @$x$@ of {@$p$@ -> @$e$@ ; _ -> @$e'$@}}@\\
+%\\
+@case @$e_0$@ of {_ -> @$e$@; _ -> @$e'$@}@\\
+@        @$=$@ @$e$\\
+%\\
+@case @$e_0$@ of {@$K p_1 \ldots p_n$@ -> @$e$@; _ -> @$e'$@}@\\
+@        @$=$@  case @$e_0$@ of@\\
+@             @$K x_1 \ldots x_n$@ -> case @$x_1$@ of@\\
+@                              @$p_1$@ -> @$\ldots$@  case @$x_n$@ of@\\
+@                                           @$p_n$@ -> @$e$\\
+@                                           _  -> @$e'$\\
+@                                    @$\ldots$\\
+@                              _  -> @$e'$\\
+@             _ -> @$e'$\\
+@        @{\rm (when $x_1, \ldots, x_n$ are new variables not in $p_1, \ldots, p_n$ or free in $e_1, \ldots, e_n$)}\\
+%\\
+@case @$e_0$@ of {@$k$@ -> @$e$@; _ -> @$e'$@}@\\
+@        @$=$@  if (@$k$@ == @$e_0$@) then @$e$@ else @$e'$\\
+%\\
+@case @$e_0$@ of {@$x$@+@$k$@ -> @$e$@; _ -> @$e'$@}@\\
+@        @$=$@  if (@$e_0$@ >= @$k$@) then (case (@$e_0$@-@$k$@) of {@$x$@ -> @$e$@}) else @$e'$\\
+%\\
+@case @$e_0$@ of {@$x$@ -> @$e$@; _ -> @$e'$@}@\\
+@        @$=$@ case @$e_0$@ of {@$x$@ -> @$e$@}@\\
+%\\
+@case @$e_0$@ of {@$x$@ -> @$e$@}@\\
+@        @$=$@  (\@$x$@ -> @$e$@) @$e_0$\\
+%\\
+@case (@$K'$@ @$e_1$@ @$\ldots$@ @$e_m$@) of {@$K$@ @$x_1$@ @$\ldots$@ @$x_n$@ -> @$e$@; _ -> @$e'$@}@\\
+@        @$=$@  @$e'$\\
+@        @{\rm (when $K$ and $K'$ are distinct constructors of arity $n$ and $m$ respectively)}\\
+%\\
+@case (@$K$@ @$e_1$@ @$\ldots$@ @$e_n$@) of {@$K$@ @$x_1$@ @$\ldots$@ @$x_n$@ -> @$e$@; _ -> @$e'$@}@\\
+@        @$=$@  case @$e_1$@ of { @$x_1$@ -> @$\ldots$@  case @$e_n$@ of { @$x_n$@ -> @$e$@ } @$\ldots$@}@\\
+@        @{\rm (when $K$ is a constructor of arity $n$)}
+\end{flushleft}
+}
+\ecaption{Semantics of Case Expressions}
+\label{simple-case-expr}
+\end{figure}
+
+Using all but the last two identities in Figure~\ref{simple-case-expr}
+in a left-to-right manner yields a translation into a
+subset of general @case@ expressions, called {\em simple case expressions}.%
+\index{case expression!simple}
+The first identity matches a general source-language
+@case@ expression, regardless of whether it actually includes
+guards---if no guards are written, then @True@ is substituted for the $g_i$.
+Subsequent identities manipulate the resulting @case@ expression into simpler
+and simpler forms.
+The semantics of simple @case@ expressions is 
+given by the last two identities.
+
+When used as a translation, the identities in
+Figure~\ref{simple-case-expr} will generate a very inefficient
+program.  This can be fixed by using further @case@ or @where@ 
+expressions, but doing so 
+would clutter the identities, which are intended only to convey the semantics.
+
+These identities all preserve the static semantics.
+The third rule from last uses a 
+lambda rather than a @where@; this
+indicates that variables bound by @case@ are monomorphically typed
+(Section~\ref{type-semantics}).
+
+% Local Variables: 
+% mode: latex
+% End:
