@@ -1,0 +1,55 @@
+
+<title>The Haskell 98 Report: Compiler Pragmas</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Report</i><br> <a href="index.html">top</a> | <a href="derived.html">back</a> | <a href="ratio.html">next</a> | <a href="index98.html">contents</a> | <a href="prelude-index.html">function index</a> <br><hr>
+<a name="pragmas"></a><a name="sect11"></a>
+<h2>11<tt>&nbsp;&nbsp;</tt>Compiler Pragmas</h2>
+<p>
+Some compiler implementations support compiler <I>pragmas</I>, which are
+used to give additional instructions or hints to the compiler, but which
+do not form part of the Haskell  language proper and do not change a
+program's semantics.  This
+chapter summarizes this existing practice.  An implementation is not
+required to respect any pragma, but the pragma should be ignored if an
+implementation is not prepared to handle it.  
+Lexically, pragmas appear as comments, except that the enclosing
+syntax is <tt>{-#</tt> <tt>#-}</tt>.<p>
+<a name="sect11.1"></a>
+<h3>11.1<tt>&nbsp;&nbsp;</tt>Inlining</h3>
+
+<table cellspacing=0 cellspacing=0>
+<tr><td width=100>
+decl </td><td width=20>  <tt>-&gt;</tt> </td><td width=250> <tt>{-#</tt> <tt>INLINE</tt> qvars <tt>#-}
+</tt></td></tr><tr><td>
+decl </td><td>  <tt>-&gt;</tt> </td><td> <tt>{-#</tt> <tt>NOINLINE</tt> qvars <tt>#-}
+</tt></td></tr></table>
+<p>
+The <tt>INLINE</tt> pragma instructs the compiler to inline the specified variables
+at their use sites.
+Compilers will often automatically inline simple expressions.  This
+may be prevented by the <tt>NOINLINE</tt> pragma.<p>
+<a name="sect11.2"></a>
+<h3>11.2<tt>&nbsp;&nbsp;</tt>Specialization</h3>
+<table cellspacing=0 cellspacing=0>
+<tr><td width=100>
+decl </td><td width=20>  <tt>-&gt;</tt> </td><td width=250> <tt>{-#</tt> <tt>SPECIALIZE</tt> spec<sub>1</sub> <tt>,</tt> ... <tt>,</tt> spec<sub>k</sub> <tt>#-}</tt> </td><td> (k&gt;=1)
+</td></tr><tr><td>
+spec </td><td>  <tt>-&gt;</tt> </td><td> vars :: type
+</td></tr></table>
+Specialization is used to avoid inefficiencies involved in dispatching
+overloaded functions.  For example, in
+<tt><br>
+
+<br>
+factorial&nbsp;::&nbsp;Num&nbsp;a&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+factorial&nbsp;0&nbsp;=&nbsp;0<br>
+factorial&nbsp;n&nbsp;=&nbsp;n&nbsp;*&nbsp;factorial&nbsp;(n-1)<br>
+{-#&nbsp;SPECIALIZE&nbsp;factorial&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;Int,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;factorial&nbsp;::&nbsp;Integer&nbsp;-&gt;&nbsp;Integer&nbsp;#-}<br>
+
+<br>
+
+</tt>calls to <tt>factorial</tt> in which the compiler can detect that the
+parameter is either <tt>Int</tt> or <tt>Integer</tt> will
+use specialized versions of <tt>factorial</tt> which do not involve
+overloaded numeric operations.<p>
+<hr><i>The Haskell 98 Report</i><br><a href="index.html">top</a> | <a href="derived.html">back</a> | <a href="ratio.html">next</a> | <a href="index98.html">contents</a> | <a href="prelude-index.html">function index</a> <br><font size=2>December 2002</font>

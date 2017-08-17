@@ -1,0 +1,757 @@
+
+<title>The Haskell 98 Report: Modules</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Report</i><br> <a href="index.html">top</a> | <a href="decls.html">back</a> | <a href="basic.html">next</a> | <a href="index98.html">contents</a> | <a href="prelude-index.html">function index</a> <br><hr>
+<a name="sect5"></a>
+<h2>5<tt>&nbsp;&nbsp;</tt>Modules</h2> <a name="modules"></a>
+ <p>
+A module defines a collection of values, datatypes, type synonyms,
+classes, etc. (see Chapter <a href="decls.html#declarations">4</a>), in an environment created
+by a set of <I>imports</I> (resources brought into scope from other modules).
+It <I>exports</I> some of these resources, making them available to
+other modules.  
+We use the term <I>entity</I> to refer to
+a value, type, or class defined in, imported into, or perhaps
+exported from a module.<p>
+A Haskell  <I>program</I> is a collection of modules, one of
+which, by convention, must be called <tt>Main</tt> and must
+export the value <tt>main</tt>.  The <I>value</I> of the program
+is the value of the identifier <tt>main</tt> in module <tt>Main</tt>,
+which must be a computation of type <tt>IO</tt> t for some type t
+(see Chapter <a href="io-13.html#io">7</a>).  When the program is executed, the computation
+<tt>main</tt> is performed, and its result (of type t) is discarded.<p>
+Modules may reference other modules via explicit
+<tt>import</tt> declarations, each giving the name of a module to be
+imported and specifying its entities to be imported.
+Modules may be mutually recursive.<p>
+Modules are used for name-space control, and are not first class values.
+A multi-module Haskell program can be converted into a single-module
+program by giving each entity a unique name, changing all occurrences
+to refer to the appropriate unique name, and then concatenating all the module
+bodies (There are two minor exceptions to this statement.
+First, <tt>default</tt> declarations scope over a single module (Section <a href="decls.html#default-decls">4.3.4</a>).
+Second, Rule 2 of the monomorphism restriction (Section <a href="decls.html#sect:monomorphism-restriction">4.5.5</a>)
+is affected by module boundaries.
+).  
+For example, here is a three-module program:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;Main&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;A<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;B<br>
+&nbsp;&nbsp;&nbsp;&nbsp;main&nbsp;=&nbsp;A.f&nbsp;&gt;&gt;&nbsp;B.f<br>
+<br>
+&nbsp;&nbsp;module&nbsp;A&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;f&nbsp;=&nbsp;...<br>
+<br>
+&nbsp;&nbsp;module&nbsp;B&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;f&nbsp;=&nbsp;...<br>
+
+<br>
+
+</tt>It is equivalent to the following single-module program:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;Main&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;main&nbsp;=&nbsp;af&nbsp;&gt;&gt;&nbsp;bf<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;af&nbsp;=&nbsp;...<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;bf&nbsp;=&nbsp;...<br>
+
+<br>
+
+</tt>Because they are allowed to be mutually recursive,
+modules allow a program to be partitioned freely without regard to
+dependencies.<p>
+The name-space for modules themselves is flat, with each module being associated
+with a unique module name (which are Haskell  identifiers
+beginning with a capital letter; i.e. <I>modid</I>).  
+There is one distinguished module, <tt>Prelude</tt>, which is imported into
+all modules by default (see Section <a href="modules.html#standard-prelude">5.6</a>), plus a
+set of standard library modules that may be imported as required
+(see Part II).<p>
+<a name="sect5.1"></a>
+<h3>5.1<tt>&nbsp;&nbsp;</tt>Module Structure</h3> <a name="module-implementations"></a>
+<p>
+A module defines a mutually
+recursive scope containing declarations for value bindings, data
+types, type synonyms, classes, etc. (see Chapter <a href="decls.html#declarations">4</a>).<p>
+<table cellspacing=0 cellspacing=0>
+<tr><td width=100></td><td width=20></td><td width=250></td></tr><tr><td>
+module </td><td>  <tt>-&gt;</tt> </td><td> <tt>module</tt> modid [exports] <tt>where</tt> body
+</td></tr><tr><td>
+</td><td> <tt>|</tt> </td><td>  body
+</td></tr><tr><td>
+body </td><td>  <tt>-&gt;</tt> </td><td> <tt>{</tt> impdecls <tt>;</tt> topdecls <tt>}
+</tt></td></tr><tr><td>
+</td><td> <tt>|</tt> </td><td> <tt>{</tt> impdecls  <tt>}
+</tt></td></tr><tr><td>
+</td><td> <tt>|</tt> </td><td> <tt>{</tt> topdecls <tt>}
+</tt></td></tr><tr><td>
+modid </td><td>  <tt>-&gt;</tt> </td><td> conid
+</td></tr><tr><td>
+impdecls </td><td>  <tt>-&gt;</tt> </td><td> impdecl<sub>1</sub> <tt>;</tt> ... <tt>;</tt> impdecl<sub>n</sub> 	</td><td> (n&gt;=1)
+</td></tr><tr><td>
+topdecls </td><td>  <tt>-&gt;</tt> </td><td> topdecl<sub>1</sub> <tt>;</tt> ... <tt>;</tt> topdecl<sub>n</sub> 	</td><td> (n&gt;=1)
+</td></tr></table>
+<p>
+A module 
+begins with a header: the keyword
+<tt>module</tt>, the module name, and a list of entities (enclosed in round
+parentheses) to be exported.  The header is followed by a possibly-empty
+list of <tt>import</tt> declarations (<I>impdecls</I>, Section <a href="modules.html#import">5.3</a>) that specify modules to be imported,
+optionally restricting the imported bindings.  
+This is followed by a possibly-empty list of top-level declarations (<I>topdecls</I>, Chapter <a href="decls.html#declarations">4</a>).<p>
+An abbreviated form of module, consisting only 
+of
+the module body, is permitted.  If this is used, the header is assumed to be
+`<tt>module&nbsp;Main(main)&nbsp;where</tt>'.
+If the first lexeme in the
+abbreviated module is not a <tt>{</tt>, then the layout rule applies
+for the top level of the module.<a name="export"></a><p>
+<a name="sect5.2"></a>
+<h3>5.2<tt>&nbsp;&nbsp;</tt>Export Lists</h3>
+<p>
+<table cellspacing=0 cellspacing=0>
+<tr><td width=100></td><td width=20></td><td width=250></td></tr><tr></tr><tr><td>
+exports </td><td>  <tt>-&gt;</tt> </td><td> <tt>(</tt> export<sub>1</sub> <tt>,</tt> ... <tt>,</tt> export<sub>n</sub> [ <tt>,</tt> ] <tt>)</tt> </td><td> (n&gt;=0)
+</td></tr><tr><td>
+export </td><td>  <tt>-&gt;</tt> </td><td> qvar
+</td></tr><tr><td>
+</td><td> <tt>|</tt> </td><td>  qtycon [<tt>(..)</tt> | <tt>(</tt> cname<sub>1</sub> <tt>,</tt> ... <tt>,</tt> cname<sub>n</sub> <tt>)</tt>] </td><td>  (n&gt;=0)
+</td></tr><tr><td>
+</td><td> <tt>|</tt> </td><td>  qtycls [<tt>(..)</tt> | <tt>(</tt> var<sub>1</sub> <tt>,</tt> ... <tt>,</tt> var<sub>n</sub> <tt>)</tt>] </td><td>  (n&gt;=0)
+</td></tr><tr><td>
+</td><td> <tt>|</tt> </td><td>  <tt>module</tt> modid
+</td></tr><tr><td>
+cname </td><td>  <tt>-&gt;</tt> </td><td> var | con
+</td></tr></table>
+<p>
+An <I>export list</I> identifies the entities to be exported by a
+module declaration.  A module implementation may only export an entity
+that it declares, or that it imports from some other module.  If the
+export list is omitted, all values, types and classes defined in the
+module are exported, <I>but not those that are imported</I>.<p>
+Entities in an export list may be named as follows:
+<OL><LI>
+A value, field name, or class method, whether declared in
+the module body or imported,
+may be named by giving the name of the value as a <I>qvarid</I>, which must be in scope.
+Operators should be enclosed in parentheses to turn them into
+<I>qvarid</I>s.  <p>
+<LI>
+An algebraic datatype <I>T
+
+</I>declared by a <tt>data</tt> or <tt>newtype</tt> declaration may be named in one of
+three ways: 
+<UL><LI>
+The form <I>T</I> names the type <I>but not the constructors or field names</I>.
+The ability to export a type without its constructors allows the
+construction of abstract datatypes (see Section <a href="modules.html#abstract-types">5.8</a>).
+<LI>
+The form T<tt>(</tt>c<sub>1</sub><tt>,</tt>...<tt>,</tt>c<sub>n</sub><tt>)</tt>, 
+names the type and some or all of its constructors and field names.  
+<LI>
+The abbreviated form <I>T</I><tt>(..)</tt> names the type 
+and all its constructors and field names that are currently in scope
+(whether qualified or not).
+</UL>
+In all cases, the (possibly-qualified) type constructor <I>T</I> must be in scope. 
+The constructor and field names c<sub>i</sub> in the second form are unqualified;
+one of these subordinate names is legal if and only if (a) it names a constructor
+or field of <I>T</I>, and (b) the constructor or field
+is in scope in the module body <I>regardless of whether it is in scope
+under a qualified or unqualified name</I>. For example, the following is 
+legal
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;A(&nbsp;Mb.Maybe(&nbsp;Nothing,&nbsp;Just&nbsp;)&nbsp;)&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;qualified&nbsp;Maybe&nbsp;as&nbsp;Mb<br>
+
+<br>
+
+</tt>Data constructors cannot be named in export lists except as subordinate names, because
+they cannot otherwise be distinguished from type constructors.<p>
+<LI>
+A type synonym <I>T</I> declared by a
+<tt>type</tt> declaration may be named by the form <I>T</I>, where <I>T</I> is in scope.<p>
+<LI>
+
+A class C with operations f<sub>1</sub>,...,f<sub>n</sub>
+declared in a <tt>class</tt> declaration may be named in one of three ways:
+<UL><LI>
+The form <I>C</I> names the class <I>but not the class methods</I>.
+<LI>
+The form C<tt>(</tt>f<sub>1</sub><tt>,</tt>...<tt>,</tt>f<sub>n</sub><tt>)</tt>, names the class and some or all
+of its methods.  
+<LI>
+The abbreviated form C<tt>(..)</tt> names the class and all its methods
+that are in scope (whether qualified or not).
+</UL>
+In all cases, <I>C</I> must be in scope.  In the second form,
+one of the (unqualified) subordinate names f<sub>i</sub> is legal if and only if (a) it names a
+class method of <I>C</I>, and (b) the class method 
+is in scope in the module body regardless of whether it is in scope
+under a qualified or unqualified name.<p>
+<LI>
+The form "<tt>module&nbsp;M</tt>" names the set of all entities that are in
+scope with both an unqualified name "<tt>e</tt>" and a qualified name
+"<tt>M.e</tt>".
+This set may be empty.
+For example:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;Queue(&nbsp;module&nbsp;Stack,&nbsp;enqueue,&nbsp;dequeue&nbsp;)&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;Stack<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;...<br>
+
+<br>
+
+</tt>Here the module <tt>Queue</tt> uses the module name <tt>Stack</tt> in its export
+list to abbreviate all the entities imported from <tt>Stack</tt>.  <p>
+A module can name its own local definitions in its export
+list using its own name in the "<tt>module&nbsp;M</tt>" syntax, because a local
+declaration brings into scope both a qualified and unqualified name (Section <a href="modules.html#qualifiers">5.5.1</a>). 
+For example:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;Mod1(&nbsp;module&nbsp;Mod1,&nbsp;module&nbsp;Mod2&nbsp;)&nbsp;where<br>
+&nbsp;&nbsp;import&nbsp;Mod2<br>
+&nbsp;&nbsp;import&nbsp;Mod3<br>
+
+<br>
+
+</tt>Here module <tt>Mod1</tt> exports all local definitions as well as those
+imported from <tt>Mod2</tt> but not those imported from <tt>Mod3</tt>.<p>
+It is an error to use <tt>module&nbsp;M</tt> in an export list unless <tt>M</tt> is 
+the module bearing the export list, or <tt>M</tt> is imported by at 
+least one import declaration (qualified or unqualified).
+</OL>
+Exports lists are cumulative: the set of entities exported by an export
+list is the union of the entities exported by the individual items of the list.<p>
+It makes no difference to an importing module how an entity was 
+exported.  For example, a field name <tt>f</tt> from data type <tt>T</tt> may be exported individually
+(<tt>f</tt>, item (1) above); or as an explicitly-named member of its data type (<tt>T(f)</tt>, item (2));
+or as an implicitly-named member (<tt>T(..)</tt>, item(2)); or by exporting an entire
+module (<tt>module&nbsp;M</tt>, item (5)).  <p>
+The <I>unqualified</I> names of the entities exported by a module must all be distinct
+(within their respective namespace).  For example
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;A&nbsp;(&nbsp;C.f,&nbsp;C.g,&nbsp;g,&nbsp;module&nbsp;B&nbsp;)&nbsp;where&nbsp;&nbsp;&nbsp;--&nbsp;an&nbsp;invalid&nbsp;module<br>
+&nbsp;&nbsp;import&nbsp;B(f)<br>
+&nbsp;&nbsp;import&nbsp;qualified&nbsp;C(f,g)<br>
+&nbsp;&nbsp;g&nbsp;=&nbsp;f&nbsp;True<br>
+
+<br>
+
+</tt>There are no name clashes within module <tt>A</tt> itself, 
+but there are name clashes in the export list between <tt>C.g</tt> and <tt>g
+</tt>(assuming <tt>C.g</tt> and <tt>g</tt> are different entities -- remember, modules
+can import each other recursively), and between <tt>module&nbsp;B</tt> and <tt>C.f
+</tt>(assuming <tt>B.f</tt> and <tt>C.f</tt> are different entities).<a name="import"></a><p>
+<a name="sect5.3"></a>
+<h3>5.3<tt>&nbsp;&nbsp;</tt>Import Declarations</h3>
+<p>
+<table cellspacing=0 cellspacing=0>
+<tr><td width=100></td><td width=20></td><td width=250></td></tr><tr><td>
+impdecl </td><td>  <tt>-&gt;</tt> </td><td> <tt>import</tt> [<tt>qualified</tt>] modid [<tt>as</tt> modid] [impspec]
+</td></tr><tr><td>
+</td><td> <tt>|</tt> </td><td> 	</td><td> (empty declaration)
+</td></tr><tr><td>
+impspec </td><td>  <tt>-&gt;</tt> </td><td> <tt>(</tt> import<sub>1</sub> <tt>,</tt> ... <tt>,</tt> import<sub>n</sub> [ <tt>,</tt> ] <tt>)</tt> </td><td> (n&gt;=0)
+</td></tr><tr><td>
+</td><td> <tt>|</tt> </td><td>  <tt>hiding</tt> <tt>(</tt> import<sub>1</sub> <tt>,</tt> ... <tt>,</tt> import<sub>n</sub> [ <tt>,</tt> ] <tt>)</tt> </td><td> (n&gt;=0)
+</td></tr><tr><td>
+import </td><td>  <tt>-&gt;</tt> </td><td> var
+</td></tr><tr><td>
+</td><td> <tt>|</tt> </td><td>  tycon [ <tt>(..)</tt> | <tt>(</tt> cname<sub>1</sub> <tt>,</tt> ... <tt>,</tt> cname<sub>n</sub> <tt>)</tt>] </td><td>  (n&gt;=0)
+</td></tr><tr><td>
+</td><td> <tt>|</tt> </td><td>  tycls [<tt>(..)</tt> | <tt>(</tt> var<sub>1</sub> <tt>,</tt> ... <tt>,</tt> var<sub>n</sub> <tt>)</tt>] </td><td> (n&gt;=0)
+</td></tr><tr><td>
+cname </td><td>  <tt>-&gt;</tt> </td><td> var | con
+</td></tr></table>
+<p>
+The entities exported by a module may be brought into scope in
+another module with
+an <tt>import
+</tt>declaration at the beginning
+of the module.  
+The <tt>import</tt> declaration names the module to be
+imported
+and optionally specifies the entities to be imported.
+A single module may be imported by more than one <tt>import</tt> declaration.  
+Imported names serve as top level declarations: they scope over
+the entire body of the module but may  be shadowed by local
+non-top-level bindings.  <p>
+The effect of multiple <tt>import</tt> declarations is strictly
+cumulative: an entity is in scope if it is imported by any of the <tt>import
+</tt>declarations in a module.  The ordering of import declarations is irrelevant.<p>
+Lexically, the terminal symbols "<tt>as</tt>", "<tt>qualified</tt>" and
+"<tt>hiding</tt>" are each a <I>varid</I> rather than a <I>reservedid</I>.  They have
+special significance only in the context of an <tt>import</tt> declaration;
+they may also be used as variables.<a name="whatisimported"></a><p>
+<a name="sect5.3.1"></a>
+<h4>5.3.1<tt>&nbsp;&nbsp;</tt>What is imported</h4>
+<p>
+Exactly which entities are to be imported can be specified in one
+of the following three ways:
+<OL><LI>
+The imported entities can be specified explicitly
+by listing them in parentheses.
+Items in the list have the same form as those in export lists, except
+qualifiers are not permitted and
+the `<tt>module</tt> <I>modid</I>' entity is not permitted.  When the <tt>(..)</tt> form
+of import is used for a type or class, the <tt>(..)</tt> refers to all of the
+constructors, methods, or field names exported from the module.<p>
+The list must name only
+entities exported by the imported module.
+The list may be empty, in which case nothing except the instances is
+imported.<p>
+<LI>
+Entities can be excluded by 
+using the form <tt>hiding(</tt><I>import</I><sub><I>1</I></sub><I> </I><tt>,</tt><I> ... </I><tt>,</tt><I> import</I><sub><I>n</I></sub>
+<tt>)</tt>, which
+specifies that all entities exported by the named module should
+be imported except for those named in the list.  Data constructors may be
+named directly in hiding lists without being prefixed by the
+associated type.  Thus, in
+<tt><br>
+
+<br>
+&nbsp;&nbsp;import&nbsp;M&nbsp;hiding&nbsp;(C)<br>
+
+<br>
+
+</tt>any constructor, class, or type named <tt>C</tt> is excluded.  In contrast,
+using <tt>C</tt> in an import list names only a class or type.  <p>
+It is an error to hide an entity that is not, in fact, exported by
+the imported module.<p>
+<LI>
+Finally, if <I>impspec</I> is omitted then 
+all the entities exported by the specified module are imported.
+</OL><p>
+<a name="sect5.3.2"></a>
+<h4>5.3.2<tt>&nbsp;&nbsp;</tt>Qualified import</h4><p>
+For each entity imported under the rules of Section <a href="modules.html#whatisimported">5.3.1</a>,
+the top-level environment is extended.  If the import declaration used
+the <tt>qualified</tt> keyword, only the <I>qualified name</I> of the entity is
+brought into scope.  If the <tt>qualified</tt> keyword is omitted, then <I>both</I> the
+qualified <I>and</I> unqualified name of the entity is brought into scope.
+Section <a href="modules.html#qualifiers">5.5.1</a> describes qualified names in more detail.<p>
+The qualifier on the imported name is either the name of the imported module,
+or the local alias given in the <tt>as</tt> clause (Section <a href="modules.html#as-clause">5.3.3</a>) 
+on the <tt>import</tt> statement.
+Hence, <I>the qualifier is not necessarily the name of the module in which the
+entity was originally declared</I>.<p>
+The ability to exclude the unqualified names allows full programmer control of
+the unqualified namespace: a locally defined entity can share the same
+name as a qualified import:
+
+
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;Ring&nbsp;where<br>
+&nbsp;&nbsp;import&nbsp;qualified&nbsp;Prelude&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;All&nbsp;Prelude&nbsp;names&nbsp;must&nbsp;be&nbsp;qualified<br>
+&nbsp;&nbsp;import&nbsp;List(&nbsp;nub&nbsp;)<br>
+<br>
+&nbsp;&nbsp;l1&nbsp;+&nbsp;l2&nbsp;=&nbsp;l1&nbsp;Prelude.++&nbsp;l2&nbsp;&nbsp;--&nbsp;This&nbsp;+&nbsp;differs&nbsp;from&nbsp;the&nbsp;one&nbsp;in&nbsp;the&nbsp;Prelude<br>
+&nbsp;&nbsp;l1&nbsp;*&nbsp;l2&nbsp;=&nbsp;nub&nbsp;(l1&nbsp;+&nbsp;l2)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;This&nbsp;*&nbsp;differs&nbsp;from&nbsp;the&nbsp;one&nbsp;in&nbsp;the&nbsp;Prelude<br>
+<br>
+&nbsp;&nbsp;succ&nbsp;=&nbsp;(Prelude.+&nbsp;1)<br>
+
+<br>
+
+<a name="as-clause"></a><p>
+</tt><a name="sect5.3.3"></a>
+<h4>5.3.3<tt>&nbsp;&nbsp;</tt>Local aliases</h4>
+<p>
+Imported modules may be assigned a local alias in the importing module
+using the <tt>as</tt> clause.
+For example, in
+<tt><br>
+
+<br>
+&nbsp;&nbsp;import&nbsp;qualified&nbsp;VeryLongModuleName&nbsp;as&nbsp;C<br>
+
+<br>
+
+</tt>entities must be referenced using `<tt>C.</tt>' as a qualifier instead of
+`<tt>VeryLongModuleName.</tt>'.  This also allows a different module to be substituted
+for <tt>VeryLongModuleName</tt> without changing the qualifiers used for the imported module.
+It is legal for more than one module in scope to 
+use the same qualifier, provided that all names can still be resolved unambiguously.
+For example:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;M&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;qualified&nbsp;Foo&nbsp;as&nbsp;A<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;qualified&nbsp;Baz&nbsp;as&nbsp;A<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;=&nbsp;A.f<br>
+
+<br>
+
+</tt>This module is legal provided only that <tt>Foo</tt> and <tt>Baz</tt> do not both export <tt>f</tt>.<p>
+An <tt>as</tt> clause may also be used on an un-<tt>qualified</tt> <tt>import</tt> statement:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;import&nbsp;Foo&nbsp;as&nbsp;A(f)<br>
+
+<br>
+
+</tt>This declaration brings into scope <tt>f</tt> and <tt>A.f</tt>.<p>
+<a name="sect5.3.4"></a>
+<h4>5.3.4<tt>&nbsp;&nbsp;</tt>Examples</h4><p>
+To clarify the above import rules, suppose the module <tt>A</tt> exports <tt>x</tt> and <tt>y</tt>.
+Then this table shows what names are brought into scope by the specified import statement:
+<div align=center><table >
+<tr><td>
+Import declaration </td><td> Names brought into scope </td></tr><tr><td>
+  <tt>import&nbsp;A</tt>			</td><td> <tt>x</tt>, <tt>y</tt>, <tt>A.x</tt>, <tt>A.y</tt> </td></tr><tr><td><tt>import&nbsp;A()</tt>			</td><td> (nothing)	</td></tr><tr><td><tt>import&nbsp;A(x)</tt> 		</td><td> <tt>x</tt>, <tt>A.x</tt> </td></tr><tr><td><tt>import&nbsp;qualified&nbsp;A</tt>		</td><td> <tt>A.x</tt>, <tt>A.y</tt> </td></tr><tr><td><tt>import&nbsp;qualified&nbsp;A()</tt>	</td><td> (nothing) </td></tr><tr><td><tt>import&nbsp;qualified&nbsp;A(x)</tt>	</td><td> <tt>A.x</tt> </td></tr><tr><td><tt>import&nbsp;A&nbsp;hiding&nbsp;()</tt>		</td><td> <tt>x</tt>, <tt>y</tt>, <tt>A.x</tt>, <tt>A.y</tt> </td></tr><tr><td><tt>import&nbsp;A&nbsp;hiding&nbsp;(x)</tt>		</td><td> <tt>y</tt>, <tt>A.y</tt> </td></tr><tr><td><tt>import&nbsp;qualified&nbsp;A&nbsp;hiding&nbsp;()</tt>	</td><td> <tt>A.x</tt>, <tt>A.y</tt> </td></tr><tr><td><tt>import&nbsp;qualified&nbsp;A&nbsp;hiding&nbsp;(x)</tt>	</td><td> <tt>A.y</tt> </td></tr><tr><td><tt>import&nbsp;A&nbsp;as&nbsp;B</tt>		</td><td> <tt>x</tt>, <tt>y</tt>, <tt>B.x</tt>, <tt>B.y</tt> </td></tr><tr><td><tt>import&nbsp;A&nbsp;as&nbsp;B(x)</tt>		</td><td> <tt>x</tt>, <tt>B.x</tt> </td></tr><tr><td><tt>import&nbsp;qualified&nbsp;A&nbsp;as&nbsp;B</tt>	</td><td> <tt>B.x</tt>, <tt>B.y</tt> </td></tr><tr><td>
+</td></tr></table>
+
+</div>
+In all cases, all instance declarations in scope in module <tt>A</tt> are imported
+(Section <a href="modules.html#import-instances">5.4</a>).<a name="import-instances"></a><p>
+<a name="sect5.4"></a>
+<h3>5.4<tt>&nbsp;&nbsp;</tt>Importing and Exporting Instance Declarations</h3>
+<p>
+Instance declarations cannot be explicitly named on import or export
+lists.  All instances in scope within a module are <I>always
+</I>exported and any import brings <I>all</I> instances in from the
+imported module.  Thus, an
+instance declaration is in scope if and only if a chain of <tt>import
+</tt>declarations leads to the module containing the instance declaration.<p>
+For example, <tt>import&nbsp;M()</tt> does not bring
+any new names in scope from module <tt>M</tt>, but does bring in any instances
+visible in <tt>M</tt>.  A module whose only purpose is to provide instance
+declarations can have an empty export list.  For example
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;MyInstances()&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;instance&nbsp;Show&nbsp;(a&nbsp;-&gt;&nbsp;b)&nbsp;where<br>
+	show&nbsp;fn&nbsp;=&nbsp;"&lt;&lt;function&gt;&gt;"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;instance&nbsp;Show&nbsp;(IO&nbsp;a)&nbsp;where<br>
+	show&nbsp;io&nbsp;=&nbsp;"&lt;&lt;IO&nbsp;action&gt;&gt;"<br>
+
+<br>
+<a name="qualifiers"></a><p>
+</tt><a name="sect5.5"></a>
+<h3>5.5<tt>&nbsp;&nbsp;</tt>Name Clashes and Closure</h3><p>
+<a name="sect5.5.1"></a>
+<h4>5.5.1<tt>&nbsp;&nbsp;</tt>Qualified names</h4>
+<p>
+A <I>qualified name</I> is written as <I>modid</I><tt>.</tt><I>name</I> (Section <a href="lexemes.html#ids">2.4</a>).
+A qualified name is brought into scope:
+<UL><LI><I>By a top level declaration.
+</I>A top-level declaration brings into scope both the unqualified <I>and
+</I>the qualified name of the entity being defined.  Thus:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;M&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;f&nbsp;x&nbsp;=&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;g&nbsp;x&nbsp;=&nbsp;M.f&nbsp;x&nbsp;x<br>
+
+<br>
+
+</tt>is legal.  The <I>defining</I> occurrence must mention the <I>unqualified</I> name; therefore, it is
+illegal to write
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;M&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;M.f&nbsp;x&nbsp;=&nbsp;...			--&nbsp;ILLEGAL<br>
+&nbsp;&nbsp;&nbsp;&nbsp;g&nbsp;x&nbsp;=&nbsp;let&nbsp;M.y&nbsp;=&nbsp;x+1&nbsp;in&nbsp;...	--&nbsp;ILLEGAL<br>
+
+<br>
+
+</tt><LI><I>By an </I><tt>import</tt><I> declaration.</I>  An <tt>import</tt> declaration, whether <tt>qualified</tt> or not,
+always brings into scope the qualified name of the imported entity (Section <a href="modules.html#import">5.3</a>).
+This allows a qualified
+import to be replaced with an unqualified one without forcing changes
+in the references to the imported names.  
+</UL><p>
+<a name="sect5.5.2"></a>
+<h4>5.5.2<tt>&nbsp;&nbsp;</tt>Name clashes</h4><p>
+If a module contains a bound occurrence of a name, such as <tt>f</tt> or <tt>A.f</tt>,
+it must be possible unambiguously to resolve which entity is thereby referred to;
+that is, there must be only one binding for <tt>f</tt> or <tt>A.f</tt> respectively.<p>
+It is <I>not</I> an error for there to exist names that cannot be so 
+resolved, provided that the program does not mention those names.  For example:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;A&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;B<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;C<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tup&nbsp;=&nbsp;(b,&nbsp;c,&nbsp;d,&nbsp;x)<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;module&nbsp;B(&nbsp;d,&nbsp;b,&nbsp;x,&nbsp;y&nbsp;)&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;D<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;=&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;=&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;b&nbsp;=&nbsp;...<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;module&nbsp;C(&nbsp;d,&nbsp;c,&nbsp;x,&nbsp;y&nbsp;)&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;D<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;=&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;=&nbsp;...<br>
+&nbsp;&nbsp;&nbsp;&nbsp;c&nbsp;=&nbsp;...<br>
+<br>
+&nbsp;&nbsp;module&nbsp;D(&nbsp;d&nbsp;)&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;d&nbsp;=&nbsp;...<br>
+
+<br>
+
+</tt>Consider the definition of <tt>tup</tt>.  
+<UL><LI>The references to <tt>b</tt> and <tt>c
+</tt>can be unambiguously resolved to <tt>b</tt> declared in <tt>B</tt>, and <tt>c</tt> declared in
+<tt>C</tt> respectively.  
+<LI>The reference to <tt>d</tt> is unambiguously resolved to
+<tt>d</tt> declared in <tt>D</tt>.  In this case the same entity is brought into scope by two routes
+(the import of <tt>B</tt> and the import of <tt>C</tt>), and can be referred to in <tt>A</tt> by the names
+<tt>d</tt>, <tt>B.d</tt>, and <tt>C.d</tt>.
+<LI>The reference to <tt>x</tt> is ambiguous: it could mean <tt>x</tt> declared in <tt>B</tt>, or <tt>x</tt> 
+declared in <tt>C</tt>.  The ambiguity could be fixed by replacing the reference to <tt>x</tt> by
+<tt>B.x</tt> or <tt>C.x</tt>.
+<LI>There is no reference to <tt>y</tt>, so it is not erroneous that distinct entities called
+<tt>y</tt> are exported by both <tt>B</tt> and <tt>C</tt>.  An error is only reported if <tt>y</tt> is actually mentioned.
+</UL><p>
+The name occurring in a type signature or fixity declarations is
+always unqualified, and unambiguously refers to another declaration in
+the same declaration list (except that the fixity declaration for a
+class method can occur at top level --- Section <a href="decls.html#fixity">4.4.2</a>). For example,
+the following module is legal:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;F&nbsp;where<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sin&nbsp;::&nbsp;Float&nbsp;-&gt;&nbsp;Float<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sin&nbsp;x&nbsp;=&nbsp;(x::Float)<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;f&nbsp;x&nbsp;=&nbsp;Prelude.sin&nbsp;(F.sin&nbsp;x)<br>
+
+<br>
+
+</tt>The local declaration for <tt>sin</tt> is
+legal, even though the Prelude function <tt>sin</tt> is implicitly in
+scope. The references to <tt>Prelude.sin</tt> and <tt>F.sin</tt> must both be qualified
+to make it unambiguous which <tt>sin</tt> is meant. However, the unqualified
+name <tt>sin</tt> in the type signature in the first line of <tt>F</tt> unambiguously
+refers to the local declaration for <tt>sin</tt>.<a name="closure"></a><p>
+<a name="sect5.5.3"></a>
+<h4>5.5.3<tt>&nbsp;&nbsp;</tt>Closure</h4>
+<p>
+Every module in a Haskell  program must be <I>closed</I>.  That is,
+every name explicitly mentioned by the source code
+must be either defined locally or imported from another module.
+However, entities that the compiler requires for type checking or other
+compile time analysis need not be imported if they are not mentioned
+by name.  The Haskell  compilation system is responsible for finding
+any information needed for compilation without the help of the
+programmer.  That is, the import of a variable <tt>x</tt> does not
+require that the datatypes and classes in the signature of <tt>x</tt> be
+brought into the module along with <tt>x</tt> unless these entities are
+referenced by name in the user program.  The Haskell 
+system silently imports any information that must accompany an
+entity for type checking or any other purposes.  Such entities need
+not even be explicitly exported: the following program is valid even though
+<tt>T</tt> does not escape <tt>M1</tt>:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;M1(x)&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;data&nbsp;T&nbsp;=&nbsp;T<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;=&nbsp;T<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;module&nbsp;M2&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;M1(x)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;y&nbsp;=&nbsp;x<br>
+
+<br>
+
+</tt>In this example, there is no way to supply an explicit type signature
+for <tt>y</tt> since <tt>T</tt> is not in scope.
+Whether or not <tt>T</tt> is explicitly exported, module <tt>M2</tt> knows
+enough about <tt>T</tt> to correctly type check the program.<p>
+The type of an exported entity is unaffected by non-exported type
+synonyms.  For example, in
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;M(x)&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;type&nbsp;T&nbsp;=&nbsp;Int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;::&nbsp;T<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;=&nbsp;1<br>
+
+<br>
+
+</tt>the type of <tt>x</tt> is both <tt>T</tt> and <tt>Int</tt>; these are interchangeable even
+when <tt>T</tt> is not in scope.  That is, the definition of <tt>T</tt> is available
+to any module that encounters it whether or not the name <tt>T</tt> is
+in scope.  The only reason to export <tt>T</tt> is to allow other modules to
+refer it by name; the type checker finds the definition of <tt>T</tt> if
+needed whether or not it is exported.<a name="standard-prelude"></a><p>
+<a name="sect5.6"></a>
+<h3>5.6<tt>&nbsp;&nbsp;</tt>Standard Prelude</h3>
+
+
+
+Many of the features of Haskell  are defined in Haskell 
+itself as a library of standard datatypes, classes, and
+functions, called the "Standard Prelude."  In
+Haskell , the Prelude is contained in the
+module <tt>Prelude</tt>. There are also
+many predefined library modules, which provide less frequently used
+functions and types.  For example, complex numberss, arrays, 
+and most of the input/output are all part of the standard
+libraries.    These are 
+defined in Part II
+Separating
+libraries from the Prelude has the advantage of reducing the size and
+complexity of the Prelude, allowing it to be more easily assimilated,
+and increasing the space of useful names available to the programmer.<p>
+Prelude and library modules differ from other modules in that
+their semantics (but not their implementation) are a fixed part of the
+Haskell  language definition.
+This means, for example, that a compiler may optimize calls to
+functions in the Prelude without consulting the source code
+of the Prelude.<p>
+<a name="sect5.6.1"></a>
+<h4>5.6.1<tt>&nbsp;&nbsp;</tt>The <tt>Prelude</tt> Module</h4><p>
+The <tt>Prelude</tt> module is imported automatically into all modules as if
+by the statement `<tt>import&nbsp;Prelude</tt>', if and only if it is not imported
+with an explicit <tt>import</tt> declaration. This provision for explicit
+import allows entities defined in the Prelude to be selectively imported,
+just like those from any other module.<p>
+The semantics of the entities in <tt>Prelude</tt> is specified by a reference
+implementation of <tt>Prelude</tt> written in Haskell , given in
+Chapter <a href="standard-prelude.html#stdprelude">8</a>.  Some datatypes (such as <tt>Int</tt>) and
+functions (such as <tt>Int</tt> addition) cannot be specified directly in
+Haskell .  Since the treatment of such entities depends on the
+implementation, they are not formally defined in Chapter <a href="standard-prelude.html#stdprelude">8</a>.
+The implementation of
+<tt>Prelude</tt> is also incomplete in its treatment of tuples: there should
+be an infinite family of tuples and their instance declarations, but the
+implementation only gives a scheme.<p>
+Chapter <a href="standard-prelude.html#stdprelude">8</a> defines the module <tt>Prelude</tt> using
+several other modules: <tt>PreludeList</tt>, <tt>PreludeIO</tt>, and so on.
+These modules are <I>not</I> part of Haskell 98, and they cannot be imported
+separately.  They are simply 
+there to help explain the structure of the <tt>Prelude</tt> module; they
+should be considered part of its implementation, not part of the language
+definition.
+ <a name="std-prel-shadowing"></a>
+<a name="sect5.6.2"></a>
+<h4>5.6.2<tt>&nbsp;&nbsp;</tt>Shadowing Prelude Names</h4>
+<p>
+The rules about the Prelude have been cast so that it is
+possible to use Prelude names for nonstandard purposes; however,
+every module that does so must have an <tt>import</tt> declaration
+that makes this nonstandard usage explicit.  For example:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;A(&nbsp;null,&nbsp;nonNull&nbsp;)&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;Prelude&nbsp;hiding(&nbsp;null&nbsp;)&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;null,&nbsp;nonNull&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;Bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;null&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;=&nbsp;x&nbsp;==&nbsp;0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;nonNull&nbsp;x&nbsp;=&nbsp;not&nbsp;(null&nbsp;x)<br>
+
+<br>
+
+</tt>Module <tt>A</tt> redefines <tt>null</tt>, and contains an unqualified reference to <tt>null
+</tt>on the right hand side of <tt>nonNull</tt>. The latter would be ambiguous
+without the <tt>hiding(null)</tt> on the <tt>import&nbsp;Prelude</tt> statement. Every
+module that imports <tt>A</tt> unqualified, and then makes an unqualified
+reference to <tt>null</tt> must also resolve the ambiguous use of <tt>null</tt> just as
+<tt>A</tt> does. Thus there is little danger of accidentally shadowing Prelude
+names.<p>
+It is possible to construct and use a different module to serve in
+place of the Prelude.  Other than the fact that it is implicitly
+imported, the Prelude is an ordinary Haskell  module; it is special
+only in that some objects in the Prelude are referenced by special
+syntactic constructs.  Redefining names used by the Prelude does not
+affect the meaning of these special constructs.  For example, in
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;B&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;Prelude()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;import&nbsp;MyPrelude<br>
+&nbsp;&nbsp;&nbsp;&nbsp;f&nbsp;x&nbsp;=&nbsp;(x,x)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;g&nbsp;x&nbsp;=&nbsp;(,)&nbsp;x&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;h&nbsp;x&nbsp;=&nbsp;[x]&nbsp;++&nbsp;[]<br>
+
+<br>
+
+</tt>the explicit <tt>import&nbsp;Prelude()</tt> declaration prevents the automatic
+import of <tt>Prelude</tt>, while the declaration <tt>import&nbsp;MyPrelude</tt> brings the
+non-standard prelude into scope.  
+The special syntax for tuples (such as <tt>(x,x)</tt> and <tt>(,)</tt>) and lists
+(such as <tt>[x]</tt> and <tt>[]</tt>) continues to refer to the tuples and lists
+defined by the standard <tt>Prelude</tt>;
+there is no way to redefine the meaning of <tt>[x]</tt>, for example, in terms of a
+different implementation of lists.
+On the other hand, the use of <tt>++</tt> is not special syntax, so it refers
+to <tt>++</tt> imported from <tt>MyPrelude</tt>.<p>
+It is not possible, however, to hide <tt>instance</tt> declarations in the
+<tt>Prelude</tt>.  For example, one cannot define a new instance for <tt>Show&nbsp;Char</tt>.<p>
+<a name="sect5.7"></a>
+<h3>5.7<tt>&nbsp;&nbsp;</tt>Separate Compilation</h3>
+
+Depending on the Haskell  implementation used, separate compilation
+of mutually recursive modules may require that imported modules contain
+additional information so that they may be referenced before they are
+compiled.  Explicit type signatures for all exported values may be
+necessary to deal with mutual recursion.  The
+precise details of separate compilation are not defined by this
+report. <a name="abstract-types"></a><p>
+<a name="sect5.8"></a>
+<h3>5.8<tt>&nbsp;&nbsp;</tt>Abstract Datatypes</h3>
+<p>
+
+The ability to export a datatype without its constructors
+allows the construction of abstract datatypes (ADTs).  For example,
+an ADT for stacks could be defined as:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;Stack(&nbsp;StkType,&nbsp;push,&nbsp;pop,&nbsp;empty&nbsp;)&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;data&nbsp;StkType&nbsp;a&nbsp;=&nbsp;EmptyStk&nbsp;|&nbsp;Stk&nbsp;a&nbsp;(StkType&nbsp;a)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;push&nbsp;x&nbsp;s&nbsp;=&nbsp;Stk&nbsp;x&nbsp;s<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pop&nbsp;(Stk&nbsp;_&nbsp;s)&nbsp;=&nbsp;s<br>
+&nbsp;&nbsp;&nbsp;&nbsp;empty&nbsp;=&nbsp;EmptyStk<br>
+
+<br>
+
+</tt>Modules importing <tt>Stack</tt> cannot construct values of type <tt>StkType
+</tt>because they do not have access to the constructors of the type.
+Instead, they must use <tt>push</tt>, <tt>pop</tt>, and <tt>empty</tt> to construct such values.<p>
+It is also possible to build an ADT on top of an existing type by
+using a <tt>newtype</tt> declaration.  For example, stacks can be defined
+with lists: 
+<tt><br>
+
+<br>
+&nbsp;&nbsp;module&nbsp;Stack(&nbsp;StkType,&nbsp;push,&nbsp;pop,&nbsp;empty&nbsp;)&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;newtype&nbsp;StkType&nbsp;a&nbsp;=&nbsp;Stk&nbsp;[a]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;push&nbsp;x&nbsp;(Stk&nbsp;s)&nbsp;=&nbsp;Stk&nbsp;(x:s)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pop&nbsp;(Stk&nbsp;(_:s))&nbsp;=&nbsp;Stk&nbsp;s<br>
+&nbsp;&nbsp;&nbsp;&nbsp;empty&nbsp;=&nbsp;Stk&nbsp;[]<br>
+<p>
+<hr><i>The Haskell 98 Report</i><br><a href="index.html">top</a> | <a href="decls.html">back</a> | <a href="basic.html">next</a> | <a href="index98.html">contents</a> | <a href="prelude-index.html">function index</a> <br><font size=2>December 2002</font>
+<p>
+</tt>

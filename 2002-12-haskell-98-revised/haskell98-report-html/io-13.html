@@ -1,0 +1,276 @@
+<p>
+<title>The Haskell 98 Report: Basic Input/Output</title>
+<body bgcolor="#ffffff"> <i>The Haskell 98 Report</i><br> <a href="index.html">top</a> | <a href="basic.html">back</a> | <a href="standard-prelude.html">next</a> | <a href="index98.html">contents</a> | <a href="prelude-index.html">function index</a> <br><hr>
+<a name="io"></a><p>
+<a name="sect7"></a>
+<h2>7<tt>&nbsp;&nbsp;</tt>Basic Input/Output</h2>
+
+<p>
+The I/O system in Haskell  is purely functional, yet has all of the
+expressive power found in conventional programming languages.  To
+achieve this, Haskell  uses a <I>monad</I> to integrate I/O operations into
+a purely functional context.<p>
+The I/O monad used by Haskell  mediates between the <I>values</I> natural to
+a functional language and the <I>actions</I> that characterize I/O
+operations and imperative programming in general.  The order of
+evaluation of expressions in Haskell  is constrained only by data
+dependencies; an implementation has a great deal of freedom
+in choosing this order.  Actions, however, must be ordered in a
+well-defined manner for program execution -- and I/O in particular --
+to be meaningful.  Haskell 's I/O monad provides the user with a way to
+specify the sequential chaining of actions, and an implementation is
+obliged to preserve this order.<p>
+
+The term <I>monad</I> comes from a branch of mathematics known as 
+<I>category theory</I>.  From the perspective of a Haskell  programmer,
+however, it is best to think of a monad as an <I>abstract datatype</I>.
+In the case of the I/O monad, the abstract values are the <I>actions
+</I>mentioned above.  Some operations are primitive actions,
+corresponding to conventional I/O operations.  Special operations
+(methods in the class <tt>Monad</tt>, see Section <a href="basic.html#monad-class">6.3.6</a>)
+sequentially compose actions,
+corresponding to sequencing operators (such as the semicolon) in imperative
+languages.<a name="standard-io-functions"></a><p>
+<a name="sect7.1"></a>
+<h3>7.1<tt>&nbsp;&nbsp;</tt>Standard I/O Functions</h3>
+
+Although Haskell  provides fairly sophisticated I/O facilities, as
+defined in the <tt>IO</tt> library, it is possible to write many
+Haskell  programs using only the few simple functions that are
+exported from the Prelude, and which are described in this section.<p>
+All I/O functions defined here are character oriented.  The treatment
+of the newline character will vary on different systems.  For example,
+two characters of input, return and linefeed, may read as a single
+newline character.  These functions cannot be used portably for binary
+I/O.<p>
+In the following, recall that <tt>String</tt> is a synonym for <tt>[Char]</tt> (Section <a href="basic.html#characters">6.1.2</a>).<p>
+<h3>Output Functions</h3>
+These functions write to the standard output device (this is normally
+the user's terminal). 
+<tt><br>
+
+<br>
+&nbsp;&nbsp;putChar&nbsp;&nbsp;::&nbsp;Char&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+&nbsp;&nbsp;putStr&nbsp;&nbsp;&nbsp;::&nbsp;String&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+&nbsp;&nbsp;putStrLn&nbsp;::&nbsp;String&nbsp;-&gt;&nbsp;IO&nbsp;()&nbsp;&nbsp;--&nbsp;adds&nbsp;a&nbsp;newline<br>
+&nbsp;&nbsp;print&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Show&nbsp;a&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+
+<br>
+
+
+
+
+
+</tt>The <tt>print</tt> function outputs a value of any printable type to the
+standard output device.
+Printable types are those that are instances of class <tt>Show</tt>; <tt>print
+</tt>converts values to strings for output using the <tt>show</tt> operation and
+adds a newline.<p>
+For example, a program to print the first 20 integers and their
+powers of 2 could be written as:
+<tt><br>
+
+<br>
+main&nbsp;=&nbsp;print&nbsp;([(n,&nbsp;2^n)&nbsp;|&nbsp;n&nbsp;&lt;-&nbsp;[0..19]])<br>
+
+<br>
+<p>
+</tt><h3>Input Functions</h3>
+These functions read input from the standard input device (normally
+the user's terminal).
+<tt><br>
+
+<br>
+&nbsp;&nbsp;getChar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;Char<br>
+&nbsp;&nbsp;getLine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;String<br>
+&nbsp;&nbsp;getContents&nbsp;::&nbsp;IO&nbsp;String<br>
+&nbsp;&nbsp;interact&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(String&nbsp;-&gt;&nbsp;String)&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+&nbsp;&nbsp;readIO&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Read&nbsp;a&nbsp;=&gt;&nbsp;String&nbsp;-&gt;&nbsp;IO&nbsp;a<br>
+&nbsp;&nbsp;readLn&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Read&nbsp;a&nbsp;=&gt;&nbsp;IO&nbsp;a<br>
+
+<br>
+
+</tt>The <tt>getChar</tt> operation raises an exception (Section <a href="io-13.html#io-exceptions">7.3</a>) on end-of-file; a 
+predicate <tt>isEOFError</tt> that identifies this exception is defined in the <tt>IO</tt> library.
+The <tt>getLine</tt> operation raises an exception under the same circumstances as <tt>hGetLine</tt>, 
+defined the <tt>IO</tt> library.<p>
+The <tt>getContents</tt> operation returns all user input as a single
+string, which is read lazily as it is needed.  The <tt>interact
+</tt>function takes a function of type 
+<tt>String-&gt;String</tt> as its argument.  The entire input from the standard
+input device is passed to this function
+as its argument, and the resulting string is output on the
+standard output device.<p>
+Typically, the <tt>read</tt> operation from class <tt>Read</tt> is used
+to convert the string to a value.  The <tt>readIO</tt> function is similar to <tt>read
+</tt>except that it signals parse failure to the I/O monad instead of
+terminating the program.  The <tt>readLn</tt> function combines <tt>getLine</tt> and
+<tt>readIO</tt>.<p>
+The following program simply removes all non-ASCII characters from its
+standard input and echoes the result on its standard output.  (The
+<tt>isAscii</tt> function is defined in a library.)
+<tt><br>
+
+<br>
+main&nbsp;=&nbsp;interact&nbsp;(filter&nbsp;isAscii)<br>
+
+<br>
+
+</tt><h3>Files</h3>
+These functions operate on files of characters.  Files are named by
+strings using some implementation-specific method to resolve strings as
+file names.<p>
+The <tt>writeFile</tt> and <tt>appendFile</tt> functions write or append the string,
+their second argument, to the file, their first argument.
+The <tt>readFile</tt> function reads a file and
+returns the contents of the file as a string.  The file is read
+lazily, on demand, as with <tt>getContents</tt>.
+<tt><br>
+
+<br>
+&nbsp;&nbsp;type&nbsp;FilePath&nbsp;=&nbsp;&nbsp;String<br>
+&nbsp;&nbsp;<br>
+&nbsp;&nbsp;writeFile&nbsp;&nbsp;::&nbsp;FilePath&nbsp;-&gt;&nbsp;String&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+&nbsp;&nbsp;appendFile&nbsp;::&nbsp;FilePath&nbsp;-&gt;&nbsp;String&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+&nbsp;&nbsp;readFile&nbsp;&nbsp;&nbsp;::&nbsp;FilePath&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;IO&nbsp;String<br>
+
+<br>
+
+</tt>Note that <tt>writeFile</tt> and <tt>appendFile</tt> write a literal string
+to a file.  To write a value of any printable type, as with <tt>print</tt>, use the
+<tt>show</tt> function to convert the value to a string first.
+<tt><br>
+
+<br>
+main&nbsp;=&nbsp;appendFile&nbsp;"squares"&nbsp;(show&nbsp;[(x,x*x)&nbsp;|&nbsp;x&nbsp;&lt;-&nbsp;[0,0.1..2]])<br>
+
+<br>
+<p>
+</tt><a name="sect7.2"></a>
+<h3>7.2<tt>&nbsp;&nbsp;</tt>Sequencing I/O Operations</h3>
+
+
+The type constructor <tt>IO</tt> is an instance of the <tt>Monad</tt> class.
+The two monadic binding functions, methods in the <tt>Monad</tt> class, are
+used to compose a series of I/O
+operations.  The <tt>&gt;&gt;
+</tt>function is used where the result of the first operation is
+uninteresting, for example when it is <tt>()</tt>.  The <tt>&gt;&gt;=</tt> operation
+passes the result of the first operation as an argument to the second
+operation.  
+<tt><br>
+
+<br>
+&nbsp;&nbsp;(&gt;&gt;=)&nbsp;::&nbsp;IO&nbsp;a&nbsp;-&gt;&nbsp;(a&nbsp;-&gt;&nbsp;IO&nbsp;b)&nbsp;-&gt;&nbsp;IO&nbsp;b&nbsp;<br>
+&nbsp;&nbsp;(&gt;&gt;)&nbsp;&nbsp;::&nbsp;IO&nbsp;a&nbsp;-&gt;&nbsp;IO&nbsp;b&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;IO&nbsp;b<br>
+
+<br>
+
+</tt>For example,
+<tt><br>
+
+<br>
+main&nbsp;=&nbsp;readFile&nbsp;"input-file"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&gt;&gt;=&nbsp;\&nbsp;s&nbsp;-&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;writeFile&nbsp;"output-file"&nbsp;(filter&nbsp;isAscii&nbsp;s)&nbsp;&nbsp;&gt;&gt;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;putStr&nbsp;"Filtering&nbsp;successful\n"<br>
+
+<br>
+
+</tt>is similar to the previous example using <tt>interact</tt>, but takes its input
+from <tt>"input-file"</tt> and writes its output to <tt>"output-file"</tt>.  A message
+is printed on the standard output before the program completes.<p>
+
+The <tt>do</tt> notation allows programming in a more imperative syntactic
+style.  A slightly more elaborate version of the previous example
+would be:
+<tt><br>
+
+<br>
+main&nbsp;=&nbsp;do<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;putStr&nbsp;"Input&nbsp;file:&nbsp;"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ifile&nbsp;&lt;-&nbsp;getLine<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;putStr&nbsp;"Output&nbsp;file:&nbsp;"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ofile&nbsp;&lt;-&nbsp;getLine<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;s&nbsp;&lt;-&nbsp;readFile&nbsp;ifile<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;writeFile&nbsp;ofile&nbsp;(filter&nbsp;isAscii&nbsp;s)&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;putStr&nbsp;"Filtering&nbsp;successful\n"<br>
+
+<br>
+<p>
+</tt>The <tt>return</tt> function is used to define the result of an I/O
+operation.  For example, <tt>getLine</tt> is defined in terms of <tt>getChar</tt>,
+using <tt>return</tt> to define the result:
+<tt><br>
+
+<br>
+getLine&nbsp;::&nbsp;IO&nbsp;String<br>
+getLine&nbsp;=&nbsp;do&nbsp;c&nbsp;&lt;-&nbsp;getChar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;c&nbsp;==&nbsp;'\n'&nbsp;then&nbsp;return&nbsp;""<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;else&nbsp;do&nbsp;s&nbsp;&lt;-&nbsp;getLine<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;(c:s)<br>
+
+<br>
+<a name="io-exceptions"></a><p>
+</tt><a name="sect7.3"></a>
+<h3>7.3<tt>&nbsp;&nbsp;</tt>Exception Handling in the I/O Monad</h3>
+
+<p>
+The I/O monad includes a simple exception handling system.  Any I/O
+operation may raise an exception instead of returning a result.<p>
+Exceptions in the I/O monad are represented by values of 
+type <tt>IOError</tt>.  This is an abstract type: its constructors are hidden
+from the user.  The <tt>IO</tt> library defines functions that construct and
+examine <tt>IOError</tt> values.  The only Prelude function that creates an
+<tt>IOError</tt> value is <tt>userError</tt>.  User error values include a string
+describing the error.
+<tt><br>
+
+<br>
+&nbsp;&nbsp;userError&nbsp;::&nbsp;String&nbsp;-&gt;&nbsp;IOError<br>
+
+<br>
+
+</tt>Exceptions are raised and caught using the following functions:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;ioError&nbsp;::&nbsp;IOError&nbsp;-&gt;&nbsp;IO&nbsp;a<br>
+&nbsp;&nbsp;catch&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;a&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;(IOError&nbsp;-&gt;&nbsp;IO&nbsp;a)&nbsp;-&gt;&nbsp;IO&nbsp;a&nbsp;<br>
+
+<br>
+
+</tt>The <tt>ioError</tt> function raises an exception;
+the <tt>catch</tt> function establishes a handler that receives any
+exception raised in the action protected by <tt>catch</tt>.  An exception is
+caught by the most recent handler established by <tt>catch</tt>.  These
+handlers are not selective: all exceptions are caught.  Exception
+propagation must be explicitly provided in a handler by re-raising any
+unwanted exceptions.  For example, in
+<tt><br>
+
+<br>
+f&nbsp;=&nbsp;catch&nbsp;g&nbsp;(\e&nbsp;-&gt;&nbsp;if&nbsp;IO.isEOFError&nbsp;e&nbsp;then&nbsp;return&nbsp;[]&nbsp;else&nbsp;ioError&nbsp;e)<br>
+
+<br>
+
+</tt>the function <tt>f</tt> returns <tt>[]</tt> when an end-of-file exception occurs
+in <tt>g</tt>; otherwise, the exception is propagated to the next
+outer handler.  The <tt>isEOFError</tt> function is part of <tt>IO</tt> library.<p>
+When an exception propagates outside the main program, the Haskell 
+system prints the associated <tt>IOError</tt> value and exits the program.<p>
+The <tt>fail</tt> method of the <tt>IO</tt> instance of the <tt>Monad</tt> class (Section <a href="basic.html#monad-class">6.3.6</a>) raises a
+<tt>userError</tt>, thus:
+<tt><br>
+
+<br>
+&nbsp;&nbsp;instance&nbsp;Monad&nbsp;IO&nbsp;where&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;...bindings&nbsp;for&nbsp;return,&nbsp;(&gt;&gt;=),&nbsp;(&gt;&gt;)<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fail&nbsp;s&nbsp;=&nbsp;ioError&nbsp;(userError&nbsp;s)<br>
+
+<br>
+
+</tt>The exceptions raised by the I/O functions in the Prelude are defined
+in Chapter <a href="io.html#IO">21</a>.<p>
+<hr><i>The Haskell 98 Report</i><br><a href="index.html">top</a> | <a href="basic.html">back</a> | <a href="standard-prelude.html">next</a> | <a href="index98.html">contents</a> | <a href="prelude-index.html">function index</a> <br><font size=2>December 2002</font>
+<p>
