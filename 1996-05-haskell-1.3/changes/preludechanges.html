@@ -1,0 +1,593 @@
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252"><title>Changes to the Haskell 1.3 Prelude</title>
+</head><body><h1>Changes to the Haskell 1.3 Prelude</h1>
+<hr>
+The following changes are being made in the Prelude for Haskell 1.3.
+The report contains the complete Prelude.
+
+<ul>
+<a href="#types"> </a><li><a href="#types">
+New Types				</a><a href="#ord"> </a></li><li><a href="#ord">
+Reorganize the Ord class                </a><a href="#to-from-Enum"> </a></li><li><a href="#to-from-Enum">
+Add toEnum and fromEnum to Enum         </a><a href="#complex"> </a></li><li><a href="#complex">
+Add strictness annotation to Complex    </a><a href="#take-drop"> </a></li><li><a href="#take-drop">
+Use Int in take, drop, !!, and splitAt    </a><a href="#replicate"> </a></li><li><a href="#replicate">
+Add replicate, lookup, curry and uncurry</a><a href="#diet-haskell"> </a></li><li><a href="#diet-haskell">
+Move functions into libraries           </a><a href="#bounded"> </a></li><li><a href="#bounded">
+Add the `bounded class'                  </a><a href="#numeric"> </a></li><li><a href="#numeric">
+Numeric Issues                          </a><a href="#simplify-lex"> </a></li><li><a href="#simplify-lex">
+Simplify lex                            </a><a href="#undefined"> </a></li><li><a href="#undefined">
+Add undefined                           </a><a href="#monad-class"> </a></li><li><a href="#monad-class">
+Add classes Monad, MonadZero, and MonadPlus  </a><a href="#cleanups"> </a></li><li><a href="#cleanups">
+Minor Changes                           </a>
+</li></ul>
+
+I have altered the formatting of the Prelude somewhat.  PreludeBuiltin
+has been removed since we no longer have interface files and it was
+pretty much vacuous.  Also, instance declarations that merely bind
+every method onto a primitive have been abbreviated.  Many comments
+have been removed - functions like `head' are self-documenting.  I
+have also moved comments between the signature and the definition of
+an object.  All types now have a data declaration, even when such a
+declaration is not syntacticly valid.
+
+<a name="types">
+<h4> New Types
+</h4>
+The following types are now in the Prelude:
+<pre>data  Maybe a  =  Nothing | Just a	deriving (Eq, Ord, Read, Show)
+
+data  Either a b  =  Left a | Right b	deriving (Eq, Ord, Read, Show)
+
+data  Void  -- No constructor, not in any classes
+</pre>
+
+</a><a name="ord">
+<h4> Changes to Ord
+</h4>
+</a>
+
+In Haskell 1.2, two comparisons are required to do a "three way branch":
+<pre>    if x == y then ...
+    else if x &lt; y then ...
+    else ...
+</pre>
+Even a standard two way branch can be inefficient - here's the
+default definition of "&lt;" in the standard prelude:
+
+<pre>x &lt; y = x &lt;= y &amp;&amp; x /= y
+</pre>
+Instead of defining a &lt;= operator which returns just two values, it
+is almost as easy to define an operator which returns three different
+values:
+<pre>   case compare x y of
+    EQ -&gt; ...
+    LT -&gt; ...
+    GT -&gt; ...
+</pre>
+The constructors <tt> EQ </tt>, <tt>LT</tt> ,and <tt>GT</tt> belong to
+a new type: <tt>Ordering</tt>.
+In addition to this efficiency problem, many uses of <tt>Ord</tt> such as
+sorting or operations on ordered binary trees assume total ordering.
+The <tt>compare</tt> operation formalizes this concept: it can not
+return a value which indicates that its arguments are unordered.
+Programmers are free to define a class for partial orderings; here, we
+simply state that Ord is reserved for total orderings.
+<p>
+Changes:
+</p><ul>
+<li> Add a new type:
+<pre>data Ordering = LT | EQ | GT  deriving (Eq,Ord,Ix,Enum,Read, Show)
+</pre>
+</li><li> Delete comment in definition of class Ord which explains how
+to define min and max for both total and partial orders.
+</li><li> Change definition of Ord to
+<pre>class Eq a =&gt; Ord a where
+   compare :: a -&gt; a -&gt; Ordering
+   (&lt;), (&lt;=), (&gt;=), (&gt;):: a -&gt; a -&gt; Bool
+   max, min	       :: a -&gt; a -&gt; a
+   -- circular default definition:
+   -- either &lt;= or compare must be explicitly provided
+     x &lt; y	  	= compare x y == LT
+     x &lt;= y          = compare x y /= GT
+     x &gt; y              = compare x y == GT
+     x &gt;= y		= compare x y /= LT
+     compare x y
+       | x == y    = EQ
+       | x &lt;= y    = LT
+       | otherwise = GT
+     max x y = case compare x y of
+                LT -&gt; x
+                _  -&gt; y
+     min x y = case compare x y of
+                LT -&gt; y
+                _  -&gt; x
+</pre>
+</li></ul>
+
+<a name="to-from-Enum">
+<h4>
+Add toEnum and fromEnum to Enum
+</h4>
+</a>
+
+Haskell 1.2 provides very limited facilities for operating on
+enumerations.  The following elementary operations must be implemented
+in an obscure and inefficient manner, if at all:
+<ul>
+<li> Get the next value in enumeration: <tt>(\ x -&gt; head (tail [x..]))</tt>
+</li><li> Get the previous value in enumeration: no reasonable way
+</li><li> Get the n'th value in enumeration: <tt>[C0..] !! (n - 1)</tt>
+     (where <tt>C0</tt> is first in enumeration)
+</li><li> Find where a value occurs in an enumeration: <tt>lookup (zip [C0..]
+[0..]) x</tt>
+</li></ul>
+<p>
+Changes:
+</p><p>
+</p><ul>
+<li> Add two new methods to Enum:
+<pre>   toEnum   :: Int -&gt; a
+   fromEnum :: a -&gt; Int
+</pre>
+Informally, given an enumeration:
+<pre> data T = C0 | C1 | ... Cm
+</pre>
+we have:
+<pre> toEnum i | 0 &lt;= i &amp;&amp; i &lt;= m = Ci
+          | otherwise           = error "Prelude.toEnum: result out of range"
+ fromEnum Ci = i
+</pre>
+For example, given the datatype:
+<pre>
+ data Colour = Red | Orange | Yellow | Green | Blue | Indigo | Violet
+</pre>
+we would have:
+<pre> toEnum 0 = Red
+ toEnum 1 = Orange
+ ...
+ toEnum 6 = Violet
+ toEnum _ = error "Prelude.toEnum: result out of range"
+</pre>
+and
+<pre> fromEnum Red    = 0
+ fromEnum Orange = 1
+ ...
+ fromEnum Violet = 6
+</pre>
+
+
+</li><li>
+Remove ord and chr fromPrelude and replace uses of ord and chr by
+fromEnum and toEnum respectively.
+
+</li><li>
+Add these definitions to Prelude:
+<pre> succ, pred  :: Enum a =&gt; a -&gt; a
+ succ = toEnum . (+1) . fromEnum
+ pred = toEnum . (+(-1)) . fromEnum
+</pre>
+
+</li></ul>
+Notes:
+<ul>
+<li> The types of toEnum and fromEnum could be changed to:
+<pre>   toEnum   :: Integer -&gt; a
+   fromEnum :: a -&gt; Integer
+</pre>
+
+This would allow correct operation across the full range of integers,
+floats and doubles - but it's not clear that that is useful or necessary.
+The fact that toNum and fromEnum will fail in some instances doesn't
+bother us.
+
+</li><li>The instances of <tt>enumFrom[Then][To]</tt> ought to be written
+carefully to avoid overflow.  In particular we must avoid either of:
+<pre>     [True..] = True : error "succ{Prelude}: result out of range"
+     [maxChar..] = maxChar : error "succ{Prelude}: result out of range"
+</pre>
+This problem is present in Haskell 1.2 for the types Int, Float and
+Double where it doesn't seem to be troubling anyone.
+
+</li><li>
+This proposal does not affect the cumulative rounding problems found in
+float and double.
+
+</li></ul>
+
+<a name="complex">
+<h4> Strictness annotations in Ratio and Complex </h4>
+</a>
+
+Augustsson's FPCA'94 paper demonstrates very significantly
+lower memory requirements when these annotations are added to
+<tt>Complex</tt>.  Adding similar annotations to <tt>Ratio</tt>
+should have a similar effect.
+<p>
+Whereas changing the strictness of lists or integers would break
+many programs, only the most contrived programs will be affected by
+this change.
+</p><p>
+Changes:
+</p><ul>
+<li>
+Change definitions of Complex and Ratio to (both are now in libraries):
+<pre> data (RealFloat a) =&gt; Complex a = !a :+ !a deriving (Eq, Binary, Read, Show)
+ data (Integral a)  =&gt; Ratio a   = !a :% !a deriving (Eq, Binary)
+</pre>
+</li></ul>
+
+<a name="take-drop">
+<h4> Using Int in list operations </h4>
+</a>
+
+The Haskell 1.2 prelude forces the use of <tt>Integer</tt> rather
+than the more efficient <tt>Int</tt> for the very common operations
+<tt>take</tt>, <tt>drop</tt>, <tt>!!</tt>, and
+<tt>splitAt</tt>.  There are only two circumstances where the
+overhead of using <tt>Integer</tt>'s is worthwhile:
+<ul>
+<li> To pass conformance tests such as:
+<pre>   head (take (toInteger maxInt * 2) [1..]) == 1
+</pre>
+</li><li> When dealing with very large datasets (more than 2^29 elements)
+</li></ul>
+Users of these very large datasets are probably already using
+implementations where maxInt == 2^31-1 or maxInt == 2^63-1
+where the problem is less likely to occur.
+The old definitions can be placed in a library should problems arise.
+<p>
+Changes:
+</p><ul>
+<li>
+Change the types of take, drop, !!, and splitAt to:
+<pre> take, drop :: Int -&gt; [b] -&gt; [b]
+ splitAt :: Int -&gt; [b] -&gt; ([b]. [b])
+ !! :: [a] -&gt; Int -&gt; a
+</pre>
+
+</li></ul>
+
+<a name="replicate">
+<h4>
+New functions: replicate, lookup, curry, uncurry.
+</h4>
+</a>
+
+The following functions are deemed sufficiently useful that they
+should be added to the Haskell Prelude.
+<p>
+Changes:
+</p><ul>
+<li>
+Add replicate and lookup to PreludeList:
+<pre>   replicate :: Int -&gt; a -&gt; [a]
+   replicate n x = take n . repeat x
+
+   lookup :: Eq a =&gt; a -&gt; [(a,b)] -&gt; Maybe b
+   lookup key [] = Nothing
+   lookup key ((x,y):xys)
+     | key == x  = Just y
+     | otherwise = lookup key xys
+</pre>
+
+</li><li>
+Add curry and uncurry to Prelude:
+<pre>  curry :: ((a, b) -&gt; c) -&gt; a -&gt; b -&gt; c
+  curry f x y = f (x,y)
+
+  uncurry :: (a -&gt; b -&gt; c) -&gt; (a, b) -&gt; c
+  uncurry f p = f (fst p) (snd p)
+</pre>
+</li></ul>
+
+Notes:
+<ul>
+<li>
+Adding functions in the Prelude rather than a library forces the
+automatic import of the name into every Haskell program.
+This may break existing code which already uses these names or
+ prevent a programmer from using these names for their own
+functions.  (This is why we chose the name <tt>replicate</tt> instead
+of <tt>copy</tt>.)  It also expands the "vocabulary" of Haskell -
+adding an extra name which Haskell programmers can be expected to know.
+<p>
+In previous discussion, the name <tt>assoc</tt> was preferred to
+<tt>lookup</tt> to avoid stealing a useful name from the user.
+The library proposal also defines <tt>LibFiniteMap.lookup</tt> and
+<tt>LibHashTable.lookup</tt> - we feel that stealing the one name for
+three purposes is reasonable.
+
+</p></li><li>
+An alternative definition for uncurry is:
+<pre>      uncurry f (x, y) = f x y
+</pre>
+Which is slightly stricter.  Does this matter?
+
+</li></ul>
+
+
+<a name="diet-haskell">
+<h4>
+Moving functions to libraries
+</h4>
+</a>
+
+A large prelude helps the programmer by providing a wide range of
+pre-written functions to use and combine.  It also hinders the
+programmer by making the language larger to learn, preventing the
+programmer from using prelude names for their own purposes and
+slowing down compilation.
+<p>
+It is possible to have our cake and eat it by simply moving rarely
+used functions into standard libraries (the language size remains
+the same but the "core language" gets smaller).
+</p><p>
+The following changes are based on counting how many times certain
+functions are used in a large body of Haskell programs (i.e. the
+Glasgow Haskell repository).
+</p><p>
+Many functions have been moved: see the new prelude to find out what
+remains.
+
+<a name="bounded">
+</a></p><h4><a name="bounded">
+The Bounded class
+</a></h4><a name="bounded">
+Add the class
+<pre>class Bounded a where
+  minBound, maxBound :: a
+</pre>
+This class provides a convenient name for the minimum and maximum
+values in a type.  Instances for <tt>Int</tt> and <tt>Char</tt>
+replace <tt>maxInt</tt>, <tt>minInt</tt>, <tt>maxChar</tt>,
+<tt>minChar</tt>.  No instance will be defined for floats since it's
+not obvious whether to use infinity or the greatest finite value.
+Bounded is intended for carrying the range in enumerated classes or
+for verifying maps from Integers onto a type.
+The bounded
+class will be derivable for enumerations and tuples only.  Note these
+class methods take no argument: you use
+<tt>minBound :: Char</tt> instead of <tt>minBound 'x'</tt>.  This is
+inconsistant with the treatment of class-wide parameters (for example,
+<tt>floatRadix</tt>) elsewhere but seems to be a cleaner design.
+
+</a><a name="numeric">
+<h4> Numeric Issues </h4>
+</a>
+
+Haskell 1.2 provides no way to detect IEEE arithmetic values
+such as "NaN" or "Infinity".
+This seemed reasonable since Haskell 1.2 (and 1.3) doesn't
+require IEEE arithmetic.
+<p>
+Providing everything numerical analysts could ask for requires
+a large amount of work, especially since the basic operations do not
+fit into the existing numeric classes (Num, Ord, ...).  We are
+planning to create a library which will provide strict LIA
+conformance.  However, a few simple additions to the numerics will make
+it possible to take advantage of some features of IEEE floating point
+operations.
+</p><p>
+Changes:
+</p><ul>
+<li>
+Add methods <tt>isNaN</tt>, <tt>isInfinite</tt>, <tt>isDenormalized</tt>
+and <tt>isIEEE</tt> to <tt>RealFloat</tt>:
+<pre>  isNaN, isInfinite, isDenormalized, isIEEE, isNegativeZero
+        :: RealFloat a =&gt; a -&gt; Bool
+</pre>
+In non-IEEE implementations, these all return False.
+In IEEE implementations, isIEEE returns True and all others
+return appropriate responses.
+
+</li><li>
+Add line to definition of <tt>showFloat</tt> (this is not explicitly
+part of the Prelude but should be supported by implementations):
+<pre>  showFloat x =
+    if isNaN x then showString "&lt;&lt;NaN&gt;&gt;"
+    else if isInfinite x then
+       if x &lt; 0 then  showString "&lt;&lt;-Infinity&gt;&gt;"
+		else showString "&lt;&lt;Infinity&gt;&gt;"
+    else if isNegativeZero x then
+             showString ("-0." ++ take (m-2) (repeat '0')
+    else if x == 0 then then showString ("0." ++ take (m-1) (repeat '0'))
+    else if e &gt;= m-1 || e &lt; 0 then showSci else showFix
+    where
+    -- remainder of function is unchanged
+<li>
+It is not necessary for a string that is to be converted to a
+floating point number using one of the standard prelude functions
+to include a `.' character.  In Haskell 1.2, the expression:
+<pre>    read "2" :: Double
+</pre>
+causes a run-time error; with the new prelude, the result is just
+<tt>2.0 :: Double</tt>.
+
+</li></pre>
+</li></ul>
+
+Notes:
+<ul>
+<li>
+These changes do not preclude a library for full IEEE  or LIA compatibility.
+Such a library is under development.
+</li><li>
+There is also a need for versions of showFloat which provide
+control over the format used and the number of digits displayed
+(like the E,F and G format controls in C's printf function).
+These will be provided in a library.
+</li></ul>
+
+<a name="simplify-lex">
+<h4> Simplified Lex </h4>
+</a>
+
+The <tt>lex</tt> function is very inefficient and overly complex.
+Some of this complexity is necessary to ensure that almost any value that
+is printed out using standard Read and Show instances can be read
+back in.  (Exceptions: functions and infinite data structures.)
+However, <tt>lex</tt> is able to parse several tokens that are never produced
+by these Read, Show instances.
+<p>
+Changes:
+</p><ul>
+<li>
+Remove support in <tt>lex</tt> for:
+<ul>
+<li> Both forms of comment (change to lex)
+</li><li> &lt;- (change to lex)
+</li><li> "^&lt;ctrl-char&gt;" tokens (change to lexLitChar)
+</li><li> octal tokens          (change to lexLitChar)
+</li><li> hex tokens            (change to lexLitChar)
+</li><li> ASCII abbreviations for control characters (change to lexLitChar)
+</li></ul>
+
+</li><li>
+Move <tt>isOctDigit</tt> and <tt>isHexDigit</tt> to the same module
+as functions like <tt>isAscii</tt> and <tt>isControl</tt>.
+</li></ul>
+
+Notes:
+
+<ul>
+<li>
+This won't make <tt>lex</tt> or <tt>read</tt> any more efficient.
+The problems are:
+<ul>
+<li> <tt>lex</tt> is built using the same fully backtracking
+technology as <tt>read</tt> (it returns a list of alternative parses
+instead of a single token) but the resulting flexibility doesn't
+seem to be used anywhere.  This imposes a significant overhead with little
+reward.
+</li><li> <tt>lex</tt> produces strings rather than tokens.  This means
+that every token has to be identified twice: once in <tt>lex</tt> where the
+input list is split into strings representing tokens and once in
+<tt>read</tt> where these strings are matched against required input.
+The most effective way of fixing this is to introduce a new datatype
+representing each token.
+</li><li> Derived instances of <tt>readsPrec</tt> (which is called by
+<tt>read</tt>) usually have the following form (see Appendix E):
+<pre>   readsPrec d r =
+      readCon K1 k1 "K1" r ++
+      readCon K2 k2 "K2" r ++
+	  ...
+      readCon Km km "Km" r
+</pre>
+In order to successfully parse a string starting with "Km",
+readsPrec will call the <tt>lex</tt> function m times.  If
+<tt>lex</tt> were separated from <tt>read</tt> by preprocessing the input
+ into a token stream, <tt>lex</tt> would only have to be called once.
+</li><li>  When parsing a type with infix constructors, the derived
+      instance of <tt>readsPrec</tt> may relex and reparse the same
+      expression many times.
+</li></ul>
+
+</li><li>
+Though a good start, this doesn't make <tt>lex</tt> much easier to
+understand.  A more effective specification would be a
+grammar or regular expression.  This would also simplify the task of
+feeding the specification into a Haskell lexer/parser generator or
+some similar (more appropriate) implementation technology.
+
+</li><li>
+Haskell 1.3 will support hex (and octal) specification of numbers.
+It isn't clear whether <tt>lex</tt> should be modified to support this.
+
+</li></ul>
+
+<a name="undefined">
+<h4> Undefined </h4>
+</a>
+
+Add undefined to the prelude.  Previous proposals used _ or _|_
+as the name.
+<pre>undefined = error "undefined{Prelude}"
+</pre>
+It is expected that compilers will recognize this and insert error messages
+which are more appropriate to the context in which <tt>undefined</tt>
+appears.
+
+<a name="monad-class">
+<h4> The Monad class</h4>
+</a>
+
+  The Haskell 1.3 IO proposal uses the symbols "&gt;&gt;", "&gt;&gt;=" and
+  "return" for the IO monad operations and a separate proposal
+  provides syntactic sugar to make monadic code even easier to
+  write.  The provision of constructor classes makes it possible
+  to define these symbols as methods in a "monad class"
+  allowing the symbols and sugar to be used for any monad.
+<p>
+Changes:
+
+Add these classes to Prelude:
+</p><pre>  infixr 1  &gt;&gt;, &gt;&gt;=
+
+  class Functor where
+    map :: (a -&gt; b) -&gt; m a -&gt; m b
+
+  class Monad m where
+    (&gt;&gt;=) :: m a -&gt; (a -&gt; m b) -&gt; m b
+    (&gt;&gt;)  :: m a -&gt; m b -&gt; m b
+    return :: a -&gt; m a
+
+  class Monad m =&gt; MonadZero m where
+    zero :: m a
+
+  class MonadZero m =&gt; MonadPlus m where
+    (++) :: m a -&gt; m a -&gt; m a
+
+</pre>
+with Monad instances for <tt>[]</tt>, <tt>Maybe</tt>,
+and <tt>IO</tt>; MonadZero and MonadPlus instances for <tt>[]</tt> and
+<tt>Maybe</tt>.
+
+
+<a name="cleanups">
+<h4> Minor Changes </h4>
+</a>
+
+<ul>
+<li>
+Improve error messages for maximum and minimum:
+<pre>  maximum [] =  error "maximum{PreludeList}: empty list"
+  maximum l  =  foldl1 max l
+  minimum [] =  error "minimum{PreludeList}: empty list"
+  minimum l  =  foldl1 min l
+</pre>
+The error messages for <tt>head</tt>, <tt>tail</tt>, <tt>init</tt> and
+<tt>last</tt> use "[]" in their error messages; these will be changed
+to "empty list" for consistency.
+
+</li><li>
+Add these equations to end of definitions of take, drop and splitAt.
+<pre>  take _ _    = error "take{PreludeList}: negative argument"
+  drop _ _    = error "drop{PreludeList}: negative argument"
+  splitAt _ _ = error "splitAt{PreludeList}: negative argument"
+</pre>
+
+</li><li>
+Add backquote to list of symbols in definition of <tt>isSingle</tt>
+in definition of <tt>lex</tt>.
+
+</li><li>
+Remove <tt>even</tt>/<tt>odd</tt> from <tt>Integral</tt> because
+we can't imagine why they're not just normal overloaded functions.
+
+</li><li>
+Change error messages to use qualified naming:
+<pre>  maximum [] =  error "PreludeList.maximum: empty list"
+</pre>
+</li><li>
+The data type <tt>Assoc</tt> (used in array comprehensions) has been
+replaced by tuples.  Occurances of <tt> x := y </tt> must be replaced
+by <tt> (x,y) </tt>.
+</li><li>
+It will be made clear that duplicate indices in array comprehensions
+must be detected at runtime by a conforming Haskell implementation.
+</li><li> All instances of <tt>index</tt> will generate a nice error
+message (mentioning the type involved) when the index is out of range.
+</li></ul>
+<p>
+<a href="from12to13.html">Back to the Haskell Report.</a>
+</p></body></html>

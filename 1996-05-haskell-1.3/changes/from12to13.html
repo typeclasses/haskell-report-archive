@@ -1,0 +1,1021 @@
+<!DOCTYPE html PUBLIC "-//IETF//DTD HTML//EN">
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Changes from Haskell 1.2 to Haskell 1.3</title>
+</head>
+<body bgcolor="#FFFFFF">
+
+<center><h1>Changes from Haskell 1.2 to Haskell 1.3</h1></center>
+
+The
+Haskell Report 1.3
+adds many new features to the
+Haskell language.  In the five years since Haskell has been available
+to the functional programming community, Haskell programmers have
+requested a number of new language features.  Most of these features
+have been implemented and tested in the various Haskell systems and we
+are confident that all of these additions to Haskell address a real
+need on the part of the community.  This revision to the Haskell
+report is much more substantial than previous ones: many significant
+additions are being made.  We have also streamlined some aspects
+of Haskell, eliminating little used features which
+complicate the language.
+<p>
+There will be some incompatibilities with Haskell 1.2.  These
+should not be serious and implementors are encouraged to provide a
+Haskell 1.2 compatibility mode.  In brief, the following incompatible
+changes are being made:
+</p><ul>
+<li> Many function have been moved from the Prelude into libraries -
+programs may need more import statements.
+</li><li> The I/O system has been completely replaced.  Most Haskell
+systems have already adopted the new I/O system so this may affect
+programs.
+</li><li> The Text class has been replaced by Read and Show.
+</li><li> A number of small changes in the module system: in import /
+export lists, instead of <t>Mod..</t> the new syntax is <t>module
+Mod</t>.  Synonyms are now exported without the <t>(..)</t>.  Renaming
+is no longer part of Haskell.  Interface files are no longer formally
+a part of the language.
+</li><li> Some small syntax changes: ~ and - no longer terminate an
+operator.
+</li><li> A few prelude functions have less general signatures.
+</li><li> ord and char have been replaced by fromEnum and toEnum.
+</li><li> n+k patterns have a slightly different syntax.  Their use is
+discouraged.
+</li><li> Strictness annotations (a formally unofficial part of the
+language) are now supported but using a syntax different from existing
+strictness annotation schemes.
+</li></ul>
+
+<h3> Overview </h3>
+
+Haskell 1.3 introduces the following major features:
+
+<ul>
+<li> <a href="#newtext"> Text class replaced by Read and Show</a>
+</li><li> <a href="#libs"> Standardized libraries </a>
+</li><li> <a href="preludechanges.html"> Many Prelude changes (this
+is a separate document)</a>
+</li><li><a href="#cc">Constructor classes (as in Gofer)
+</a></li><li><a href="#monad">
+Monadic I/O
+</a></li><li><a href="#strict">
+Strictness annotations in type definitions
+</a></li><li><a href="#records">
+Field labels in data declarations
+</a></li><li><a href="#newtype">
+A newtype mechanism
+</a></li><li><a href="#do">
+Special monad syntax (`do')
+</a></li><li><a href="#qualnames">
+Many changes to the module system
+</a></li><li><a href="#chars">
+The character set has been expanded to ISO-8559-1
+</a>
+</li></ul>
+
+<a name="newtext">
+<h3> Change in the Text class </h3>
+The <tt>Text</tt> class is being replaced by two new classes: <tt>
+Read </tt> and <tt> Show </tt>.
+All use of <tt>Text</tt> must be replaced by
+one or both of these new classes.  This affects type signatures,
+instance declarations, an derived instances.  The method names have
+not changed.
+
+</a><a name="libs">
+<h3>
+Standard Libraries
+</h3>
+</a>
+As Haskell has grown, many informal libraries of useful functions have
+been created.
+In Haskell 1.3, we have decided to standardize a set of libraries to
+accompany the core language.  Some of the functions formerly in the
+prelude are now in libraries, decreasing the size of the core
+language and giving the user a less crowded default namespace.  We
+are dividing the Haskell report into two separate documents: a
+language report and a library report.  The prelude, now smaller,
+will be described in the language report.  The library report will
+continue to evolve after the 1.3 language report is complete.
+We have moved much of the I/O, complex and rational arithmetic, many
+lesser used list functions, and arrays to the libraries and also
+developed a number of completely new libraries.
+<p>
+An initial Haskell library report is available at
+<a href="http://haskell.cs.yale.edu/haskell-report/library.html" http:="" haskell.cs.yale.edu="" haskell-report="" library.html="" <="" a="">.
+</a><a name="cc">
+</a></p><h3><a name="cc">
+Constructor Classes
+</a></h3><a name="cc">
+</a>
+
+We have observed that many programmers use Gofer instead of Haskell
+to use Gofer's constructor classes.  Since constructor
+classes are well understood, widely used, and easily implemented we
+have added these to Haskell.  Briefly, constructor classes
+remove the restriction that types be `first order'.  That is, `<tt>T
+a</tt>' is a valid Haskell type, but `<tt>t a</tt>' is not since
+`<tt>t</tt>' is a type variable.
+Constructor classes increase the power of the class system.  For
+example, this class definition uses constructor classes:
+<pre>  class Monad m where
+    (&gt;&gt;=) :: m a -&gt; (a -&gt; m b) -&gt; m b
+    return :: a -&gt; m a
+</pre>
+Here, the type variable `m' must be instantiated to a polymorphic data
+type, as in
+<pre>  instance Monad [] where
+    f &gt;&gt;= g = concat (map g f)
+    return x = [x]
+</pre>
+No changes to the expression language are necessary; constructor
+classes are an extension of the type language only.
+<p>
+Constructor classes require an extra level of type information called
+`kinds'.  Before type inference, the compiler must perform kind
+inference to compute a kinding for each type constructor.  Kinds are
+much simpler than types and are not ordinarily noticed by the programmer.
+</p><p>
+The changes to Haskell required to support constructor classes are:
+</p><ul>
+<li> The syntax of types includes type application.
+</li><li> Built-in types have names: <tt>[]</tt> for lists, <tt>(-&gt;)</tt>
+     for arrow, and  <tt>(,)</tt> for tuples.  Using type application,
+     the type `<tt>(,) a b</tt>' is identical to `<tt>(a,b)</tt>'.
+</li><li> Type constructors (but not type synonyms) can be partially applied.
+</li><li> The basic monadic operations: <tt>&gt;&gt;</tt>, <tt>&gt;&gt;=</tt>,
+     and <tt>return</tt>, will be placed in the <tt>Monad</tt> class.
+     All monads will share the same basic operations.
+</li></ul>
+During generalization, all contexts must be reducable to simple type
+variables.  This precludes contexts such as
+<pre>x :: C(a b) =&gt; a b
+</pre>
+
+<a name="monad">
+<h3>
+Monadic I/O
+</h3>
+</a>
+Monadic I/O has already become the de-facto standard in the various
+Haskell systems.  We have chosen a fairly conservative, but extensible
+basic design (an IO monad with error handling),
+the details of which are documented
+<a href="http://www.dcs.gla.ac.uk/~kh/Haskell1.3/IO.html">
+  here
+</a>.
+This hasn't changed recently.
+The old I/O systems (continuation &amp; stream) have been totally
+removed.  Most of the I/O system has been moved out to
+libraries.
+<p>
+The addition of <a href="#do"> monad syntax </a> should improve the
+improve the readability of programs that make heavy use of I/O.
+
+<a name="strict">
+</a></p><h3><a name="strict">
+Strictness Annotations
+</a></h3><a name="strict">
+</a>
+To achieve reasonable efficiency, Haskell programmers often use
+implementation-specific annotations to mark fields of data structures as
+strict.  These strict components are evaluated when the structure is
+created instead of delayed until demanded.  This avoids the extra
+overhead involved with delays and can result in much more compact
+structures.  To help improve efficiency, we now supply a
+simple strictness annotation on the types in a data declaration.
+Using `!' in front of a type in a
+data declaration marks a structure component as strict.  (The `!'
+symbol is not a keyword; it has no special meaning outside data
+declarations).  Only data types may be marked as strict; using
+`!' in other type signatures is not allowed.  Any or all of the
+conponents of a type may be marked as strict.
+<pre>  data Foo a = F Int !Bool a a
+</pre>
+This declares <tt>F</tt> as a constructor containing four fields: a
+(non-strict) <tt>Int</tt>, a strict <tt>Bool</tt>, and two non-strict
+polymorphic fields.
+<p>
+Fully polymorphic strictness implies that values of any type may be
+evaluated when placed into a strict data structure.  There are
+compelling arguments for marking operations which use polymorphic
+strictness.  We use a special class, <tt>Eval</tt>, to explicitly designate
+the useage of polymorphicly strict operations.  Every data
+type is a member of the <tt>Eval</tt> class.  If we want to make a
+polymorphic component strict, we must add
+a "Eval" context to the declaration:
+</p><pre>  data Eval a =&gt; Foo a = F Int !Bool !a a
+</pre>
+<p>
+The libraries will use strictness annotations in the definition of
+<tt>Ratio</tt> and <tt>Complex</tt>, making these numeric types much
+more efficient.   To avoid unnecessary propagation of the <tt>Eval</tt> class,
+it is a superclass of <tt>Num</tt>.
+</p><p>
+The functions `<tt>strict</tt>' and `<tt>seq</tt>' have been added to
+to give the user additional control over evaluation.
+While no strictness annotations have been proposed for functions,
+these primitives can be used to implement strict evaluation when needed.
+</p><pre>seq :: Eval a =&gt; a -&gt; b -&gt; b
+strict :: Eval a =&gt; (a -&gt; b) -&gt; (a -&gt; b)
+strict f = \x -&gt; seq x (f x)
+</pre>
+The <tt>seq</tt> function evaluates its first argument before
+returning the second one.  <tt>strict</tt> turns an ordinary function
+into a strict one.
+
+<p>
+Strict data constructors accumulate all arguments before evaluating
+them:
+</p><pre>data R = R !Int !Int
+
+R x y = seq x (seq y (makeR x y)) -- just to show the semantics of R
+
+y = R undefined  -- Not an error
+</pre>
+
+<p>
+All datatypes, including functions, are (implicitly) members of the
+Eval class.  Adding functions to the the Eval class means that <em>all</em>
+types are in the class.  It is tempting then to omit the Eval class
+altogether and drop the Eval context from <tt>seq</tt> and
+<tt>strict</tt>.  We chose <em>not</em> to do so because the context
+provides useful information.  For example, a function of type <tt>a -&gt;
+b</tt> is certain to be lazy in its first argument whereas a function
+of type <tt>Eval a =&gt; a -&gt; b</tt> may be strict in its first argument.
+
+</p><p>
+Haskell 1.3 will not provide strictness annotations for functions.
+These can be constructed explicitly using <tt>seq</tt> if needed.
+We decided we do not yet know what the best way to handle annotations
+for function strictness so (at least for now) these are not ready for
+Haskell 1.3.
+
+<a name="records">
+</a></p><h3><a name="records">
+Labeled Fields
+</a></h3><a name="records">
+</a>
+The individual components of data types in Haskell 1.2 are completely
+anonymous: the type definition only names the type and the
+constructors, not the fields of a constructor.  It is inconvenient to
+select from, construct, or modify values associated with a constructor
+which has many components.  A number of more general record structures
+have been proposed and implemented.  After much discussion, we have
+decided to avoid the issues of inheritance or object oriented
+programming for the moment and provide a simple syntax which will
+allow the fields of a data type to be referred to by name.
+<p>
+We have decided to use the term `field labels' in the Haskell report
+instead `records'.  The terminology used here is not consistant with
+the report.
+</p><p>
+Haskell 1.3 provides a special syntax for declaring field names
+for data types, and for the selection, construction, and update of
+values with named fields.  There are no new types or new
+semantics; all new constructs have a simple translation to core
+Haskell.  Strictness annotations can be used in the obvious way with
+the obvious meaning.  A small change is required in
+the definition of import-export lists to accomodate field names.
+
+</p><h4>Declarations</h4>
+
+Haskell 1.3 records are declared using ordinary data declarations with
+added field names.  Field names are specified using a set of type
+signatures enclosed in braces.  When a constructor uses field names,
+all fields within the constructor must be named.
+For example:
+<pre>  data List a = Cons {hd::a, tl::List a} | Nil
+  data Tree a = Node {label::a, subtrees ::  [Tree a]}
+  data Date = Date {day, month, year :: Int}
+  data NonEmpty a = Head {head :: a} | Cons {head :: a, tail :: NonEmpty a}
+
+  -- example taken from page 82 of Simon Peyton Jones and David Lester's
+  -- book "Implementing Functional Languages -- A Tutorial"
+  data GMState = GMState {
+                   code    :: GMCode,
+                   stack   :: GMStack,
+		   heap    :: GMHeap,
+		   globals :: GMGlobals,
+		   stats   :: GMStats}
+</pre>
+
+Notes:
+<ul>
+<li> The braces used by records may NOT be omitted using layout.
+</li><li>
+  The <tt>NonEmpty</tt> example demonstrates that the same fieldname
+  can be used in different constructors provided both fields have the
+  same type (modulo type synonyms and addition of parentheses).  The
+  following declarations would not be legal:
+  <pre>     data F = A {x::Int} | B {x :: Float} -- ILLEGAL
+     data G = C {x::Int, x::Int}         -- ILLEGAL
+  </pre>
+  It is also be illegal to use the same field name in scope from more
+  than one type.
+
+</li></ul>
+
+
+<h4>Construction</h4>
+
+Since Haskell 1.3 records <em>only add syntactic sugar</em>, it is
+possible to construct values without using any new syntax --- even if
+they were declared using record syntax.  For example:
+<pre>  let
+    list42     = Cons 42 Nil
+    treeabc    = Node 'b' [Node 'a' [], Node 'c' []]
+    today      = Date 11 10 1995
+  in show (list, treeabc, today)
+</pre>
+
+But, especially for larger records, it may be more convenient or
+reliable to use the fieldnames:
+<pre>  let
+    today = Date{day = 11, month = 10, year = 1995}
+    other_day = Date{day = 10, month = 11, year = 1995}
+    state = GMState{
+              code    = [],
+	      stack   = emptyStack,
+	      heap    = emptyHeap,
+	      globals = preludeGlobals,
+	      stats   = initStats}
+  in show (today, other_day, state)
+</pre>
+Fields not named during construction are undefined.  It is a compile
+time error to omit a strict field during construction.
+<p>
+Syntacticly, the braces in records bind more tightly than any other
+operator, including application.  Thus, <tt> f C {x = 1}</tt> is
+parsed as <tt> f (C {x = 1})</tt>.  We omit the space before `{' to
+highlight the way this parses: <tt> f C{x = 1} </tt>.
+
+</p><h4>Pattern Matching</h4>
+
+It is possible to pattern match against values without using any new
+syntax --- even if they were declared using record syntax.  For example:
+<pre>  len :: NonEmpty a -&gt; Int
+  len (Head _) = 1
+  len (Cons x xs) = 1 + length xs
+
+  labels (Node l ns) = l : concat (map labels ns)
+  (Date d1 m1 y1) &lt;= (Date d2 m2 y2) =
+    y1 &lt; y2 || (y1 == y2 &amp;&amp; (m1 &lt; m2 || (m1 == m2 &amp;&amp; d1 &lt;= d2)))
+</pre>
+
+But, especially for larger records, it may be more convenient or
+reliable to use the fieldnames:
+<pre>  showsPrec d (Date{day = d, month = m, year = y}) =
+    shows d . ('/':) . shows m . ('/':) . shows y
+  showsPrec d (GMState{code, stack, heap, globals, stats}) =
+    ('&lt;':) . shows code .
+    (' ':) . shows stack .
+    (' ':) . shows heap .
+    (' ':) . shows globals .
+    (' ':) . shows stats .
+    ('&gt;':)
+</pre>
+
+The first example shows how you can bind arbitrary variables to the
+fields.  The second example demonstrates "punning".  With punning, the
+same name is used in two different name spaces.  The contents of a
+field named `f' is associated with a value in variable `f'.
+If you write
+<tt>field</tt> anywhere that <tt>field = var</tt> is expected, it is
+treated as an abbreviation for <tt>field = field</tt>.  Thus the
+example is just an abbreviation of:
+<pre>  showsPrec d (GMState {code=code, stack=stack, heap=heap,
+                        globals=globals, stats=stats}) =
+    ('&lt;':) . shows code .
+    (' ':) . shows stack .
+    (' ':) . shows heap .
+    (' ':) . shows globals .
+    (' ':) . shows stats .
+    ('&gt;':)
+</pre>
+and is equivalent (modulo alpha-conversion) to
+<pre>  showsPrec d (GMState {code=c; stack=s; heap=h; globals=g; stats=s}) =
+    ('&lt;':) . shows c .
+    (' ':) . shows s .
+    (' ':) . shows h .
+    (' ':) . shows g .
+    (' ':) . shows s .
+    ('&gt;':)
+</pre>
+
+(We could also have used "punning" in the creation examples; it is
+used in the same way for record construction but it's
+probably most useful for pattern matching and updates.)
+
+<h4>Selection</h4>
+
+Pattern matching is great when working with multi-constructor types or
+when you want to extract lots of fields from a record.  Sometimes
+though, you just want one field of a single-constructor record.  For
+this very common case, Haskell 1.3 provides "selector functions" to
+extract the fields directly.  For example, the declaration:
+<pre>  data Date = Date {day, month, year :: Int}
+</pre>
+defines the following (global) selector functions:
+<pre>  day, month, year :: Date -&gt; Int
+  day   (Date{day   = d}) = d
+  month (Date{month = m}) = m
+  year  (Date{year  = y}) = y
+</pre>
+It is a runtime error to select a field from a value which does not
+have that field (this happens only when the type has more than one
+constructor).
+
+<p>
+
+Note: Since selector functions are just ordinary functions, they can
+get "shadowed" if you have local variables of the same name.  For
+example, the following has a type error because a local variable
+"shadows" the global selector function:
+
+</p><pre>  daysSinceStart d@(Date {day, month, year) =
+    day + sum [ daysInMonth m | m = [1..month-1] ]
+   where
+    daysInMonth m
+      | m `elem` [9,4,6,11] = 30
+    daysInMonth 2
+      | isLeapYear (year d) = 29  -- WRONG: year is shadowed
+      | otherwise           = 28
+    daysInMonth _           = 31
+</pre>
+
+The correct (and more obvious!) way to write this example is to use the
+value "year" from the pattern match rather than using the selector.
+<p>
+Only these selector functions are shadowed: field names used within
+braces are never shadowed by ordinary variables.
+
+</p><h4>Updates</h4>
+
+When working with records (especially <em>large</em> records), one
+often needs to be able to "update" one or two fields in the record
+while leaving the other fields intact.  (By "update" we mean "make a
+copy of an existing record making changes as we copy it".)
+
+Simon Peyton Jones and David Lester's book defines many such "update
+functions".  For example:
+<pre>  putCode :: GMCode -&gt; GMState -&gt; GMState
+  putCode code' (GMCode {code, stack, heap, globals, stats} =
+    (GMCode {code = code', stack, heap, globals, stats} =
+
+  putStack :: GMStack -&gt; GMState -&gt; GMState
+  putStack stack' (GMCode {code, stack, heap, globals, stats} =
+    (GMCode {code, stack = stack', heap, globals, stats} =
+
+  putStats :: GMStats -&gt; GMState -&gt; GMState
+  putStats stats' (GMCode with {code; stack; heap; globals; stats} =
+    (GMCode {code, stack, heap, globals, stats = stats'} =
+</pre>
+
+(These are taken from pages 83-85 and adapted to use record pattern
+matching and construction.)
+
+<p>
+
+Using Haskell 1.3's update expressions, these could be rewritten:
+
+</p><pre>  putCode :: GMCode -&gt; GMState -&gt; GMState
+  putCode code' s = s{code = code'}
+
+  putStack :: GMStack -&gt; GMState -&gt; GMState
+  putStack stack' s = s{stack = stack'}
+
+  putStats :: GMStats -&gt; GMState -&gt; GMState
+  putStats stats' s = s{stats = stats'}
+</pre>
+
+or, using puns:
+
+<pre>  putCode :: GMCode -&gt; GMState -&gt; GMState
+  putCode code s = s{code}
+
+  putStack :: GMStack -&gt; GMState -&gt; GMState
+  putStack stack s = s {stack}
+
+  putStats :: GMStats -&gt; GMState -&gt; GMState
+  putStats stats s = s {stats}
+</pre>
+
+However, these functions are now so trivial that one wouldn't normally
+bother to write them - you'd just use update expressions directly in
+your code.  For example, Peyton Jones and Lester define a function to
+increment a counter by:
+
+<pre>  doAdmin :: GMState -&gt; GMState
+  doAdmin s = putStats (statIncSteps (getStats s)) s
+</pre>
+which can be easily defined using selection and updates by:
+<pre>  doAdmin :: GMState -&gt; GMState
+  doAdmin s = s{stats = statIncSteps (stats s)}
+</pre>
+or (clumsily) defined using pattern matching and updates
+<pre>  doAdmin :: GMState -&gt; GMState
+  doAdmin s@GMState{stats} = s{stats = statIncSteps stats}
+</pre>
+
+<p>
+
+Simultaneous updates are also allowed.  For example, if an American
+had (incorrectly) entered the date "25th January 1996" as "1/25/1996",
+one could use the following function to fix the record:
+
+</p><pre>  fixUSDate :: Date -&gt; Date
+  fixUSDate d = d{day = month d, month = day d}
+</pre>
+
+(Obviously, it's a (compile time) error to simultaneously update
+fields from different constructors; and a (runtime) error to update a
+field in a value built with a constructor which doesn't have that field.)
+
+
+<h4>Derived instances</h4>
+
+All derived instances are exactly the same as if no field names are used
+--- with one exception:
+if a constructor is declared in which all fields are named, the
+derived Read and Show
+instances will produce output like that used to create a record.
+For example,
+<pre>  show (Date{day = 25, month = 1, year = 1996})
+  =
+  "Date{day = 25, month = 1, year = 1996}"
+</pre>
+and will (only!) accept input in the same format.
+
+<h4>Import/Export</h4>
+
+In Haskell 1.2, programmers can import just the datatype
+by writing (for example):
+<pre>  import Prelude(Maybe)
+</pre>
+or they can import the datatype and its constructors
+(allowing construction and pattern matching) by writing:
+<pre>  import Prelude(Maybe(..))
+</pre>
+which is an abbreviation for:
+<pre>  import Prelude(Maybe(Just,Nothing))
+</pre>
+
+The only difference under Haskell 1.3 is that the field names must be
+listed along with the constructor names in the unabbreviated form:
+<pre>  import Prelude(List(Cons,head,tail,Nil))
+</pre>
+There is no way to selectively hide field names: they must always
+accompany their associated constructor.
+<p>
+(All the above examples work for export too - just replace "import" by
+"export" throughout.)
+
+<a name="newtype">
+</a></p><h3><a name="newtype">
+Renaming Existing Types
+</a></h3><a name="newtype">
+</a>
+Haskell users have often needed to declare a new name for an existing
+type.  There were two ways of doing this: declaring a synonym, as in
+<pre>  type Foo = Int
+</pre>
+or creating a type wrapper, as in
+<pre>  data Foo = Foo Int
+</pre>
+
+This first approach has no runtime overhead, but does not distinguish
+the new type from the old.  More seriously, instances cannot be attached to
+the new type, only the old one.  The other approach incurs an
+additional overhead in the representation.
+
+An additional type declaration will provide a more efficient way of
+creating a new type from an existing one:
+<pre>  newtype <i>context</i> =&gt; <i>simple</i> = <i>con type</i> [deriving <i>classes</i>]
+</pre>
+
+Examples:
+
+<pre>  newtype Foo = Foo Int deriving Show
+  newtype Bar a = Bar [a] deriving (Show,Eq)
+  newtype LongName = L Int
+</pre>
+
+This new type is used in the same manner as a wrapper type and,
+similarly, the type name need not match the constructor name.  The
+constructor is used for explicit coercion between the new and existing
+types.  Derived instances simply re-use instances already attached to
+the existing type (except for <tt>Read</tt> and <tt>Show</tt>, which use the
+constructor as it would for a wrapper type).
+<p>
+At first glance, it looks as though the newtype "Foo" could have been
+defined using normal data types and strictness annotations.
+
+</p><pre>  data Foo = Foo !Int deriving Show
+</pre>
+
+The difference between the two is rather subtle (but important):
+<ul>
+<li>
+Using strictness annotations, evaluation of the field occurs when a
+Foo is created.  That is:
+
+<pre>  case Foo undefined of Foo _ -&gt; True
+  =
+  undefined
+</pre>
+
+</li><li>
+Using newtype, evaluation of the field occurs when the field is
+used.  That is
+
+<pre>  case Foo undefined of Foo _ -&gt; True
+  =
+  True
+</pre>
+</li></ul>
+This does not mean that <tt>newtype</tt> involves any special
+semantics - the same effect can be achieved by adding a <tt>~</tt> to
+the pattern <tt>Foo _</tt>.  The advantage of <tt>newtype</tt> is that
+supplies a convenient way of defining a type which is identical to an
+existing type without adding any overhead to the representation of
+that type.
+
+<a name="do">
+<h3>
+Monad Syntax
+</h3>
+</a>
+The <tt>Monad</tt> class is now an important part of the Haskell
+language.  The monadic binding operators, <tt>&gt;&gt;</tt> and <tt>&gt;&gt;=</tt>
+are heavily used the monadic style of programming.  Especially since
+I/O operations make use of monads, it makes sense to provide a
+more readable style for monadic programming.  The `do' syntax has been
+added to Haskell to provide a convenient syntax for monadic binding:
+<pre>  Syntax:                            Expansion:
+  exp  -&gt; do {stmt}
+  stmt -&gt; exp                        exp
+  stmt -&gt; exp ; stmt                 exp &gt;&gt; do stmt
+  stmt -&gt; let decls ; stmt           let decls in do stmt
+  stmt -&gt; pat &lt;- exp ; stmt          &lt;see below&gt;
+</pre>
+
+<p>
+The Haskell layout rules already allow you to write:
+</p><pre>  let
+    x = 1
+    y = 2
+  in x + y
+</pre>
+as an abbreviation for:
+<pre>  let { x = 1; y = 2 } in x + y
+</pre>
+
+By the same rules, it is possible to write:
+<pre>  do
+    x &lt;- getInt
+    y &lt;- getInt
+    return (x + y)
+</pre>
+as an abbreviation for:
+<pre>  do {
+       x &lt;- getInt;
+       y &lt;- getInt;
+       return (x + y)
+     }
+</pre>
+C programmers might prefer the latter.
+
+<p>
+As in a list comprehension, variables bound by patterns are scoped
+over the following statements in the <tt>do</tt>.  The
+<tt>do</tt> has the same type as the last statement.
+
+</p><p> The translation of <tt>pat &lt;- exp; stmt</tt> depends on the
+pattern <tt>pat</tt>.
+</p><ul>
+<li>
+  The most common case is that <tt>pat</tt> is a variable in which case
+  the translation is:
+  <pre>    exp &gt;&gt;= \pat -&gt; do stmt
+  </pre>
+
+  In fact, this translation is used for any failure-free pattern
+  such as "x", "~(x:xs)", "~(Just 3)".  A
+  pattern is failure-free when it is either irrefutable or consists of
+  a constructor from a single-constructor data type applied to
+  failure-free patterns.
+  <p>
+  For example, <tt>do (x,y) &lt;- getPair; return (x+y)</tt> is translated to
+  </p><pre>    getPair &gt;&gt;= \(x,y) -&gt;
+    return (x+y)
+  </pre>
+</li><li>
+  If <tt>pat</tt> is pattern which might not match at runtime (ignoring
+  bottom), the translation is:
+  <pre>    exp &gt;&gt;= \ x -&gt; case x of { pat -&gt; do stmt; _ -&gt; zero }
+  </pre>
+  (where <tt>x</tt> is free in <tt>stmt</tt>).
+
+  <p>
+  For example, <tt>do Just x &lt;- getOpt "x"; foo x</tt> is translated to
+  </p><pre>    getOpt &gt;&gt;= \ z -&gt;
+    case z of {
+    Just x -&gt; foo x;
+    _ -&gt; zero
+    }
+  </pre>
+
+  <p>
+
+  Note that using this translation results in monad expressions of type
+  <tt>MonadZero m =&gt; m a</tt> instead of <tt>Monad m =&gt; m a</tt>.  The above
+  special cases are included to reduce the clutter in IO monad expressions.
+</p></li></ul>
+
+
+<p>
+A <tt>let</tt> in a <tt>do</tt> is scoped over all remaining
+statements.  Note there is no <tt>in</tt>; this distinguishes this
+from an ordinary let.
+
+</p><p> H
+Haskell 1.3 omits several features from earlier proposals and
+the Gofer implementation.  In particular, there is no support for "guards".
+</p><pre>  do
+    x &lt;- foo
+    if even x
+    bar
+</pre>
+
+  The problem is that in some monads, guard failure should yield a zero
+  while in others it should cause an exception or even an error (with
+  an appropriate error message).  Fortunately, there's no need to wrestle
+  with these thorny semantic issues since it's trivial for programmers to
+  define and use their own "guard functions".
+
+<pre>  -- raise an error if condition fails.
+  assert :: Monad m =&gt; Bool -&gt; String -&gt; m ()
+  assert p msg = if p then return () else error ("Assertion failed: " ++ msg)
+
+  -- return a zero if condition fails.
+  -- Similar to guards in list comprehensions.
+  guard :: MonadZero m =&gt; Bool -&gt; m ()
+  guard p = if p then return () else zero
+
+  do
+    x &lt;- foo
+    assert (even x) "foo didn't return an even result at line 32 of Bar.lhs"
+    y &lt;- bar x
+    guard (x `elem` y)
+    return y
+</pre>
+
+<a name="qualnames">
+<h3>
+The Module System
+</h3>
+</a>
+Many changes have been made to the module system.  These include:
+<ul>
+<li> Renaming has been removed.
+</li><li> Qualifiers are used to handle name clashes between modules.
+</li><li> The closure rule has been relaxed.
+</li><li> Interface module are no longer a part of the language.
+</li><li> All names are redefinable - no PreludeCore.
+</li><li> The C-T rule has been relaxed.  The rules for import / export of
+instances are different.
+</li></ul>
+<h4> Qualified Names </h4>
+As in Haskell 1.2, all outside names are brought into
+scope using `<tt>import</tt>'.  Instead of using renaming to resolve
+name clashes, Haskell 1.3 uses qualified names.
+Qualified names are built from a module name and a local name,
+separated by a `.'. Thus,
+`<tt>Prelude.foldr</tt>' refers to the <tt>foldr</tt> exported from
+<tt>Prelude</tt>.  (Note that qualified names are not the same as
+`original names': an
+original name uses the defining module; here, the exporting module is
+named).  Qualified
+names have two advantages:
+<ul>
+<li> Using qualified names prevents or resolves name clashes between
+different modules.
+</li><li> Qualified names result in more readable code since import declarations
+need not be consulted to find the defining module for a name.
+</li></ul>
+A qualified name can be used for any entity.  By adding
+<tt>qualified</tt> to an import declaration, all names brought into
+scope must be referenced via a qualifier.  In all other ways, a
+qualified import is the same as an unqualified import.
+Short names, omitting
+the module and separating `.' can be used only for locally defined
+names, or for entities which are imported unqualified (i.e. ones
+mentioned in an import declaration which does not use the "qualified"
+keyword).
+<p>
+By default, the name of the imported module is used as the qualifier
+in a qualified name.  An import declaration may contain an <tt>as</tt>
+clause to specify a different qualifier.
+</p><p>
+Qualified names are defined in the lexical syntax.  Thus,
+`<tt>Foo.a</tt>' and
+`<tt>Foo . a</tt>' are quite different.  No whitespace is permitted in
+a qualified name.  Symbols may also be qualified: `<tt>Prelude.+</tt>' is
+an operator which can be used in exactly the same manner as `<tt>+</tt>'.
+</p><p>
+Note that the `<tt>.</tt>' operator presents a syntactic problem.  It causes
+`<tt>Foo..</tt>', which was used in export lists (this syntax has
+changed) and occasionally in
+arithmetic sequences, to parse as a qualified name instead of a usage
+of the `<tt>..</tt>' token.  Inserting a space before the
+`<tt>..</tt>' will resolve this problem.
+</p><p>
+Qualifiers are prohibited in definitions:
+</p><pre>M.x = 1
+</pre>
+is not allowed.  In all other contexts, names may be qualified.  It is
+an error to export more than one entity with the same name:
+<pre>module M3(M1.x,M2.x) where  -- an error
+import qualified M1(x)
+import qualified M2(x)
+</pre>
+<p> Although <tt>as</tt> appears in the syntax for imports, it is not
+treated as a keyword in other contexts.
+<a name="redef">
+</a></p><h3><a name="redef">
+Redefinable Names
+</a></h3><a name="redef">
+</a>
+A complaint about Haskell has been that names defined in
+PreludeCore cannot be redefined in any way.  Since many operators,
+like <tt>+</tt>, <tt>-</tt>, <tt>&gt;</tt>, and <tt>==</tt>, are defined in PreludeCore this has made some
+users deeply unhappy --  this restriction prevents any sort of
+alternative numeric class structure which uses the standard symbols, for example.
+There is no real reason for stealing all these names from the user; in
+Haskell 1.3 PreludeCore is no longer special: all ordinary names are
+redefinable.  Special syntax will remain attached to Prelude names;
+thus `<tt>[x]</tt>' would always refer to lists as defined in the Prelude.
+
+As before, the Prelude module is implicitly
+imported (in unqualified form) unless an explicit import is found.
+There is also an implicit (and unavoidable) qualified import of the
+Prelude which is used to define the meaning of various pieces of
+syntactic sugar.  This eliminates the need to make PreludeCore symbols
+immutable.
+Since qualified names can always be used for imported entities,
+any Prelude entities that the programmer has chosen to shadow
+can still be referred to using
+`<tt>Prelude.</tt>'.
+<p>
+Unfortunately, while Prelude names are redefinable, translations of
+special syntax yield fixed definitions in the Prleude.  Although
+subtraction (-) can be redefined, negation is a special syntax and
+always refers to the negate defined in the Prelude.  Similarly,
+numeric constants have an implicit fromInteger / fromRational.  This
+implicit function is always as defined in the Prelude even when
+fromInteger is redefined.
+
+</p><h4>
+C-T Rule relaxation
+</h4>
+
+The C-T rule restricts the placement of instance declarations to the
+module containing either the class or data type definition associated
+with an instance.  This is unnecessarily restrictive and will be
+relaxed in Haskell 1.3.
+
+The new restriction will be that no more than one instance for a given
+class - datatype pair is allowed in a program.  (Sadly, there's little
+hope of detecting violations of this rule before link time.)
+<p>
+The visibility of instance declarations presents a problem.  Unlike
+classes or types, instances cannot be mentioned explicitly in export
+lists.  Instead of changing the syntax of the export list, we have adopted a
+simple rule: all instances are exported regardless of the export list.
+All imports bring in the full set of instances from the imported
+module.  An instance is in scope when a chainof import statements
+leads to the module defining the instance.
+
+</p><h4>
+Interface Files
+</h4>
+
+The current report requires that interface files be transitively
+closed and that the original names of all entities be supplied.  Such
+interfaces are appropriate for compilers to generate, but are not
+necessarily useful to the programmer.  Since hand-written interfaces
+are not in general use, we are removing the notion of interface files
+from the report.  More importantly, there seems to be no real need for
+a separate `interface file' when an implementation which has
+signatures for all exported variables contains the exact same
+information as an interface file.  It would certainly be possible for
+implementations to be able to consult the interface component of a
+source file to achieve separate compilation.
+
+<h4> Exporting Type Synonyms </h4>
+Type synonyms are now referenced in import and export lists without
+the (..).
+
+<h4> Closure </h4>
+The closure restriction has been relaxed.  Now, only names explicitly
+referenced in a module need to be imported.  It is no longer an error
+to export a value without exporting its type.
+
+<a name="chars">
+<h3>
+Expanded Character Set
+</h3>
+</a>
+This change in character set supports both an expanded Char type at
+execution time and a greatly increased vocabulary for constructing
+program names.  Many new characters have been added to `<i>small</i>',
+`<i>large</i>', and `<i>symbol</i>' in the lexical syntax.  Section 2
+has the full details.
+
+<h3>
+Other Changes to Haskell
+</h3>
+
+
+<h4>
+Polymorphic Recursion
+</h4>
+
+This is a simple extension to the type system which allows the user to
+attach a more general type to a recursive function than would be
+normally be inferred.  For example, in
+
+<pre>  f x y = if f True False then x else y
+</pre>
+
+the type of f would normally be inferred as `Bool -&gt; Bool -&gt; Bool'.
+However, polymorphic recursion allows the user to add a type signature
+to f such as `f :: a -&gt; a -&gt; a' to give it a more general type.  While
+polymorphic recursion is not likely to be needed by the average
+Haskell user, it occasionally will prevent the type checker from
+complaining about a quite sensible looking program.
+
+<a name="list-let-bindings"> </a>
+<h4>
+List Comprehension Let Bindings
+</h4>
+
+The syntax of list comprehensions is being expanded to include
+
+<pre>  <i>qual</i> -&gt; let {<i>decls</i>}
+</pre>
+
+(The absence of `<tt>in</tt>' distinguishes this from a "let"-expression in a
+guard).  These decls are scoped over the remaining qualifiers and the
+generated expression.  Binding is irrefutable: pattern match failure
+is a program error.  The expansion of this is trivial: it expands
+directly into a conventional let.
+
+<h4>
+Standard Annotations
+</h4>
+A number of pragmas, already widely used, will be standardized.
+
+
+<h4>
+Minor Syntax
+</h4>
+
+Minor syntax changes include:
+<ul>
+<li> There is a new syntax for hex and octal constants
+</li><li> The types listed in a default declaration must always be in parentheses
+</li><li> Empty export lists are now allowed
+</li><li> Presymbols are gone; this allows "~" and "-" to be embedded in a symbol
+</li><li> Extra commas are allowed in import / export / hiding lists
+</li><li> \begin{code} - \end{code} is now allowed in literate files
+      as an alternative to "&gt;" ("Bird tracks")
+</li><li> Exporting entire modules uses "module M" instead of "M..".  This
+     prevents syntax errors due to qualified names.
+</li><li> The default module header is now <tt> module Main(main)
+     where</tt>.  This fixes unintentional monomorphism whining by the
+     compiler.
+</li><li> The interaction of layout with explicit braces has been
+     clarified: within explicit braces, layout established outside the
+     braces is ignored.
+</li></ul>
+
+
+<h4>
+Features Removed from Haskell
+</h4>
+Import declarations no longer have a renaming clause.  Qualified
+names should be used to handle name clashes.  This also removes the
+need for the `single name' rule (see Section 5.1.2 of the report).
+<p>
+n+k patterns are still present, but their use is officially
+discouraged.
+
+</p><hr>
+<address>Last update: September 16th, 1998</address>
+
+
+
+</body></html>
