@@ -1,0 +1,282 @@
+<title> Haskell 1.3 Prelude Index </title>
+<body bgcolor="#ffffff"><i>The Haskell 1.4 Report</i><br>
+<a href="index.html">top</a><hr>
+
+<h3> Index of the Haskell 1.4 Prelude </h3>
+
+<h4> Types and Synonyms </h4>
+Instances which are not defined by Haskell code the Prelude (a ... is used)
+are not hyperlinked.
+<p>
+<pre>
+data <a href="standard-prelude.html#$t$P$C">()</a> = ()  deriving (Eq, Ord, Enum, Bounded) (see <a href="basic.html#sect6.1.5">6.1.5</a>)
+      Instances: <a href="standard-prelude.html#$iRead$$$P$C">Read</a> <a href="standard-prelude.html#$iShow$$$P$C">Show</a>
+data <a href="standard-prelude.html#$t$Ba$c">[a]</a> = [] | a : [a]  deriving (Eq, Ord) (see <a href="basic.html#sect6.1.3">6.1.3</a>)
+      Instances: <a href="standard-prelude.html#$iRead$$$Ba$c">Read</a> <a href="standard-prelude.html#$iShow$$$Ba$c">Show</a> <a href="standard-prelude.html#$iFunctor$$$Ba$c">Functor</a> <a href="standard-prelude.html#$iMonad$$$Ba$c">Monad</a> <a href="standard-prelude.html#$iMonadZero$$$Ba$c">MonadZero</a> <a href="standard-prelude.html#$iMonadPlus$$$Ba$c">MonadPlus</a>
+data <a href="standard-prelude.html#$t$Pa$xb$C">(a,b)</a> = (a,b) deriving (Eq, Ord, Bounded) (see <a href="basic.html#sect6.1.4">6.1.4</a>) 
+      Instances: <a href="standard-prelude.html#$iRead$$$Pa$xb$C">Read</a> <a href="standard-prelude.html#$iShow$$$Pa$xb$C">Show</a>
+data a->b (see <a href="basic.html#sect6.1.7">6.1.7</a>)
+      Instances: <a href="standard-prelude.html#$iShow$$a$D$Ab">Show</a>
+data <a href="standard-prelude.html#$tBool">Bool</a> = False | True deriving (Eq, Ord, Enum, Read, Show, Bounded) (see <a href="basic.html#sect6.1.1">6.1.1</a>)
+data <a href="standard-prelude.html#$tChar">Char</a> (see <a href="basic.html#sect6.1.2">6.1.2</a>)
+       Instances: Eq Ord <a href="standard-prelude.html#$iEnum$$Char">Enum</a> <a href="standard-prelude.html#$iRead$$Char">Read</a> <a href="standard-prelude.html#$iShow$$Char">Show</a> 
+data <a href="standard-prelude.html#$tDouble">Double</a> (see <a href="basic.html#sect6.3">6.3</a>) 
+       Instances: Eq Ord Enum Read Show Num Real Fractional RealFrac Floating RealFloat
+data <a href="standard-prelude.html#$tEither">Either</a> a b  =  Left a | Right b deriving (Eq, Ord, Read, Show) (see <a href="basic.html#sect6.1.9">6.1.9</a>)
+type <a href="standard-prelude.html#$tFilePath">FilePath</a> =  String (see <a href="io-13.html#sect7.1">7.1</a>)
+data <a href="standard-prelude.html#$tFloat">Float</a> (see <a href="basic.html#sect6.3">6.3</a>)
+       Instances: Eq Ord Enum Read Show Num Real Fractional RealFrac Floating RealFloat
+data <a href="standard-prelude.html#$tInt">Int</a> (see <a href="basic.html#sect6.3">6.3</a>)
+       Instances: Eq Ord Enum Read Show Num Real Integral Bounded
+data <a href="standard-prelude.html#$tInteger">Integer</a> (see <a href="basic.html#sect6.3">6.3</a>)
+       Instances: Eq Ord Enum Read Show Num Real Integral
+data <a href="standard-prelude.html#$tIO">IO</a> a (see <a href="basic.html#sect6.1.8">6.1.8</a>)
+       Instances: <a href="standard-prelude.html#$iShow$$IO">Show</a> <a href="standard-prelude.html#$iFunctor$$IO">Functor</a> Monad
+data <a href="standard-prelude.html#$tIOError">IOError</a> (see <a href="basic.html#sect6.1.8">6.1.8</a>)
+       Instances: Show Eq
+data <a href="standard-prelude.html#$tMaybe">Maybe</a> a  =  Nothing | Just a deriving (Eq, Ord, Read, Show) (see <a href="basic.html#sect6.1.9">6.1.9</a>)
+        Instances: <a href="standard-prelude.html#$iFunctor$$Maybe">Functor</a> <a href="standard-prelude.html#$iMonad$$Maybe">Monad</a> <a href="standard-prelude.html#$iMonadZero$$Maybe">MonadZero</a> <a href="standard-prelude.html#$iMonadPlus$$Maybe">MonadPlus</a>
+data <a href="standard-prelude.html#$tOrdering">Ordering</a> = LT | EQ | GT  deriving (Eq, Ord, Enum, Read, Show, Bounded) (see <a href="basic.html#sect6.1.8">6.1.8</a>)
+type <a href="standard-prelude.html#$tReadS">ReadS</a> a = String -> [(a,String)] (see <a href="io-13.html#sect7">7</a>)
+type <a href="standard-prelude.html#$tShowS">ShowS</a> = String -> String (see <a href="io-13.html#sect7">7</a>)
+type <a href="standard-prelude.html#$tString">String</a> = [Char] (see <a href="basic.html#sect6.1.2">6.1.2</a>)
+data <a href="standard-prelude.html#$tVoid">Void</a> (see <a href="basic.html#sect6.1.6">6.1.6</a>)
+</pre>
+
+<h4> Constructors </h4>
+<pre>
+<a href="standard-prelude.html#$t$Ba$c">[]</a>
+<a href="standard-prelude.html#$t$Ba$c">:</a>
+<a href="standard-prelude.html#$t$Pa$xb$C">(,)</a>
+<a href="standard-prelude.html#$tOrdering">EQ</a>
+<a href="standard-prelude.html#$tBool">False</a>
+<a href="standard-prelude.html#$tOrdering">GT</a>
+<a href="standard-prelude.html#$tMaybe">Just</a>
+<a href="standard-prelude.html#$tEither">Left</a>
+<a href="standard-prelude.html#$tOrdering">LT</a>
+<a href="standard-prelude.html#$tMaybe">Nothing</a>
+<a href="standard-prelude.html#$tEither">Right</a>
+<a href="standard-prelude.html#$tBool">True</a>
+
+</pre>
+
+<h4> Classes </h4>
+<pre>
+class                             <a href="standard-prelude.html#$tBounded">Bounded</a> a    (see <a href="basic.html#sect6.2.6">6.2.6</a>)
+class                             <a href="standard-prelude.html#$tEnum">Enum</a> a       (see <a href="basic.html#sect6.2.4">6.2.4</a>)
+class                             <a href="standard-prelude.html#$tEq">Eq</a> a         (see <a href="basic.html#sect6.2.1">6.2.1</a>)
+class                             <a href="standard-prelude.html#$tEval">Eval</a> a       (see <a href="basic.html#sect6.2.7">6.2.7</a>)
+class           (Fractional a) => <a href="standard-prelude.html#$tFloating">Floating</a> a   (see <a href="basic.html#sect6.3">6.3</a>)
+class                  (Num a) => <a href="standard-prelude.html#$tFractional">Fractional</a> a (see <a href="basic.html#sect6.3">6.3</a>)
+class                             <a href="standard-prelude.html#$tFunctor">Functor</a> f    (see <a href="basic.html#sect6.2.4">6.2.4</a>)
+class         (Real a, Enum a) => <a href="standard-prelude.html#$tIntegral">Integral</a> a   (see <a href="basic.html#sect6.3">6.3</a>)
+class                             <a href="standard-prelude.html#$tMonad">Monad</a> m      (see <a href="basic.html#sect6.2.4">6.2.4</a>)
+class            (MonadZero m) => <a href="standard-prelude.html#$tMonadPlus">MonadPlus</a> m  (see <a href="basic.html#sect6.2.4">6.2.4</a>)
+class                (Monad m) => <a href="standard-prelude.html#$tMonadZero">MonadZero</a> m  (see <a href="basic.html#sect6.2.4">6.2.4</a>)
+class   (Eq a, Show a, Eval a) => <a href="standard-prelude.html#$tNum">Num</a> a        (see <a href="basic.html#sect6.3">6.3</a>)
+class                   (Eq a) => <a href="standard-prelude.html#$tOrd">Ord</a> a        (see <a href="basic.html#sect6.2.2">6.2.2</a>)
+class                             <a href="standard-prelude.html#$tRead">Read</a> a       (see <a href="basic.html#sect6.2.3">6.2.3</a>)
+class           (Num a, Ord a) => <a href="standard-prelude.html#$tReal">Real</a> a       (see <a href="basic.html#sect6.3">6.3</a>)
+class (RealFrac a, Floating a) => <a href="standard-prelude.html#$tRealFloat">RealFloat</a> a  (see <a href="basic.html#sect6.3">6.3</a>)  
+class   (Real a, Fractional a) => <a href="standard-prelude.html#$tRealFrac">RealFrac</a> a   (see <a href="basic.html#sect6.3">6.3</a>)
+class                             <a href="standard-prelude.html#$tShow">Show</a> a       (see <a href="basic.html#sect6.2.3">6.2.3</a>) 
+
+</pre>
+<h4> Functions and Methods </h4>
+<table>
+<tr><td><tt><a href="standard-prelude.html#$v$E$E">(!!)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;->&nbsp;Int&nbsp;->&nbsp;a&nbsp;</tt></td><td><tt>[0,1,2]&nbsp;!!&nbsp;1&nbsp;=&nbsp;1</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$v$D">($)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;b)&nbsp;->&nbsp;a&nbsp;->&nbsp;b&nbsp;</tt></td><td><tt>f&nbsp;x&nbsp;$&nbsp;g&nbsp;y&nbsp;=&nbsp;f&nbsp;x&nbsp;(g&nbsp;y)&nbsp;&nbsp;&nbsp;&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$v$A$A">(&amp;&amp;)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Bool&nbsp;->&nbsp;Bool&nbsp;->&nbsp;Bool&nbsp;</tt></td><td><tt>Boolean&nbsp;`and'</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$v$b$b">(||)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Bool&nbsp;->&nbsp;Bool&nbsp;->&nbsp;Bool&nbsp;</tt></td><td><tt>Boolean&nbsp;`or'</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tNum">(*)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Num&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">(**)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tNum">(+)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Num&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tMonadPlus">(++)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;MonadPlus&nbsp;m&nbsp;=>&nbsp;m&nbsp;a&nbsp;->&nbsp;m&nbsp;a&nbsp;->&nbsp;m&nbsp;a&nbsp;</tt></td><td><tt>"abc"&nbsp;++&nbsp;"def"&nbsp;=&nbsp;"abdec"</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$v$D">(-)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Num&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$v.">(.)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(b&nbsp;->&nbsp;c)&nbsp;->&nbsp;(a&nbsp;->&nbsp;b)&nbsp;->&nbsp;a&nbsp;->&nbsp;c&nbsp;</tt></td><td><tt>Function&nbsp;composition</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFractional">(/)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Fractional&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tEq">(/=)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;Bool&nbsp;</tt></td><td><tt>not&nbsp;equal</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tOrd">(&lt;)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Ord&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;Bool&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tOrd">(&lt;=)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Ord&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;Bool&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tEq">(==)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;Bool&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tOrd">(&gt;)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Ord&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;Bool&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tOrd">(&gt;=)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Ord&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;Bool&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$v$A$A">(&gt;&gt;)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;m&nbsp;a&nbsp;->&nbsp;m&nbsp;b&nbsp;->&nbsp;m&nbsp;b&nbsp;</tt></td><td><tt>Monadic&nbsp;binding&nbsp;(see&nbsp;<a href="exps.html#sect3.14">3.14</a>)</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tMonad">(&gt;&gt;=)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=>&nbsp;m&nbsp;a&nbsp;->&nbsp;(a&nbsp;->&nbsp;m&nbsp;b)&nbsp;->&nbsp;m&nbsp;b&nbsp;</tt></td><td><tt>Monadic&nbsp;binding&nbsp;(see&nbsp;<a href="exps.html#sect3.14">3.14</a>)</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$v$U">(^)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Num&nbsp;a,&nbsp;Integral&nbsp;b)&nbsp;=>&nbsp;a&nbsp;->&nbsp;b&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$v$U$U">(^^)</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Fractional&nbsp;a,&nbsp;Integral&nbsp;b)&nbsp;=>&nbsp;a&nbsp;->&nbsp;b&nbsp;->&nbsp;a&nbsp;</tt></td><td><tt>negative&nbsp;exponent&nbsp;allowed</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tNum">abs</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Num&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vaccumulate">accumulate</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=>&nbsp;[m&nbsp;a]&nbsp;->&nbsp;m&nbsp;[a]&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">acos</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">acosh</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vall">all</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;Bool)&nbsp;->&nbsp;[a]&nbsp;->&nbsp;Bool&nbsp;</tt></td><td><tt>all&nbsp;(/=&nbsp;'a')&nbsp;"cba"&nbsp;=&nbsp;False</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vand">and</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[Bool]&nbsp;->&nbsp;Bool&nbsp;</tt></td><td><tt>and&nbsp;[True,&nbsp;True,&nbsp;True]&nbsp;=&nbsp;True</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vany">any</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;Bool)&nbsp;->&nbsp;[a]&nbsp;->&nbsp;Bool&nbsp;</tt></td><td><tt>any&nbsp;(==&nbsp;'c')&nbsp;"abc"&nbsp;=&nbsp;True</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vappendFile">appendFile</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;FilePath&nbsp;->&nbsp;String&nbsp;->&nbsp;IO&nbsp;()</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vapplyM">applyM</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=>&nbsp;(a&nbsp;->&nbsp;m&nbsp;b)&nbsp;->&nbsp;m&nbsp;a&nbsp;->&nbsp;m&nbsp;b</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vasTypeOf">asTypeOf</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td><td><tt>Sort&nbsp;of&nbsp;a&nbsp;type&nbsp;cast</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">asin</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">asinh</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">atan</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vatan2">atan2</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;RealFrac&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">atanh</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vbreak">break</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;Bool)&nbsp;->&nbsp;[a]&nbsp;->&nbsp;([a],&nbsp;[a])&nbsp;</tt></td><td><tt>break&nbsp;(<2) [1,2,3] = ([1],[2,3])</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vcatch">catch</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;a&nbsp;->&nbsp;(IOError&nbsp;->&nbsp;IO&nbsp;a)&nbsp;->&nbsp;IO&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFrac">ceiling</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(RealFrac&nbsp;a,&nbsp;Integral&nbsp;b)&nbsp;=>&nbsp;a&nbsp;->&nbsp;b&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tOrd">compare</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Ord&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;Ordering&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vconcat">concat</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;MonadPlus&nbsp;m&nbsp;=>&nbsp;[m&nbsp;a]&nbsp;->&nbsp;m&nbsp;a&nbsp;</tt></td><td><tt>concat&nbsp;["a","bc","d"]&nbsp;=&nbsp;"abcd"</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vconcatMap">concatMap</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;[b])&nbsp;->&nbsp;[a]&nbsp;->&nbsp;[b]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vconst">const</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;->&nbsp;b&nbsp;->&nbsp;a</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">cos</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">cosh</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vcurry">curry</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;((a,&nbsp;b)&nbsp;->&nbsp;c)&nbsp;->&nbsp;a&nbsp;->&nbsp;b&nbsp;->&nbsp;c</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vcycle">cycle</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>cycle&nbsp;"abc"&nbsp;=&nbsp;"abcabcabc&nbsp;..."</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFloat">decodeFloat</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;RealFloat&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;(Integer,&nbsp;Int)&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tIntegral">div</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tIntegral">divMod</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;(a,&nbsp;a)&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vdrop">drop</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int&nbsp;->&nbsp;[a]&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>drop&nbsp;2&nbsp;"abcd"&nbsp;=&nbsp;"cd"</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vdropWhile">dropWhile</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;Bool)&nbsp;->&nbsp;[a]&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>dropWhile&nbsp;(>3)&nbsp;[5,3,5]&nbsp;=&nbsp;[3,5]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$velem">elem</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;[a]&nbsp;->&nbsp;Bool&nbsp;</tt></td><td><tt>'a'&nbsp;`Elem`&nbsp;"abc"&nbsp;=&nbsp;True</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFloat">encodeFloat</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;RealFloat&nbsp;a&nbsp;=>&nbsp;Integer&nbsp;->&nbsp;Int&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tEnum">enumFrom</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Enum&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>[n..]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tEnum">enumFromThen</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Enum&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>[m,n..]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tEnum">enumFromThenTo</a>&nbsp;&nbsp;&nbsp;::&nbsp;Enum&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>[m,n..o]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tEnum">enumFromTo</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Enum&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>[m..n]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$verror">error</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;String&nbsp;->&nbsp;a&nbsp;</tt></td><td><tt>&nbsp;(see&nbsp;<a href="exps.html#sect3.1">3.1</a>)</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$veven">even</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;Bool</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">exp</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFloat">exponent</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;RealFloat&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;Int&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vfail">fail</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IOError&nbsp;->&nbsp;IO&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vfilter">filter</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;MonadZero&nbsp;m&nbsp;=>&nbsp;(a&nbsp;->&nbsp;Bool)&nbsp;->&nbsp;m&nbsp;a&nbsp;->&nbsp;m&nbsp;a&nbsp;</tt></td><td><tt>filter&nbsp;isUpper&nbsp;"AbCd"&nbsp;=&nbsp;"AB"</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vflip">flip</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;b&nbsp;->&nbsp;c)&nbsp;->&nbsp;(b&nbsp;->&nbsp;a&nbsp;->&nbsp;c)</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFloat">floatDigits</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;RealFloat&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;Int&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFloat">floatRadix</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;RealFloat&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;Integer&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFloat">floatRange</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;RealFloat&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;(Int,&nbsp;Int)&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFrac">floor</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(RealFrac&nbsp;a,&nbsp;Integral&nbsp;b)&nbsp;=>&nbsp;a&nbsp;->&nbsp;b&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vfoldl">foldl</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;b&nbsp;->&nbsp;a)&nbsp;->&nbsp;a&nbsp;->&nbsp;[b]&nbsp;->&nbsp;a&nbsp;</tt></td><td><tt>foldl&nbsp;(+)&nbsp;0&nbsp;[a,b,c]&nbsp;=&nbsp;((a+b)+c)+0</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vfoldl1">foldl1</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;a&nbsp;->&nbsp;a)&nbsp;->&nbsp;[a]&nbsp;->&nbsp;a&nbsp;</tt></td><td><tt>foldl1&nbsp;(+)&nbsp;[a,b,c]&nbsp;=&nbsp;(a+b)+c</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vfoldr">foldr</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;b&nbsp;->&nbsp;b)&nbsp;->&nbsp;b&nbsp;->&nbsp;[a]&nbsp;->&nbsp;b&nbsp;</tt></td><td><tt>foldr&nbsp;(+)&nbsp;0&nbsp;[a,b,c]&nbsp;=&nbsp;0+(a+(b+c))</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vfoldr1">foldr1</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;a&nbsp;->&nbsp;a)&nbsp;->&nbsp;[a]&nbsp;->&nbsp;a&nbsp;</tt></td><td><tt>foldr&nbsp;(+)&nbsp;[a,b,c]&nbsp;=&nbsp;a+(b+c)</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tEnum">fromEnum</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Enum&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;Int&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tNum">fromInteger</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Num&nbsp;a&nbsp;=>&nbsp;Integer&nbsp;->&nbsp;a&nbsp;</tt></td><td><tt>(see&nbsp;<a href="exps.html#sect3.2">3.2</a>)</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vfromIntegral">fromIntegral</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Integral&nbsp;a,&nbsp;Num&nbsp;b)&nbsp;=>&nbsp;a&nbsp;->&nbsp;b</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFractional">fromRational</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Fractional&nbsp;a&nbsp;=>&nbsp;Rational&nbsp;->&nbsp;a&nbsp;</tt></td><td><tt>(see&nbsp;<a href="exps.html#sect3.2">3.2</a>)</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vfromRealFrac">fromRealFrac</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(RealFrac&nbsp;a,&nbsp;Fractional&nbsp;b)&nbsp;=>&nbsp;a&nbsp;->&nbsp;b</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vfst">fst</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a,&nbsp;b)&nbsp;->&nbsp;a</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vgcd">gcd</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Integral&nbsp;a)&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vgetChar">getChar</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;Char&nbsp;</tt></td><td><tt>eof&nbsp;generates&nbsp;an&nbsp;IOError</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vgetContents">getContents</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;String</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vgetLine">getLine</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;Char&nbsp;</tt></td><td><tt>eof&nbsp;generates&nbsp;an&nbsp;IOError</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vguard">guard</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;MonadZero&nbsp;m&nbsp;=>&nbsp;Bool&nbsp;->&nbsp;m&nbsp;()</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vhead">head</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;->&nbsp;a</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vid">id</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;->&nbsp;a</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vinit">init</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;->&nbsp;[a]</tt></td><td><tt>init&nbsp;"abcd"&nbsp;=&nbsp;"abc"</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vinteract">interact</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(String&nbsp;->&nbsp;String)&nbsp;->&nbsp;IO&nbsp;()</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFloat">isDenormalized</a>&nbsp;&nbsp;&nbsp;::&nbsp;RealFloat&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;Bool&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFloat">isIEEE</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;RealFloat&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;Bool&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFloat">isInfinite</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;RealFloat&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;Bool&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFloat">isNaN</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;RealFloat&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;Bool&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFloat">isNegativeZero</a>&nbsp;&nbsp;&nbsp;::&nbsp;RealFloat&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;Bool&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$viterate">iterate</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;a)&nbsp;->&nbsp;a&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>iterate&nbsp;(++&nbsp;"&nbsp;")&nbsp;""&nbsp;=&nbsp;["",&nbsp;"&nbsp;",&nbsp;"&nbsp;&nbsp;",...]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vlast">last</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;->&nbsp;a&nbsp;</tt></td><td><tt>last&nbsp;"abcde"&nbsp;=&nbsp;"e"</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vlcm">lcm</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vlength">length</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;->&nbsp;Int&nbsp;</tt></td><td><tt>length&nbsp;"Abc"&nbsp;=&nbsp;3</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vlex">lex</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;ReadS&nbsp;String&nbsp;</tt></td><td><tt>lex&nbsp;"abc&nbsp;def"&nbsp;=&nbsp;[("abc","&nbsp;def")]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vlines">lines</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;String&nbsp;->&nbsp;[String]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">log</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">logBase</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vlookup">lookup</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;[(a,&nbsp;b)]&nbsp;->&nbsp;Maybe&nbsp;b</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFunctor">map</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Functor&nbsp;f&nbsp;=>&nbsp;(a&nbsp;->&nbsp;b)&nbsp;->&nbsp;f&nbsp;a&nbsp;->&nbsp;f&nbsp;b&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vmapM">mapM</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=>&nbsp;(a&nbsp;->&nbsp;m&nbsp;b)&nbsp;->&nbsp;[a]&nbsp;->&nbsp;m&nbsp;[b]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vmapM_">mapM_</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=>&nbsp;(a&nbsp;->&nbsp;m&nbsp;b)&nbsp;->&nbsp;[a]&nbsp;->&nbsp;m&nbsp;()</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tOrd">max</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Ord&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tBounded">maxBound</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Bounded&nbsp;a&nbsp;=>&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vmaximum">maximum</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Ord&nbsp;a&nbsp;=>&nbsp;[a]&nbsp;->&nbsp;a</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vmaybe">maybe</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;b&nbsp;->&nbsp;(a&nbsp;->&nbsp;b)&nbsp;->&nbsp;Maybe&nbsp;a&nbsp;->&nbsp;b&nbsp;</tt></td><td><tt>maybe&nbsp;0&nbsp;(+1)&nbsp;(Just&nbsp;1)&nbsp;=&nbsp;2</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tOrd">min</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Ord&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tBounded">minBound</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Bounded&nbsp;a&nbsp;=>&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vminimum">minimum</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Ord&nbsp;a&nbsp;=>&nbsp;[a]&nbsp;->&nbsp;a</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tIntegral">mod</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tNum">negate</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Num&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vnot">not</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Bool&nbsp;->&nbsp;Bool</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vnotElem">notElem</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eq&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;[a]&nbsp;->&nbsp;Bool</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vnull">null</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;->&nbsp;Bool</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vodd">odd</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;Bool</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vor">or</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[Bool]&nbsp;->&nbsp;Bool</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$votherwise">otherwise</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Bool</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">pi</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vpred">pred</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Enum&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td><td><tt>pred&nbsp;True&nbsp;=&nbsp;False</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vprint">print</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Show&nbsp;a&nbsp;=>&nbsp;IO&nbsp;()&nbsp;</tt></td><td><tt>adds&nbsp;a&nbsp;newline</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vproduct">product</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Num&nbsp;a&nbsp;=>&nbsp;[a]&nbsp;->&nbsp;a</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFrac">properFraction</a>&nbsp;&nbsp;&nbsp;::&nbsp;(RealFrac&nbsp;a,&nbsp;Integral&nbsp;b)&nbsp;=>&nbsp;a&nbsp;->&nbsp;(b,&nbsp;a)&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vputChar">putChar</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Char&nbsp;->&nbsp;IO&nbsp;()</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vputStr">putStr</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;String&nbsp;->&nbsp;IO&nbsp;()</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vputStrLn">putStrLn</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;String&nbsp;->&nbsp;IO&nbsp;()&nbsp;</tt></td><td><tt>adds&nbsp;a&nbsp;newline</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tIntegral">quot</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tIntegral">quotRem</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;(a,&nbsp;a)&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vread">read</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Read&nbsp;a&nbsp;=>&nbsp;String&nbsp;->&nbsp;a</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vreadFile">readFile</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;FilePath&nbsp;->&nbsp;IO&nbsp;String</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vreadIO">readIO</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Read&nbsp;a&nbsp;=>&nbsp;String&nbsp;->&nbsp;IO&nbsp;a&nbsp;</tt></td><td><tt>fails&nbsp;with&nbsp;IOError</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRead">readList</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Read&nbsp;a&nbsp;=>&nbsp;ReadS&nbsp;[a]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vreadLn">readLn</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Read&nbsp;a&nbsp;=>&nbsp;IO&nbsp;a</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vreadParen">readParen</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Bool&nbsp;->&nbsp;ReadS&nbsp;a&nbsp;->&nbsp;ReadS&nbsp;a</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vreads">reads</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Read&nbsp;a&nbsp;=>&nbsp;ReadS&nbsp;a&nbsp;</tt></td><td><tt>reads&nbsp;"1&nbsp;2"&nbsp;::&nbsp;[(Int,String)]&nbsp;=&nbsp;[(1,"&nbsp;2")]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRead">readsPrec</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Read&nbsp;a&nbsp;=>&nbsp;Int&nbsp;->&nbsp;ReadS&nbsp;a</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFractional">recip</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Fractional&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tIntegral">rem</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vrepeat">repeat</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>repeat&nbsp;'a'&nbsp;=&nbsp;"aaaaaaaaa..."</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vreplicate">replicate</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int&nbsp;->&nbsp;a&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>replicate&nbsp;4&nbsp;'a'&nbsp;=&nbsp;"aaaa"</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tMonad">return</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=>&nbsp;a&nbsp;->&nbsp;m&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vreverse">reverse</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>reverse&nbsp;"abc"&nbsp;=&nbsp;"cba"</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFrac">round</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(RealFrac&nbsp;a,&nbsp;Integral&nbsp;b)&nbsp;=>&nbsp;a&nbsp;->&nbsp;b&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFloat">scaleFloat</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;RealFloat&nbsp;a&nbsp;=>&nbsp;Int&nbsp;->&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vscanl">scanl</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;b&nbsp;->&nbsp;a)&nbsp;->&nbsp;a&nbsp;->&nbsp;[b]&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>scanl&nbsp;(+)&nbsp;0&nbsp;[1,2,3]&nbsp;=&nbsp;[1,3,6]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vscanl1">scanl1</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;a&nbsp;->&nbsp;a)&nbsp;->&nbsp;[a]&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>scanl1&nbsp;(+)&nbsp;[1,2,3]&nbsp;=&nbsp;[1,3,6]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vscanr">scanr</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;b&nbsp;->&nbsp;b)&nbsp;->&nbsp;b&nbsp;->&nbsp;[a]&nbsp;->&nbsp;[b]&nbsp;</tt></td><td><tt>scanr&nbsp;(+)&nbsp;0&nbsp;[1,2,3]&nbsp;=&nbsp;[6,5,1,0]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vscanr1">scanr1</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;a&nbsp;->&nbsp;a)&nbsp;->&nbsp;[a]&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>scanr&nbsp;(+)&nbsp;[1,2,3]&nbsp;=&nbsp;[6,5,1]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tEval">seq</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eval&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;b&nbsp;</tt></td><td><tt>(see&nbsp;<a href="basic.html#sect6.2.7">6.2.7</a>)</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vsequence">sequence</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=>&nbsp;[m&nbsp;a]&nbsp;->&nbsp;m&nbsp;()&nbsp;</tt></td><td><tt>do&nbsp;operations&nbsp;in&nbsp;sequence</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vshow">show</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Show&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;String&nbsp;</tt></td><td><tt>(see&nbsp;<a href="basic.html#sect6.2.3">6.2.3</a>)</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vshowChar">showChar</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Char&nbsp;->&nbsp;ShowS</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tShow">showList</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Show&nbsp;a&nbsp;=>&nbsp;[a]&nbsp;->&nbsp;ShowS</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vshowParen">showParen</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Bool&nbsp;->&nbsp;ShowS&nbsp;->&nbsp;ShowS</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vshowString">showString</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;String&nbsp;->&nbsp;ShowS</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vshows">shows</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Show&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;ShowS&nbsp;</tt></td><td><tt>(see&nbsp;<a href="basic.html#sect6.2.3">6.2.3</a>)</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tShow">showsPrec</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Show&nbsp;a&nbsp;=>&nbsp;Int&nbsp;->&nbsp;a&nbsp;->&nbsp;ShowS&nbsp;</tt></td><td><tt>(see&nbsp;<a href="basic.html#sect6.2.3">6.2.3</a>)</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFloat">significand</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;RealFloat&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tNum">signum</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Num&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">sin</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">sinh</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vsnd">snd</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a,&nbsp;b)&nbsp;->&nbsp;b</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vspan">span</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;Bool)&nbsp;->&nbsp;[a]&nbsp;->&nbsp;([a],&nbsp;[a])&nbsp;</tt></td><td><tt>span&nbsp;isAlpha&nbsp;"ab&nbsp;cd"&nbsp;=&nbsp;("ab","&nbsp;cd")</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vsplitAt">splitAt</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int&nbsp;->&nbsp;[a]&nbsp;->&nbsp;([a],&nbsp;[a])&nbsp;</tt></td><td><tt>splitAt&nbsp;2&nbsp;"abcdef"&nbsp;=&nbsp;("ab","cdef")</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">sqrt</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tEval">strict</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Eval&nbsp;a&nbsp;=>&nbsp;(a&nbsp;->&nbsp;b)&nbsp;->&nbsp;(a&nbsp;->&nbsp;b)&nbsp;</tt></td><td><tt>(see&nbsp;<a href="basic.html#sect6.2.7">6.2.7</a>)</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vsubtract">subtract</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Num&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;->&nbsp;a</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vsucc">succ</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Enum&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td><td><tt>succ&nbsp;False&nbsp;=&nbsp;True</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vsum">sum</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Num&nbsp;a&nbsp;=>&nbsp;[a]&nbsp;->&nbsp;a&nbsp;</tt></td><td><tt>sum&nbsp;[1,2,3]&nbsp;=&nbsp;6</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vtail">tail</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>tail&nbsp;"abc"&nbsp;=&nbsp;"bc"</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vtake">take</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int&nbsp;->&nbsp;[a]&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>take&nbsp;3&nbsp;"abcde"&nbsp;=&nbsp;"abc"</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vtakeWhile">takeWhile</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;Bool)&nbsp;->&nbsp;[a]&nbsp;->&nbsp;[a]&nbsp;</tt></td><td><tt>takeWhile&nbsp;(>&nbsp;2)&nbsp;[3,2,1]&nbsp;=&nbsp;[3]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">tan</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tFloating">tanh</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Floating&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tEnum">toEnum</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Enum&nbsp;a&nbsp;=>&nbsp;Int&nbsp;->&nbsp;a&nbsp;</tt></td><td><tt>toEnum&nbsp;0&nbsp;::&nbsp;Bool&nbsp;=&nbsp;False</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tIntegral">toInteger</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integral&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;Integer&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tReal">toRational</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Real&nbsp;a&nbsp;=>&nbsp;a&nbsp;->&nbsp;Rational&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tRealFrac">truncate</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(RealFrac&nbsp;a,&nbsp;Integral&nbsp;b)&nbsp;=>&nbsp;a&nbsp;->&nbsp;b&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vuncurry">uncurry</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;b&nbsp;->&nbsp;c)&nbsp;->&nbsp;((a,&nbsp;b)&nbsp;->&nbsp;c)</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vundefined">undefined</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;</tt></td><td><tt>(see&nbsp;<a href="exps.html#sect3.1">3.1</a>)</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vunlines">unlines</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[String]&nbsp;->&nbsp;String</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vuntil">until</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;Bool)&nbsp;->&nbsp;(a&nbsp;->&nbsp;a)&nbsp;->&nbsp;a&nbsp;->&nbsp;a&nbsp;</tt></td><td><tt>until&nbsp;(>&nbsp;3)&nbsp;(+&nbsp;2)&nbsp;0&nbsp;=&nbsp;4</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vunwords">unwords</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[String]&nbsp;->&nbsp;String</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vunzip">unzip</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[(a,&nbsp;b)]&nbsp;->&nbsp;([a],&nbsp;[b])&nbsp;</tt></td><td><tt>unzip&nbsp;[('a','b'),('c','d')]&nbsp;=&nbsp;["ac",bd"]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vunzip3">unzip3</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[(a,&nbsp;b,&nbsp;c)]&nbsp;->&nbsp;([a],&nbsp;[b],&nbsp;[c])</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vuserError">userError</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;String&nbsp;&nbsp;->&nbsp;IOError</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vwords">words</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;String&nbsp;->&nbsp;[String]&nbsp;</tt></td><td><tt>words&nbsp;"ab&nbsp;d&nbsp;as+3"&nbsp;=&nbsp;["ab","d","as+3"]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vwriteFile">writeFile</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;FilePath&nbsp;->&nbsp;String&nbsp;->&nbsp;IO&nbsp;()</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$tMonadZero">zero</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;MonadZero&nbsp;m&nbsp;=>&nbsp;m&nbsp;a&nbsp;</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vzip">zip</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;->&nbsp;[b]&nbsp;->&nbsp;[(a,&nbsp;b)]&nbsp;</tt></td><td><tt>zip&nbsp;"abc"&nbsp;"de"&nbsp;=&nbsp;[('a','d'),&nbsp;('b',e')]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vzip3">zip3</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;->&nbsp;[b]&nbsp;->&nbsp;[c]&nbsp;->&nbsp;[(a,&nbsp;b,&nbsp;c)]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vzipWith">zipWith</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;b&nbsp;->&nbsp;c)&nbsp;->&nbsp;[a]&nbsp;->&nbsp;[b]&nbsp;->&nbsp;[c]&nbsp;</tt></td><td><tt>zipWith&nbsp;(+)&nbsp;[1,2]&nbsp;[3,4]&nbsp;=&nbsp;[4,7]</tt></td></tr>
+<tr><td><tt><a href="standard-prelude.html#$vzipWith3">zipWith3</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;->&nbsp;b&nbsp;->&nbsp;c&nbsp;->&nbsp;d)&nbsp;->&nbsp;[a]&nbsp;->&nbsp;[b]&nbsp;->&nbsp;[c]&nbsp;->&nbsp;[d]</tt></td></tr>
+</table>

@@ -1,0 +1,309 @@
+
+<title>The Haskell 1.4 Report: Preface</title>
+<body bgcolor="#ffffff"> <i>The Haskell 1.4 Report</i><br> <a href="index.html">top</a> | back | <a href="intro.html">next</a> | <a href="index14.html">contents</a> | <a href="prelude-index.html">function index</a> <br><hr>
+
+<div align=center><font size=4 ><B>Preface  <br>
+(January 1, 1997)
+</B></font></div><p>
+<blockquote>"<I>Some half dozen persons have written technically on combinatory
+logic, and most of these, including ourselves, have published
+something erroneous.  Since some of our fellow sinners are among the
+most careful and competent logicians on the contemporary scene, we
+regard this as evidence that the subject is refractory.  Thus fullness
+of exposition is necessary for accuracy; and excessive condensation
+would be false economy here, even more than it is ordinarily.</I>"
+<table >
+<tr><td align=right>Haskell B. Curry and Robert Feys </td></tr><tr><td align=right>in the Preface to <I>Combinatory Logic</I> [<a href="haskell.html#$curry&feys:book">2</a>], May 31, 1956
+</td></tr></table>
+
+</blockquote><p>
+
+In September of 1987 a meeting was held at the conference on
+Functional Programming
+Languages and Computer Architecture (FPCA '87) in
+Portland, Oregon, to discuss an unfortunate situation
+in the functional programming community: there had come into being
+more than a dozen non-strict, purely functional programming languages,
+all similar in expressive power and semantic underpinnings.  There
+was a strong consensus at this meeting that more widespread use of
+this class of functional languages was
+being hampered by the lack of a common language.  It was decided
+that a committee should be formed to design such a language, providing
+faster communication of new ideas, a stable foundation for real
+applications development, and a vehicle through which others
+would be encouraged to use functional languages.  This
+document describes the result of that committee's efforts: a purely
+functional programming language called Haskell ,
+
+named after the logician Haskell B. Curry
+whose work provides the logical basis for much of ours.<p>
+<h3>Goals</h3><p>
+The committee's primary goal was to design a language that
+satisfied these constraints:
+<OL><LI>It should be suitable for teaching, research, and applications,
+      including building large systems.
+<LI>It should be completely described via the publication of a formal
+      syntax and semantics.
+<LI>It should be freely available.  Anyone should be permitted to
+      implement the language and distribute it to whomever they please.
+<LI>It should be based on ideas that enjoy a wide consensus.  
+<LI>It should reduce unnecessary diversity in functional 
+      programming languages.
+</OL>
+The committee hopes that Haskell  can serve as a
+basis for future research in language design.
+We hope that extensions or
+variants of the language may appear, incorporating experimental
+features.<p>
+<h3>This Report</h3><p>
+This report is the official specification of the Haskell 
+language and should be suitable for writing programs and building
+implementations.  It is <I>not</I> a tutorial on programming in
+Haskell  such as the `Gentle Introduction' [<a href="haskell.html#$tutorial">5</a>], so some
+familiarity with functional languages is assumed. <p>
+Version 1.4 of the report was unveiled in 1997.  It makes some minor
+corrections to version 1.3 and adds a few new features as described
+below.  Version 1.4 is described in two separate
+documents: the Haskell Language Report (this document) and the Haskell
+Library Report[<a href="haskell.html#$libraries">8</a>].<p>
+<h3>Highlights of Haskell 1.3</h3><p>
+<h3>Libraries</h3>
+
+For the first time, we distinguish between Prelude and Library
+entities.  Entities defined by the Prelude, a module named <tt>Prelude</tt>,
+are in scope unless explicitly
+hidden.  Entities defined in library modules 
+are in scope <I>only</I> if that module is explicitly
+imported.  The library modules specified by Haskell 
+are described in the Haskell Library Report.<p>
+<h3>Monadic I/O</h3>
+
+
+Monadic I/O has proven to be more general and in many
+respects simpler than the stream-based I/O system used in Haskell  1.2.
+Here are the highlights of the I/O definition.
+<UL><LI>
+We define a <I>monadic programming model</I> for Haskell. Expressions
+of type <tt>IO</tt> a denote computations that may engage in I/O
+before returning an answer of type a.
+<LI>
+The <tt>IO</tt> monad admits computations that fail and recovers from
+such failures.
+<LI>
+We define a new type of <I>handles</I>, to mediate I/O operations on
+files and other I/O devices.  Handles are part of the I/O library.
+<LI>
+We define input polling and input of characters.  In contrast,
+Haskell  1.2 represented character input as a single <tt>String</tt> (that
+is, a lazy 
+list of characters), containing all the characters available for input
+throughout the program execution.
+<LI>
+Monadic I/O provides an extensible framework capable of incorporating
+advanced operating system and GUI interfaces in libraries.
+<LI>
+
+Monadic programming has been made more readable through the
+introduction of a special <tt>do</tt> syntax.
+</UL><p>
+<h3>Constructor Classes</h3>
+
+
+Constructor classes are a natural generalization of the original Haskell 
+type system, supporting polymorphism over type constructors.
+For example, the monadic operators
+used by the I/O system have been generalized using constructor classes
+to arbitrary monads just as <tt>(+)</tt> has been generalized to arbitrary
+numeric types using type classes. <p>
+<h3>New Datatype Features</h3>
+
+
+
+A number of enhancements have been made to Haskell  type
+declarations.  These include:
+<UL><LI>
+Strictness annotations allow structures to be represented in a more
+efficient manner.
+<LI>
+The components of a constructor may be labeled using field names.
+Selection, construction, and update operations that
+reference fields by name rather than position are now available.
+<LI>
+The <tt>newtype</tt> declaration defines a type that renames an existing
+datatype without changing the underlying object representation.
+Unlike type synonyms, types defined by <tt>newtype</tt> are distinct from
+their definition.
+</UL><p>
+<h3>Improvements in the Module System</h3>
+
+A number of substantial changes to the module system have been made.
+Instead of renaming, qualified names are used to resolve
+name conflicts.  All names are now redefinable; there is no
+longer a <tt>PreludeCore</tt> module containing names that cannot be
+reused.  Interface files are no longer specified by this report; all
+issues of separate compilation are now left up to the implementation.<p>
+<h3>The <I>n</I><tt>+</tt><I>k</I> Pattern Controversy</h3>
+
+For technical reasons, many people feel that <I>n</I><tt>+</tt><I>k</I> patterns are
+an incongruous language design feature that should be eliminated
+from Haskell .  On the other hand, they serve as a
+vehicle for teaching introductory programming, in particular
+recursion over natural numbers.  Alternatives to <I>n</I><tt>+</tt><I>k
+</I>patterns have been explored, but are too premature to include in
+Haskell  1.3.  Thus the 1.3 committee decided to retain this feature
+at present but to discourage the use of <I>n</I><tt>+</tt><I>k</I> patterns by Haskell 
+users.  This feature may be altered or removed in future versions of
+Haskell  and should be avoided.
+Implementors are encouraged to provide a mechanism for users to
+selectively enable or disable <I>n</I><tt>+</tt><I>k</I> patterns.<p>
+<h3>Highlights of Haskell 1.4</h3><p>
+Version 1.4 of the report makes the following changes in the
+language:
+<UL><LI>The character set has been changed to Unicode.
+<LI>List comprehensions have been generalized to arbitrary
+monads.
+<LI>Import and export of class methods and constructors is no longer
+restricted to `all or nothing' as previously.  Any subset of class
+methods or data constructors may be selected for import or export.
+Also, constructors and class methods can now be named directly on
+import and export lists instead of as components of a type or class.
+<LI>Qualified names may now be used as field names in patterns and
+updates. 
+<LI><tt>Ord</tt> is no longer a superclass of <tt>Enum</tt>.  Some of the default
+methods for <tt>Enum</tt> have changed.
+<LI>Context restrictions on <tt>newtype</tt> declarations have been relaxed.
+
+<LI>The Prelude is now more explicit about some instances for <tt>Read
+</tt>and <tt>Show</tt>.
+<LI>The fixity of <tt>&gt;&gt;=</tt> has changed.
+</UL>
+These changes are relatively minor -- the version 1.3 report is nearly
+identical to this one.<p>
+<h3>Haskell  Resources</h3><p>
+We welcome your comments, suggestions, and criticisms on the language
+or its presentation in the report.
+A common mailing list for technical discussion of Haskell  uses the
+following electronic mail addresses:
+<UL><LI><tt>haskell@haskell.org</tt> forwards mail to all subscribers of
+the Haskell  list.<a name="haskell-mailing-list"></a>
+
+
+<LI><tt>haskell-request@haskell.org</tt> is used to add and remove
+subscribers from the mailing list.  To subscribe or unsubscribe send
+messages of the form: 
+<tt><br>
+
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;subscribe&nbsp;haskell<br>
+&nbsp;&nbsp;&nbsp;&nbsp;unsubscribe&nbsp;haskell<br>
+
+<br>
+
+</tt>You may wish to subscribe or remove a mailing address other than the
+reply-to address contained in your mail message.  These commands may
+include an explicit email address:
+
+<tt><br>
+
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;subscribe&nbsp;haskell&nbsp;bjm@wotsamatta.edu<br>
+
+<br>
+
+</tt>Please do not send subscription requests direct to the mailing list. 
+<LI>Each implementation has an email address for discussions of
+specific Haskell  systems.  Please send questions and comments
+regarding these directly to the associated groups instead of the
+global Haskell  community.
+</UL><p>
+
+
+Web pages for Haskell , which includes an
+on-line version of this report, a tutorial, extensions to Haskell ,
+information about upgrading programs from prior Haskell  versions,
+and information about Haskell  implementations can
+be found at the following sites:
+<UL><LI>
+<a href="http://haskell.org/"><tt>http://haskell.org</tt></a>
+<LI>
+<a href="http://www.dcs.gla.ac.uk/fp/software/ghc"><tt>http://www.dcs.gla.ac.uk/fp/software/ghc</tt></a>
+<LI>
+<a href="http://www.cs.chalmers.se/Haskell"><tt>http://www.cs.chalmers.se/Haskell</tt></a>
+<LI>
+<a href="http://www.cs.nott.ac.uk/Research/fpg/haskell.html"><tt>http://www.cs.nott.ac.uk/Research/fpg/haskell.html</tt></a>
+</UL><p>
+<h3>Acknowledgements</h3><p>
+We heartily thank these people for their useful contributions
+to this report:
+Richard Bird,
+Stephen Blott,
+Tom Blenko,
+Duke Briscoe,
+Magnus Carlsson,
+Franklin Chen,
+Chris Clack,
+Guy Cousineau,
+Tony Davie,
+Chris Fasel,
+Pat Fasel, 
+Andy Gill, 
+Cordy Hall,
+Thomas Hallgren,
+Bob Hiromoto,
+Nic Holt,
+Ian Holyer, 
+Randy Hudson,
+Simon B. Jones, 
+Stef Joosten, 
+Mike Joy,
+Stefan Kahrs,
+Kent Karlsson,
+Richard Kelsey,
+Siau-Cheng Khoo, 
+Amir Kishon, 
+John Launchbury,
+Mark Lillibridge,
+Sandra Loosemore,
+Olaf Lubeck, 
+Jim Mattson,
+Randy Michelsen, 
+Rick Mohr,
+Arthur Norman,
+Nick North,
+Paul Otto, 
+Larne Pekowsky,
+Rinus Plasmeijer,
+Ian Poole,
+John Robson, 
+Colin Runciman, 
+Patrick Sansom,
+Lauren Smith, 
+Raman Sundaresh,
+Satish Thatte,
+Tom Thomson,
+Pradeep Varma,
+Tony Warnock,
+Stuart Wray,
+and Bonnie Yantis.
+We are especially grateful to past members of the Haskell  committee---Arvind,
+Jon Fairbairn, Maria M. Guzman, 
+Dick Kieburtz, Rishiyur Nikhil,
+Mike Reeve, David Wise, and
+Jonathan Young---for the major contributions they have made to
+previous versions of this report, which we have been able to build upon,
+and for their support for this latest revision of Haskell .
+We also thank those who have participated in the lively discussions
+about Haskell  on the FP and Haskell  mailing lists.<p>
+Finally, aside from the important foundational work laid by Church,
+Rosser, Curry, and others on the lambda calculus, we wish to
+acknowledge the influence of many noteworthy programming languages
+developed over the years.  Although it is difficult to pinpoint the
+origin of many ideas, we particularly wish to acknowledge the
+influence of Lisp (and its modern-day incarnations Common Lisp and
+Scheme); Landin's ISWIM; APL; Backus's FP
+[<a href="haskell.html#$back78">1</a>]; ML and Standard ML; Hope and Hope<sub>+</sub>; Clean; Id; Gofer;
+Sisal; and Turner's series of languages culminating in 
+Miranda. (Miranda is a trademark of Research
+Software Ltd.) Without these forerunners Haskell  would not have
+been possible.
+<hr><i>The Haskell 1.4 Report</i><br><a href="index.html">top</a> | back | <a href="intro.html">next</a> | <a href="index14.html">contents</a> | <a href="prelude-index.html">function index</a> <br><font size=2>March 27, 1997</font>

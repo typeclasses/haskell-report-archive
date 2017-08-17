@@ -1,0 +1,73 @@
+
+<title>The Haskell 1.3 Report: Literate Comments</title>
+<body bgcolor="#ffffff"> <i>The Haskell 1.4 Report</i><br> <a href="index.html">top</a> | <a href="syntax-iso.html">back</a> | <a href="derived.html">next</a> | <a href="index14.html">contents</a> | <a href="prelude-index.html">function index</a> <br><hr>
+<a name="literate"></a><a name="sectC"></a>
+<h2>C<tt>&nbsp;&nbsp;</tt>Literate comments</h2>
+<p>
+The "literate comment"
+convention, first developed by Richard Bird and Philip Wadler for
+Orwell, and inspired in turn by Donald Knuth's "literate
+programming", is an alternative style for encoding Haskell  source
+code. 
+The literate style encourages comments by making them the default.  A
+line in which "<tt>&gt;</tt>" is the first character is treated as part of the
+program; all other lines are comment.  Within the program part, the
+usual "<tt>--</tt>" and "<tt>{-&nbsp;-}</tt>" comment conventions may still be used.
+To capture some cases where one omits an "<tt>&gt;</tt>" by mistake, it is an
+error for a program line to appear adjacent to a non-blank comment line,
+where a line is taken as blank if it consists only of whitespace.<p>
+By convention, the style of comment is indicated by the file
+extension, with "<tt>.hs</tt>" indicating a usual Haskell file and
+"<tt>.lhs</tt>" indicating a literate Haskell file.  Using this style, a
+simple factorial program would be:
+<tt><br>
+
+<br>
+This&nbsp;program&nbsp;prompts&nbsp;the&nbsp;user&nbsp;for&nbsp;a&nbsp;number&nbsp;and&nbsp;prints&nbsp;the&nbsp;factorial<br>
+of&nbsp;that&nbsp;number:<br>
+<br>
+&gt;&nbsp;main&nbsp;::&nbsp;IO&nbsp;()<br>
+<br>
+&gt;&nbsp;main&nbsp;=&nbsp;do&nbsp;putStr&nbsp;"Enter&nbsp;a&nbsp;number:&nbsp;"<br>
+&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;l&nbsp;&lt;-&nbsp;readLine<br>
+&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;putStr&nbsp;"n!=&nbsp;"<br>
+&gt;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print&nbsp;(fact&nbsp;(read&nbsp;l))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+This&nbsp;is&nbsp;the&nbsp;factorial&nbsp;function.<br>
+<br>
+&gt;&nbsp;fact&nbsp;::&nbsp;Integer&nbsp;-&gt;&nbsp;Integer<br>
+&gt;&nbsp;fact&nbsp;0&nbsp;=&nbsp;1<br>
+&gt;&nbsp;fact&nbsp;n&nbsp;=&nbsp;n&nbsp;*&nbsp;fact&nbsp;(n-1)<br>
+
+<br>
+<p>
+</tt>An alternative style of literate programming is particularly
+suitable for use with the LaTeX text processing system.
+In this convention, only those parts of the literate program that are
+entirely enclosed between <tt>\begin{code}</tt>...<tt>\end{code}</tt> delimiters are
+treated as program text; all other lines are comment.  It is not necessary
+to insert additional blank lines before or after these delimiters, though
+it may be stylistically desirable.  For example,
+<tt><br>
+
+<br>
+\documentstyle{article}<br>
+<br>
+\begin{document}<br>
+<br>
+\section{Introduction}<br>
+<br>
+This&nbsp;is&nbsp;a&nbsp;trivial&nbsp;program&nbsp;that&nbsp;prints&nbsp;the&nbsp;first&nbsp;20&nbsp;factorials.<br>
+<br>
+\begin{code}<br>
+main&nbsp;::&nbsp;IO&nbsp;()<br>
+main&nbsp;=&nbsp;&nbsp;print&nbsp;[&nbsp;(n,&nbsp;product&nbsp;[1..n])&nbsp;|&nbsp;n&nbsp;&lt;-&nbsp;[1..20]]<br>
+\end{code}<br>
+<br>
+\end{document}<br>
+
+<br>
+
+</tt>This style uses the same file extension.  It is not advisable to mix
+these two styles in the same file.<p>
+<hr><i>The Haskell 1.4 Report</i><br><a href="index.html">top</a> | <a href="syntax-iso.html">back</a> | <a href="derived.html">next</a> | <a href="index14.html">contents</a> | <a href="prelude-index.html">function index</a> <br><font size=2>March 27, 1997</font>

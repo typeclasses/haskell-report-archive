@@ -1,0 +1,1397 @@
+
+<title>The Haskell 1.3 Report: Standard Prelude</title>
+<body bgcolor="#ffffff"> <i>The Haskell 1.4 Report</i><br> <a href="index.html">top</a> | <a href="io-13.html">back</a> | <a href="syntax-iso.html">next</a> | <a href="index14.html">contents</a> | <a href="prelude-index.html">function index</a> <br><hr>
+<a name="stdprelude"></a><a name="sectA"></a>
+<h2>A<tt>&nbsp;&nbsp;</tt>Standard Prelude</h2>
+<p>
+In this appendix the entire Haskell  prelude is given.  It is
+organized into a root module and three sub-modules.  Primitives that
+are not definable in Haskell , indicated by names starting with <tt>prim</tt>, are
+defined in a system dependent manner in module <tt>PreludeBuiltin</tt> and
+are not shown here.  Instance declarations that simply bind primitives to
+class methods are omitted.  Some of the more verbose instances with
+obvious functionality have been left out for the sake of brevity.<p>
+Declarations for special types such as <tt>Integer</tt>, <tt>()</tt>, or <tt>(-&gt;)</tt> are
+included in the Prelude for completeness even though the declaration
+may be incomplete or syntactically invalid.<p>
+
+<tt><br>
+module&nbsp;Prelude&nbsp;(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;module&nbsp;PreludeList,&nbsp;module&nbsp;PreludeText,&nbsp;module&nbsp;PreludeIO,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Bool(False,&nbsp;True),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Maybe(Nothing,&nbsp;Just),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Either(Left,&nbsp;Right),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Ordering(LT,&nbsp;EQ,&nbsp;GT),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Char,&nbsp;String,&nbsp;Int,&nbsp;Integer,&nbsp;Float,&nbsp;Double,&nbsp;IO,&nbsp;Void,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Ratio,&nbsp;Rational,&nbsp;<br>
+--&nbsp;&nbsp;List&nbsp;type:&nbsp;[]((:),&nbsp;[])<br>
+--&nbsp;&nbsp;Tuple&nbsp;types:&nbsp;(,),&nbsp;(,,),&nbsp;etc.<br>
+--&nbsp;&nbsp;Trivial&nbsp;type:&nbsp;()<br>
+--&nbsp;&nbsp;Functions:&nbsp;(-&gt;)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Eq((==),&nbsp;(/=)),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Ord(compare,&nbsp;(&lt;),&nbsp;(&lt;=),&nbsp;(&gt;=),&nbsp;(&gt;),&nbsp;max,&nbsp;min),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Enum(toEnum,&nbsp;fromEnum,&nbsp;enumFrom,&nbsp;enumFromThen,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;enumFromTo,&nbsp;enumFromThenTo),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Bounded(minBound,&nbsp;maxBound),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Eval(seq,&nbsp;strict),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Num((+),&nbsp;(-),&nbsp;(*),&nbsp;negate,&nbsp;abs,&nbsp;signum,&nbsp;fromInteger),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Real(toRational),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Integral(quot,&nbsp;rem,&nbsp;div,&nbsp;mod,&nbsp;quotRem,&nbsp;divMod,&nbsp;toInteger),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Fractional((/),&nbsp;recip,&nbsp;fromRational),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Floating(pi,&nbsp;exp,&nbsp;log,&nbsp;sqrt,&nbsp;(**),&nbsp;logBase,&nbsp;sin,&nbsp;cos,&nbsp;tan,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;asin,&nbsp;acos,&nbsp;atan,&nbsp;sinh,&nbsp;cosh,&nbsp;tanh,&nbsp;asinh,&nbsp;acosh,&nbsp;atanh),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;RealFrac(properFraction,&nbsp;truncate,&nbsp;round,&nbsp;ceiling,&nbsp;floor),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;RealFloat(floatRadix,&nbsp;floatDigits,&nbsp;floatRange,&nbsp;decodeFloat,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;encodeFloat,&nbsp;exponent,&nbsp;significand,&nbsp;scaleFloat,&nbsp;isNaN,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;isInfinite,&nbsp;isDenormalized,&nbsp;isIEEE,&nbsp;isNegativeZero),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Monad((&gt;&gt;=),&nbsp;(&gt;&gt;),&nbsp;return),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;MonadZero(zero),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;MonadPlus((++)),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Functor(map),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;succ,&nbsp;pred,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;mapM,&nbsp;mapM_,&nbsp;guard,&nbsp;accumulate,&nbsp;sequence,&nbsp;filter,&nbsp;concat,&nbsp;applyM,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;maybe,&nbsp;either,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(&amp;&amp;),&nbsp;(||),&nbsp;not,&nbsp;otherwise,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;subtract,&nbsp;even,&nbsp;odd,&nbsp;gcd,&nbsp;lcm,&nbsp;(^),&nbsp;(^^),&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromIntegral,&nbsp;fromRealFrac,&nbsp;atan2,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fst,&nbsp;snd,&nbsp;curry,&nbsp;uncurry,&nbsp;id,&nbsp;const,&nbsp;(.),&nbsp;flip,&nbsp;($),&nbsp;until,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;asTypeOf,&nbsp;error,&nbsp;undefined&nbsp;)&nbsp;where<br>
+<br>
+import&nbsp;PreludeBuiltin&nbsp;&nbsp;--&nbsp;Contains&nbsp;all&nbsp;`prim'&nbsp;values<br>
+import&nbsp;PreludeList<br>
+import&nbsp;PreludeText<br>
+import&nbsp;PreludeIO<br>
+import&nbsp;Ratio(Ratio,&nbsp;Rational,&nbsp;(%),&nbsp;numerator,&nbsp;denominator)<br>
+<br>
+infixr&nbsp;9&nbsp;&nbsp;.<br>
+infixr&nbsp;8&nbsp;&nbsp;^,&nbsp;^^,&nbsp;**<br>
+infixl&nbsp;7&nbsp;&nbsp;*,&nbsp;/,&nbsp;`quot`,&nbsp;`rem`,&nbsp;`div`,&nbsp;`mod`<br>
+infixl&nbsp;6&nbsp;&nbsp;+,&nbsp;-<br>
+infixr&nbsp;5&nbsp;&nbsp;:,&nbsp;++<br>
+infix&nbsp;&nbsp;4&nbsp;&nbsp;==,&nbsp;/=,&nbsp;&lt;,&nbsp;&lt;=,&nbsp;&gt;=,&nbsp;&gt;<br>
+infixr&nbsp;3&nbsp;&nbsp;&amp;&amp;<br>
+infixr&nbsp;2&nbsp;&nbsp;||<br>
+infixl&nbsp;1&nbsp;&nbsp;&gt;&gt;,&nbsp;&gt;&gt;=<br>
+infixr&nbsp;0&nbsp;&nbsp;$,&nbsp;`seq`<br>
+<br>
+--&nbsp;Standard&nbsp;types,&nbsp;classes,&nbsp;instances&nbsp;and&nbsp;related&nbsp;functions<br>
+<br>
+--&nbsp;Equality&nbsp;and&nbsp;Ordered&nbsp;classes<br>
+<br>
+<a name="$tEq"></a><br>
+class&nbsp;&nbsp;Eq&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(==),&nbsp;(/=)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;/=&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;not&nbsp;(x&nbsp;==&nbsp;y)<br>
+<br>
+<a name="$tOrd"></a><br>
+class&nbsp;&nbsp;(Eq&nbsp;a)&nbsp;=&gt;&nbsp;Ord&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;compare&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Ordering<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(&lt;),&nbsp;(&lt;=),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(&gt;=),&nbsp;(&gt;)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool<br>
+&nbsp;&nbsp;&nbsp;&nbsp;max,&nbsp;min&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+<br>
+--&nbsp;An&nbsp;instance&nbsp;of&nbsp;Ord&nbsp;should&nbsp;define&nbsp;either&nbsp;compare&nbsp;or&nbsp;&lt;=<br>
+--&nbsp;Using&nbsp;compare&nbsp;can&nbsp;be&nbsp;more&nbsp;efficient&nbsp;for&nbsp;complex&nbsp;types.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;compare&nbsp;x&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;x&nbsp;==&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;EQ<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;x&nbsp;&lt;=&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;LT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;=&nbsp;&nbsp;GT<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;&lt;=&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;compare&nbsp;x&nbsp;y&nbsp;/=&nbsp;GT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;&lt;&nbsp;&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;compare&nbsp;x&nbsp;y&nbsp;==&nbsp;LT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;&gt;=&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;compare&nbsp;x&nbsp;y&nbsp;/=&nbsp;LT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;&gt;&nbsp;&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;compare&nbsp;x&nbsp;y&nbsp;==&nbsp;GT<br>
+<br>
+--&nbsp;note&nbsp;that&nbsp;(min&nbsp;x&nbsp;y,&nbsp;max&nbsp;x&nbsp;y)&nbsp;=&nbsp;(x,y)&nbsp;or&nbsp;(y,x)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;max&nbsp;x&nbsp;y&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;x&nbsp;&gt;=&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;=&nbsp;&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;min&nbsp;x&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;x&nbsp;&lt;&nbsp;&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;=&nbsp;&nbsp;y<br>
+<br>
+--&nbsp;Enumeration&nbsp;and&nbsp;Bounded&nbsp;classes<br>
+<br>
+<a name="$tEnum"></a><br>
+class&nbsp;&nbsp;Enum&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;toEnum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromEnum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;Int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFrom&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;[n..]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromThen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;[n,n'..]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromTo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;[n..m]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromThenTo&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;&nbsp;&nbsp;--&nbsp;[n,n'..m]<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromTo&nbsp;x&nbsp;y&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;map&nbsp;toEnum&nbsp;[fromEnum&nbsp;x&nbsp;..&nbsp;fromEnum&nbsp;y]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromThenTo&nbsp;x&nbsp;y&nbsp;z&nbsp;=&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;map&nbsp;toEnum&nbsp;[fromEnum&nbsp;x,&nbsp;fromEnum&nbsp;y&nbsp;..&nbsp;fromEnum&nbsp;z]<br>
+<br>
+<a name="$vsucc"></a><a name="$vpred"></a><br>
+succ,&nbsp;pred&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Enum&nbsp;a&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+succ&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;toEnum&nbsp;.&nbsp;(+1)&nbsp;.&nbsp;fromEnum<br>
+pred&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;toEnum&nbsp;.&nbsp;(subtract&nbsp;1)&nbsp;.&nbsp;fromEnum<br>
+<br>
+<a name="$tBounded"></a><br>
+class&nbsp;&nbsp;Bounded&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;minBound&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;maxBound&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a<br>
+<br>
+--&nbsp;Numeric&nbsp;classes<br>
+<br>
+<a name="$tNum"></a><br>
+class&nbsp;&nbsp;(Eq&nbsp;a,&nbsp;Show&nbsp;a,&nbsp;Eval&nbsp;a)&nbsp;=&gt;&nbsp;Num&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(+),&nbsp;(-),&nbsp;(*)&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;negate&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;abs,&nbsp;signum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromInteger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integer&nbsp;-&gt;&nbsp;a<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;-&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;+&nbsp;negate&nbsp;y<br>
+<br>
+<a name="$tReal"></a><br>
+class&nbsp;&nbsp;(Num&nbsp;a,&nbsp;Ord&nbsp;a)&nbsp;=&gt;&nbsp;Real&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;toRational&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;&nbsp;a&nbsp;-&gt;&nbsp;Rational<br>
+<br>
+<a name="$tIntegral"></a><br>
+class&nbsp;&nbsp;(Real&nbsp;a,&nbsp;Enum&nbsp;a)&nbsp;=&gt;&nbsp;Integral&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;quot,&nbsp;rem&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;div,&nbsp;mod&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;quotRem,&nbsp;divMod&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;(a,a)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;toInteger&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;Integer<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;n&nbsp;`quot`&nbsp;d&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;q&nbsp;&nbsp;where&nbsp;(q,r)&nbsp;=&nbsp;quotRem&nbsp;n&nbsp;d<br>
+&nbsp;&nbsp;&nbsp;&nbsp;n&nbsp;`rem`&nbsp;d&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;r&nbsp;&nbsp;where&nbsp;(q,r)&nbsp;=&nbsp;quotRem&nbsp;n&nbsp;d<br>
+&nbsp;&nbsp;&nbsp;&nbsp;n&nbsp;`div`&nbsp;d&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;q&nbsp;&nbsp;where&nbsp;(q,r)&nbsp;=&nbsp;divMod&nbsp;n&nbsp;d<br>
+&nbsp;&nbsp;&nbsp;&nbsp;n&nbsp;`mod`&nbsp;d&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;r&nbsp;&nbsp;where&nbsp;(q,r)&nbsp;=&nbsp;divMod&nbsp;n&nbsp;d<br>
+&nbsp;&nbsp;&nbsp;&nbsp;divMod&nbsp;n&nbsp;d&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;if&nbsp;signum&nbsp;r&nbsp;==&nbsp;-&nbsp;signum&nbsp;d&nbsp;then&nbsp;(q-1,&nbsp;r+d)&nbsp;else&nbsp;qr<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;qr@(q,r)&nbsp;=&nbsp;quotRem&nbsp;n&nbsp;d<br>
+<br>
+<a name="$tFractional"></a><br>
+class&nbsp;&nbsp;(Num&nbsp;a)&nbsp;=&gt;&nbsp;Fractional&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(/)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;recip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromRational&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Rational&nbsp;-&gt;&nbsp;a<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;recip&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;1&nbsp;/&nbsp;x<br>
+<br>
+<a name="$tFloating"></a><br>
+class&nbsp;&nbsp;(Fractional&nbsp;a)&nbsp;=&gt;&nbsp;Floating&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;pi&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;exp,&nbsp;log,&nbsp;sqrt&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(**),&nbsp;logBase&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sin,&nbsp;cos,&nbsp;tan&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;asin,&nbsp;acos,&nbsp;atan&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sinh,&nbsp;cosh,&nbsp;tanh&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;asinh,&nbsp;acosh,&nbsp;atanh&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;**&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;exp&nbsp;(log&nbsp;x&nbsp;*&nbsp;y)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;logBase&nbsp;x&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;log&nbsp;y&nbsp;/&nbsp;log&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sqrt&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;**&nbsp;0.5<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tan&nbsp;&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;sin&nbsp;&nbsp;x&nbsp;/&nbsp;cos&nbsp;&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;tanh&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;sinh&nbsp;x&nbsp;/&nbsp;cosh&nbsp;x<br>
+<br>
+<a name="$tRealFrac"></a><br>
+class&nbsp;&nbsp;(Real&nbsp;a,&nbsp;Fractional&nbsp;a)&nbsp;=&gt;&nbsp;RealFrac&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;properFraction&nbsp;&nbsp;&nbsp;::&nbsp;(Integral&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;(b,a)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;truncate,&nbsp;round&nbsp;&nbsp;::&nbsp;(Integral&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ceiling,&nbsp;floor&nbsp;&nbsp;&nbsp;::&nbsp;(Integral&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;truncate&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;m&nbsp;&nbsp;where&nbsp;(m,_)&nbsp;=&nbsp;properFraction&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;round&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;let&nbsp;(n,r)&nbsp;=&nbsp;properFraction&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;m&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;if&nbsp;r&nbsp;&lt;&nbsp;0&nbsp;then&nbsp;n&nbsp;-&nbsp;1&nbsp;else&nbsp;n&nbsp;+&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;case&nbsp;signum&nbsp;(abs&nbsp;r&nbsp;-&nbsp;0.5)&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-1&nbsp;-&gt;&nbsp;n<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;0&nbsp;&nbsp;-&gt;&nbsp;if&nbsp;even&nbsp;n&nbsp;then&nbsp;n&nbsp;else&nbsp;m<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;1&nbsp;&nbsp;-&gt;&nbsp;m<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ceiling&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;if&nbsp;r&nbsp;&gt;&nbsp;0&nbsp;then&nbsp;n&nbsp;+&nbsp;1&nbsp;else&nbsp;n<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;(n,r)&nbsp;=&nbsp;properFraction&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;floor&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;if&nbsp;r&nbsp;&lt;&nbsp;0&nbsp;then&nbsp;n&nbsp;-&nbsp;1&nbsp;else&nbsp;n<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;(n,r)&nbsp;=&nbsp;properFraction&nbsp;x<br>
+<br>
+<a name="$tRealFloat"></a><br>
+class&nbsp;&nbsp;(RealFrac&nbsp;a,&nbsp;Floating&nbsp;a)&nbsp;=&gt;&nbsp;RealFloat&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;floatRadix&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;Integer<br>
+&nbsp;&nbsp;&nbsp;&nbsp;floatDigits&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;Int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;floatRange&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;(Int,Int)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;decodeFloat&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;(Integer,Int)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;encodeFloat&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Integer&nbsp;-&gt;&nbsp;Int&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;exponent&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;Int<br>
+&nbsp;&nbsp;&nbsp;&nbsp;significand&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;scaleFloat&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;isNaN,&nbsp;isInfinite,&nbsp;isDenormalized,&nbsp;isNegativeZero,&nbsp;isIEEE<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;Bool<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;exponent&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;if&nbsp;m&nbsp;==&nbsp;0&nbsp;then&nbsp;0&nbsp;else&nbsp;n&nbsp;+&nbsp;floatDigits&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;(m,n)&nbsp;=&nbsp;decodeFloat&nbsp;x<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;significand&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;encodeFloat&nbsp;m&nbsp;(-&nbsp;floatDigits&nbsp;x)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;(m,_)&nbsp;=&nbsp;decodeFloat&nbsp;x<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;scaleFloat&nbsp;k&nbsp;x&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;encodeFloat&nbsp;m&nbsp;(n+k)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;(m,n)&nbsp;=&nbsp;decodeFloat&nbsp;x<br>
+<br>
+--&nbsp;Numeric&nbsp;functions<br>
+<br>
+<a name="$vsubtract"></a><br>
+subtract&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Num&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+subtract&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;flip&nbsp;(-)<br>
+<br>
+<a name="$veven"></a><a name="$vodd"></a><br>
+even,&nbsp;odd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Integral&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;Bool<br>
+even&nbsp;n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;n&nbsp;`rem`&nbsp;2&nbsp;==&nbsp;0<br>
+odd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;not&nbsp;.&nbsp;even<br>
+<br>
+<a name="$vgcd"></a><br>
+gcd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Integral&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+gcd&nbsp;0&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"Prelude.gcd:&nbsp;gcd&nbsp;0&nbsp;0&nbsp;is&nbsp;undefined"<br>
+gcd&nbsp;x&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;gcd'&nbsp;(abs&nbsp;x)&nbsp;(abs&nbsp;y)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;gcd'&nbsp;x&nbsp;0&nbsp;&nbsp;=&nbsp;&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;gcd'&nbsp;x&nbsp;y&nbsp;&nbsp;=&nbsp;&nbsp;gcd'&nbsp;y&nbsp;(x&nbsp;`rem`&nbsp;y)<br>
+<br>
+<a name="$vlcm"></a><br>
+lcm&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Integral&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+lcm&nbsp;_&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;0<br>
+lcm&nbsp;0&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;0<br>
+lcm&nbsp;x&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;abs&nbsp;((x&nbsp;`quot`&nbsp;(gcd&nbsp;x&nbsp;y))&nbsp;*&nbsp;y)<br>
+<br>
+<a name="$v$U"></a><br>
+(^)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Num&nbsp;a,&nbsp;Integral&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;a<br>
+x&nbsp;^&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;1<br>
+x&nbsp;^&nbsp;n&nbsp;|&nbsp;n&nbsp;&gt;&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;f&nbsp;x&nbsp;(n-1)&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;f&nbsp;_&nbsp;0&nbsp;y&nbsp;=&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;f&nbsp;x&nbsp;n&nbsp;y&nbsp;=&nbsp;g&nbsp;x&nbsp;n&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;g&nbsp;x&nbsp;n&nbsp;|&nbsp;even&nbsp;n&nbsp;&nbsp;=&nbsp;g&nbsp;(x*x)&nbsp;(n&nbsp;`quot`&nbsp;2)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;=&nbsp;f&nbsp;x&nbsp;(n-1)&nbsp;(x*y)<br>
+_&nbsp;^&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;error&nbsp;"Prelude.^:&nbsp;negative&nbsp;exponent"<br>
+<br>
+<a name="$v$U$U"></a><br>
+(^^)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Fractional&nbsp;a,&nbsp;Integral&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;a<br>
+x&nbsp;^^&nbsp;n&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;if&nbsp;n&nbsp;&gt;=&nbsp;0&nbsp;then&nbsp;x^n&nbsp;else&nbsp;recip&nbsp;(x^(-n))<br>
+<br>
+<a name="$vfromIntegral"></a><br>
+fromIntegral&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Integral&nbsp;a,&nbsp;Num&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+fromIntegral&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;fromInteger&nbsp;.&nbsp;toInteger<br>
+<br>
+<a name="$vfromRealFrac"></a><br>
+fromRealFrac&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(RealFrac&nbsp;a,&nbsp;Fractional&nbsp;b)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+fromRealFrac&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;fromRational&nbsp;.&nbsp;toRational<br>
+<br>
+<a name="$vatan2"></a><br>
+atan2&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(RealFloat&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+atan2&nbsp;y&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;case&nbsp;(signum&nbsp;y,&nbsp;signum&nbsp;x)&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;0,&nbsp;1)&nbsp;-&gt;&nbsp;&nbsp;0<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;1,&nbsp;0)&nbsp;-&gt;&nbsp;&nbsp;pi/2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;0,-1)&nbsp;-&gt;&nbsp;&nbsp;pi<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(-1,&nbsp;0)&nbsp;-&gt;&nbsp;-pi/2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;_,&nbsp;1)&nbsp;-&gt;&nbsp;&nbsp;atan&nbsp;(y/x)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;_,-1)&nbsp;-&gt;&nbsp;&nbsp;atan&nbsp;(y/x)&nbsp;+&nbsp;pi<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(&nbsp;0,&nbsp;0)&nbsp;-&gt;&nbsp;&nbsp;error&nbsp;"Prelude.atan2:&nbsp;atan2&nbsp;of&nbsp;origin"<br>
+<br>
+<br>
+--&nbsp;Monadic&nbsp;classes<br>
+<br>
+<a name="$tFunctor"></a><br>
+class&nbsp;&nbsp;Functor&nbsp;f&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;map&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;f&nbsp;a&nbsp;-&gt;&nbsp;f&nbsp;b<br>
+<br>
+<a name="$tMonad"></a><br>
+class&nbsp;&nbsp;Monad&nbsp;m&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(&gt;&gt;=)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;(a&nbsp;-&gt;&nbsp;m&nbsp;b)&nbsp;-&gt;&nbsp;m&nbsp;b<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(&gt;&gt;)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;b&nbsp;-&gt;&nbsp;m&nbsp;b<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;a<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;m&nbsp;&gt;&gt;&nbsp;k&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;m&nbsp;&gt;&gt;=&nbsp;\_&nbsp;-&gt;&nbsp;k<br>
+<br>
+<a name="$tMonadZero"></a><br>
+class&nbsp;&nbsp;(Monad&nbsp;m)&nbsp;=&gt;&nbsp;MonadZero&nbsp;m&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;zero&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;m&nbsp;a<br>
+<br>
+<a name="$tMonadPlus"></a><br>
+class&nbsp;&nbsp;(MonadZero&nbsp;m)&nbsp;=&gt;&nbsp;MonadPlus&nbsp;m&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(++)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;a<br>
+<br>
+<a name="$vaccumulate"></a><br>
+accumulate&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;[m&nbsp;a]&nbsp;-&gt;&nbsp;m&nbsp;[a]&nbsp;<br>
+accumulate&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldr&nbsp;mcons&nbsp;(return&nbsp;[])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;mcons&nbsp;p&nbsp;q&nbsp;=&nbsp;p&nbsp;&gt;&gt;=&nbsp;\x&nbsp;-&gt;&nbsp;q&nbsp;&gt;&gt;=&nbsp;\y&nbsp;-&gt;&nbsp;return&nbsp;(x:y)<br>
+<br>
+<a name="$vsequence"></a><br>
+sequence&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;[m&nbsp;a]&nbsp;-&gt;&nbsp;m&nbsp;()&nbsp;<br>
+sequence&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldr&nbsp;(&gt;&gt;)&nbsp;(return&nbsp;())<br>
+<br>
+<a name="$vmapM"></a><br>
+mapM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;m&nbsp;b)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;m&nbsp;[b]<br>
+mapM&nbsp;f&nbsp;as&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;accumulate&nbsp;(map&nbsp;f&nbsp;as)<br>
+<br>
+<a name="$vmapM_"></a><br>
+mapM_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;m&nbsp;b)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;m&nbsp;()<br>
+mapM_&nbsp;f&nbsp;as&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;sequence&nbsp;(map&nbsp;f&nbsp;as)<br>
+<br>
+<a name="$vguard"></a><br>
+guard&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;MonadZero&nbsp;m&nbsp;=&gt;&nbsp;Bool&nbsp;-&gt;&nbsp;m&nbsp;()<br>
+guard&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;if&nbsp;p&nbsp;then&nbsp;return&nbsp;()&nbsp;else&nbsp;zero<br>
+<br>
+--&nbsp;This&nbsp;subsumes&nbsp;the&nbsp;list-based&nbsp;filter&nbsp;function.<br>
+<br>
+<a name="$vfilter"></a><br>
+filter&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;MonadZero&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;a<br>
+filter&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;applyM&nbsp;(\x&nbsp;-&gt;&nbsp;if&nbsp;p&nbsp;x&nbsp;then&nbsp;return&nbsp;x&nbsp;else&nbsp;zero)<br>
+<br>
+--&nbsp;This&nbsp;subsumes&nbsp;the&nbsp;list-based&nbsp;concat&nbsp;function.<br>
+<br>
+<a name="$vconcat"></a><br>
+concat&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;MonadPlus&nbsp;m&nbsp;=&gt;&nbsp;[m&nbsp;a]&nbsp;-&gt;&nbsp;m&nbsp;a<br>
+concat&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldr&nbsp;(++)&nbsp;zero<br>
+&nbsp;<br>
+<a name="$vapplyM"></a><br>
+applyM&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Monad&nbsp;m&nbsp;=&gt;&nbsp;(a&nbsp;-&gt;&nbsp;m&nbsp;b)&nbsp;-&gt;&nbsp;m&nbsp;a&nbsp;-&gt;&nbsp;m&nbsp;b<br>
+applyM&nbsp;f&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;&gt;&gt;=&nbsp;f<br>
+<br>
+<br>
+--&nbsp;Eval&nbsp;Class<br>
+<br>
+<a name="$tEval"></a><br>
+class&nbsp;&nbsp;Eval&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;seq&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;b<br>
+&nbsp;&nbsp;&nbsp;&nbsp;strict&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+&nbsp;&nbsp;&nbsp;&nbsp;strict&nbsp;f&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;`seq`&nbsp;f&nbsp;x<br>
+<br>
+<br>
+--&nbsp;Trivial&nbsp;type<br>
+<br>
+<a name="$t$P$C"></a><br>
+data&nbsp;&nbsp;()&nbsp;&nbsp;=&nbsp;&nbsp;()&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Enum,&nbsp;Bounded)<br>
+<br>
+--&nbsp;Function&nbsp;type<br>
+<br>
+<a name="$ta"></a><br>
+data&nbsp;a&nbsp;-&gt;&nbsp;b&nbsp;&nbsp;--&nbsp;No&nbsp;constructor&nbsp;for&nbsp;functions&nbsp;is&nbsp;exported.<br>
+<br>
+--&nbsp;identity&nbsp;function<br>
+<a name="$vid"></a><br>
+id&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+id&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x<br>
+<br>
+--&nbsp;constant&nbsp;function<br>
+<a name="$vconst"></a><br>
+const&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;a<br>
+const&nbsp;x&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x<br>
+<br>
+--&nbsp;function&nbsp;composition<br>
+<a name="$v."></a><br>
+(.)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(b&nbsp;-&gt;&nbsp;c)&nbsp;-&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;c<br>
+f&nbsp;.&nbsp;g&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;\&nbsp;x&nbsp;-&gt;&nbsp;f&nbsp;(g&nbsp;x)<br>
+<br>
+--&nbsp;flip&nbsp;f&nbsp;&nbsp;takes&nbsp;its&nbsp;(first)&nbsp;two&nbsp;arguments&nbsp;in&nbsp;the&nbsp;reverse&nbsp;order&nbsp;of&nbsp;f.<br>
+<a name="$vflip"></a><br>
+flip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;c)&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;c<br>
+flip&nbsp;f&nbsp;x&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;f&nbsp;y&nbsp;x<br>
+<br>
+--&nbsp;right-associating&nbsp;infix&nbsp;application&nbsp;operator&nbsp;(useful&nbsp;in&nbsp;continuation-<br>
+--&nbsp;passing&nbsp;style)<br>
+<a name="$v$D"></a><br>
+($)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+f&nbsp;$&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;f&nbsp;x<br>
+<br>
+--&nbsp;Empty&nbsp;type<br>
+<br>
+<a name="$tVoid"></a><br>
+data&nbsp;Void&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;No&nbsp;constructor&nbsp;for&nbsp;Void&nbsp;is&nbsp;exported.&nbsp;&nbsp;Import/Export<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;lists&nbsp;must&nbsp;use&nbsp;Void&nbsp;instead&nbsp;of&nbsp;Void(..)&nbsp;or&nbsp;Void()<br>
+<br>
+--&nbsp;Boolean&nbsp;type<br>
+<br>
+<a name="$tBool"></a><br>
+data&nbsp;&nbsp;Bool&nbsp;&nbsp;=&nbsp;&nbsp;False&nbsp;|&nbsp;True&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Enum,&nbsp;Read,&nbsp;Show,&nbsp;Bounded)<br>
+<br>
+--&nbsp;Boolean&nbsp;functions<br>
+<br>
+<a name="$v$A$A"></a><a name="$v$b$b"></a><br>
+(&amp;&amp;),&nbsp;(||)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Bool&nbsp;-&gt;&nbsp;Bool&nbsp;-&gt;&nbsp;Bool<br>
+True&nbsp;&nbsp;&amp;&amp;&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x<br>
+False&nbsp;&amp;&amp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;False<br>
+True&nbsp;&nbsp;||&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;True<br>
+False&nbsp;||&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x<br>
+		&nbsp;&nbsp;			<br>
+<a name="$vnot"></a><br>
+not&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Bool&nbsp;-&gt;&nbsp;Bool<br>
+not&nbsp;True&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;False<br>
+not&nbsp;False&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;True<br>
+<br>
+<a name="$votherwise"></a><br>
+otherwise&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Bool<br>
+otherwise&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;True<br>
+<br>
+<br>
+--&nbsp;Character&nbsp;type<br>
+<br>
+<a name="$tChar"></a><br>
+data&nbsp;Char&nbsp;=&nbsp;...&nbsp;'a'&nbsp;|&nbsp;'b'&nbsp;...&nbsp;--&nbsp;2^16&nbsp;unicode&nbsp;values<br>
+<br>
+<a name="$iEq$$Char"></a><br>
+instance&nbsp;&nbsp;Eq&nbsp;Char&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;c&nbsp;==&nbsp;c'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;fromEnum&nbsp;c&nbsp;==&nbsp;fromEnum&nbsp;c'<br>
+<br>
+<a name="$iOrd$$Char"></a><br>
+instance&nbsp;&nbsp;Ord&nbsp;Char&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;c&nbsp;&lt;=&nbsp;c'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;fromEnum&nbsp;c&nbsp;&lt;=&nbsp;fromEnum&nbsp;c'<br>
+<br>
+<a name="$iEnum$$Char"></a><br>
+instance&nbsp;&nbsp;Enum&nbsp;Char&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;toEnum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;primIntToChar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromEnum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;primCharToInt<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFrom&nbsp;c&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;map&nbsp;toEnum&nbsp;[fromEnum&nbsp;c&nbsp;..&nbsp;fromEnum&nbsp;(maxBound::Char)]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromThen&nbsp;c&nbsp;c'&nbsp;=&nbsp;[fromEnum&nbsp;c,&nbsp;fromEnum&nbsp;c'&nbsp;..&nbsp;fromEnum&nbsp;lastChar]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;lastChar&nbsp;::&nbsp;Char<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lastChar&nbsp;|&nbsp;c'&nbsp;&lt;&nbsp;c&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;minBound<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;=&nbsp;maxBound<br>
+<br>
+<a name="$iBounded$$Char"></a><br>
+instance&nbsp;&nbsp;Bounded&nbsp;Char&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;minBound&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;'\0'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;maxBound&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;'\xffff'<br>
+<br>
+<a name="$tString"></a><br>
+type&nbsp;&nbsp;String&nbsp;=&nbsp;[Char]<br>
+<br>
+<br>
+--&nbsp;Maybe&nbsp;type<br>
+<br>
+<a name="$tMaybe"></a><br>
+data&nbsp;&nbsp;Maybe&nbsp;a&nbsp;&nbsp;=&nbsp;&nbsp;Nothing&nbsp;|&nbsp;Just&nbsp;a&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Read,&nbsp;Show)<br>
+<br>
+<a name="$vmaybe"></a><br>
+maybe&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;b&nbsp;-&gt;&nbsp;(a&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;Maybe&nbsp;a&nbsp;-&gt;&nbsp;b<br>
+maybe&nbsp;n&nbsp;f&nbsp;Nothing&nbsp;&nbsp;=&nbsp;&nbsp;n<br>
+maybe&nbsp;n&nbsp;f&nbsp;(Just&nbsp;x)&nbsp;=&nbsp;&nbsp;f&nbsp;x<br>
+<br>
+<a name="$iFunctor$$Maybe"></a><br>
+instance&nbsp;&nbsp;Functor&nbsp;Maybe&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;map&nbsp;f&nbsp;Nothing&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;Nothing<br>
+&nbsp;&nbsp;&nbsp;&nbsp;map&nbsp;f&nbsp;(Just&nbsp;x)&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;Just&nbsp;(f&nbsp;x)<br>
+<br>
+<a name="$iMonad$$Maybe"></a><br>
+instance&nbsp;&nbsp;Monad&nbsp;Maybe&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;(Just&nbsp;x)&nbsp;&gt;&gt;=&nbsp;k&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;k&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Nothing&nbsp;&nbsp;&gt;&gt;=&nbsp;k&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;Nothing<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;Just<br>
+<br>
+<a name="$iMonadZero$$Maybe"></a><br>
+instance&nbsp;&nbsp;MonadZero&nbsp;Maybe&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;zero&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;Nothing<br>
+<br>
+<a name="$iMonadPlus$$Maybe"></a><br>
+instance&nbsp;&nbsp;MonadPlus&nbsp;Maybe&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Nothing&nbsp;++&nbsp;ys&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;ys<br>
+&nbsp;&nbsp;&nbsp;&nbsp;xs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++&nbsp;ys&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;xs<br>
+<br>
+--&nbsp;Either&nbsp;type<br>
+<br>
+<a name="$tEither"></a><br>
+data&nbsp;&nbsp;Either&nbsp;a&nbsp;b&nbsp;&nbsp;=&nbsp;&nbsp;Left&nbsp;a&nbsp;|&nbsp;Right&nbsp;b&nbsp;&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Read,&nbsp;Show)<br>
+<br>
+<a name="$veither"></a><br>
+either&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;c)&nbsp;-&gt;&nbsp;(b&nbsp;-&gt;&nbsp;c)&nbsp;-&gt;&nbsp;Either&nbsp;a&nbsp;b&nbsp;-&gt;&nbsp;c<br>
+either&nbsp;f&nbsp;g&nbsp;(Left&nbsp;x)&nbsp;&nbsp;=&nbsp;&nbsp;f&nbsp;x<br>
+either&nbsp;f&nbsp;g&nbsp;(Right&nbsp;y)&nbsp;=&nbsp;&nbsp;g&nbsp;y<br>
+<br>
+--&nbsp;IO&nbsp;type<br>
+<br>
+<a name="$tIO"></a><br>
+data&nbsp;&nbsp;IO&nbsp;a&nbsp;&nbsp;--&nbsp;abstract<br>
+<br>
+<a name="$iFunctor$$IO"></a><br>
+instance&nbsp;&nbsp;Functor&nbsp;IO&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;map&nbsp;f&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;&gt;&gt;=&nbsp;(return&nbsp;.&nbsp;f)<br>
+<br>
+<a name="$iMonad$$IO"></a><br>
+instance&nbsp;&nbsp;Monad&nbsp;IO&nbsp;&nbsp;where&nbsp;...<br>
+<br>
+--&nbsp;Ordering&nbsp;type<br>
+<br>
+<a name="$tOrdering"></a><br>
+data&nbsp;&nbsp;Ordering&nbsp;&nbsp;=&nbsp;&nbsp;LT&nbsp;|&nbsp;EQ&nbsp;|&nbsp;GT<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Enum,&nbsp;Read,&nbsp;Show,&nbsp;Bounded)<br>
+<br>
+<br>
+--&nbsp;Standard&nbsp;numeric&nbsp;types.&nbsp;&nbsp;The&nbsp;data&nbsp;declarations&nbsp;for&nbsp;these&nbsp;types&nbsp;cannot<br>
+--&nbsp;be&nbsp;expressed&nbsp;directly&nbsp;in&nbsp;Haskell&nbsp;since&nbsp;the&nbsp;constructor&nbsp;lists&nbsp;would&nbsp;be<br>
+--&nbsp;far&nbsp;too&nbsp;large.<br>
+<br>
+<a name="$tInt"></a><br>
+data&nbsp;&nbsp;Int&nbsp;&nbsp;=&nbsp;&nbsp;minBound&nbsp;...&nbsp;-1&nbsp;|&nbsp;0&nbsp;|&nbsp;1&nbsp;...&nbsp;maxBound<br>
+<a name="$iEq$$Int"></a><br>
+instance&nbsp;&nbsp;Eq&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Int&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iOrd$$Int"></a><br>
+instance&nbsp;&nbsp;Ord&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Int&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iNum$$Int"></a><br>
+instance&nbsp;&nbsp;Num&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Int&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iReal$$Int"></a><br>
+instance&nbsp;&nbsp;Real&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Int&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iIntegral$$Int"></a><br>
+instance&nbsp;&nbsp;Integral&nbsp;Int&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iEnum$$Int"></a><br>
+instance&nbsp;&nbsp;Enum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Int&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iBounded$$Int"></a><br>
+instance&nbsp;&nbsp;Bounded&nbsp;&nbsp;Int&nbsp;&nbsp;where&nbsp;...<br>
+<br>
+<a name="$tInteger"></a><br>
+data&nbsp;&nbsp;Integer&nbsp;&nbsp;=&nbsp;&nbsp;...&nbsp;-1&nbsp;|&nbsp;0&nbsp;|&nbsp;1&nbsp;...<br>
+<a name="$iEq$$Integer"></a><br>
+instance&nbsp;&nbsp;Eq&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Integer&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iOrd$$Integer"></a><br>
+instance&nbsp;&nbsp;Ord&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Integer&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iNum$$Integer"></a><br>
+instance&nbsp;&nbsp;Num&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Integer&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iReal$$Integer"></a><br>
+instance&nbsp;&nbsp;Real&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Integer&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iIntegral$$Integer"></a><br>
+instance&nbsp;&nbsp;Integral&nbsp;Integer&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iEnum$$Integer"></a><br>
+instance&nbsp;&nbsp;Enum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Integer&nbsp;&nbsp;where&nbsp;...<br>
+<br>
+<a name="$tFloat"></a><br>
+data&nbsp;&nbsp;Float<br>
+<a name="$iEq$$Float"></a><br>
+instance&nbsp;&nbsp;Eq&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Float&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iOrd$$Float"></a><br>
+instance&nbsp;&nbsp;Ord&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Float&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iNum$$Float"></a><br>
+instance&nbsp;&nbsp;Num&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Float&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iReal$$Float"></a><br>
+instance&nbsp;&nbsp;Real&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Float&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iFractional$$Float"></a><br>
+instance&nbsp;&nbsp;Fractional&nbsp;Float&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iFloating$$Float"></a><br>
+instance&nbsp;&nbsp;Floating&nbsp;&nbsp;&nbsp;Float&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iRealFrac$$Float"></a><br>
+instance&nbsp;&nbsp;RealFrac&nbsp;&nbsp;&nbsp;Float&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iRealFloat$$Float"></a><br>
+instance&nbsp;&nbsp;RealFloat&nbsp;&nbsp;Float&nbsp;&nbsp;where&nbsp;...<br>
+<br>
+<a name="$tDouble"></a><br>
+data&nbsp;&nbsp;Double<br>
+<a name="$iEq$$Double"></a><br>
+instance&nbsp;&nbsp;Eq&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Double&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iOrd$$Double"></a><br>
+instance&nbsp;&nbsp;Ord&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Double&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iNum$$Double"></a><br>
+instance&nbsp;&nbsp;Num&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Double&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iReal$$Double"></a><br>
+instance&nbsp;&nbsp;Real&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Double&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iFractional$$Double"></a><br>
+instance&nbsp;&nbsp;Fractional&nbsp;Double&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iFloating$$Double"></a><br>
+instance&nbsp;&nbsp;Floating&nbsp;&nbsp;&nbsp;Double&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iRealFrac$$Double"></a><br>
+instance&nbsp;&nbsp;RealFrac&nbsp;&nbsp;&nbsp;Double&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iRealFloat$$Double"></a><br>
+instance&nbsp;&nbsp;RealFloat&nbsp;&nbsp;Double&nbsp;&nbsp;where&nbsp;...<br>
+<br>
+--&nbsp;The&nbsp;Enum&nbsp;instances&nbsp;for&nbsp;Floats&nbsp;and&nbsp;Doubles&nbsp;are&nbsp;slightly&nbsp;unusual.<br>
+--&nbsp;The&nbsp;`toEnum'&nbsp;function&nbsp;truncates&nbsp;numbers&nbsp;to&nbsp;Int.&nbsp;&nbsp;The&nbsp;definitions<br>
+--&nbsp;of&nbsp;enumFrom&nbsp;and&nbsp;enumFromThen&nbsp;allow&nbsp;floats&nbsp;to&nbsp;be&nbsp;used&nbsp;in&nbsp;arithmetic<br>
+--&nbsp;series:&nbsp;[0,0.1&nbsp;..&nbsp;1.0].&nbsp;&nbsp;However,&nbsp;roundoff&nbsp;errors&nbsp;make&nbsp;these&nbsp;somewhat<br>
+--&nbsp;dubious.&nbsp;&nbsp;This&nbsp;example&nbsp;may&nbsp;have&nbsp;either&nbsp;10&nbsp;or&nbsp;11&nbsp;elements,&nbsp;depending&nbsp;on<br>
+--&nbsp;how&nbsp;0.1&nbsp;is&nbsp;represented.<br>
+<br>
+<a name="$iEnum$$Float"></a><br>
+instance&nbsp;&nbsp;Enum&nbsp;Float&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;toEnum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;fromIntegral<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromEnum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;fromInteger&nbsp;.&nbsp;truncate&nbsp;&nbsp;&nbsp;--&nbsp;may&nbsp;overflow<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFrom&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;numericEnumFrom<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromThen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;numericEnumFromThen<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromTo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;numericEnumFromTo<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromThenTo&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;numericEnumFromThenTo<br>
+<br>
+<a name="$iEnum$$Double"></a><br>
+instance&nbsp;&nbsp;Enum&nbsp;Double&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;toEnum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;fromIntegral<br>
+&nbsp;&nbsp;&nbsp;&nbsp;fromEnum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;fromInteger&nbsp;.&nbsp;truncate&nbsp;&nbsp;&nbsp;--&nbsp;may&nbsp;overflow<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFrom&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;numericEnumFrom<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromThen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;numericEnumFromThen<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromTo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;numericEnumFromTo<br>
+&nbsp;&nbsp;&nbsp;&nbsp;enumFromThenTo&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;numericEnumFromThenTo<br>
+<br>
+<a name="$vnumericEnumFrom"></a><br>
+numericEnumFrom&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Real&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]<br>
+<a name="$vnumericEnumFromThen"></a><br>
+numericEnumFromThen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Real&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]<br>
+<a name="$vnumericEnumFromTo"></a><br>
+numericEnumFromTo&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Real&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]<br>
+<a name="$vnumericEnumFromThenTo"></a><br>
+numericEnumFromThenTo&nbsp;&nbsp;&nbsp;::&nbsp;(Real&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]<br>
+numericEnumFrom&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;iterate&nbsp;(+1)<br>
+numericEnumFromThen&nbsp;n&nbsp;m&nbsp;=&nbsp;&nbsp;iterate&nbsp;(+(m-n))&nbsp;n<br>
+numericEnumFromTo&nbsp;n&nbsp;m&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;takeWhile&nbsp;(&lt;=&nbsp;m)&nbsp;(numericEnumFrom&nbsp;n)<br>
+numericEnumFromThenTo&nbsp;n&nbsp;n'&nbsp;m<br>
+			=&nbsp;&nbsp;takeWhile&nbsp;(if&nbsp;n'&nbsp;&gt;=&nbsp;n&nbsp;then&nbsp;(&lt;=&nbsp;m)&nbsp;else&nbsp;(&gt;=&nbsp;m))<br>
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;numericEnumFromThen&nbsp;n&nbsp;m<br>
+<br>
+<br>
+--&nbsp;Lists<br>
+<br>
+<a name="$t$Ba$c"></a><br>
+data&nbsp;&nbsp;[a]&nbsp;&nbsp;=&nbsp;&nbsp;[]&nbsp;|&nbsp;a&nbsp;:&nbsp;[a]&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord)<br>
+<br>
+<a name="$iFunctor$$$Ba$c"></a><br>
+instance&nbsp;Functor&nbsp;[]&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;map&nbsp;f&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;map&nbsp;f&nbsp;(x:xs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;f&nbsp;x&nbsp;:&nbsp;map&nbsp;f&nbsp;xs<br>
+<br>
+<a name="$iMonad$$$Ba$c"></a><br>
+instance&nbsp;&nbsp;Monad&nbsp;[]&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;m&nbsp;&gt;&gt;=&nbsp;k&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;concat&nbsp;(map&nbsp;k&nbsp;m)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[x]<br>
+<br>
+<a name="$iMonadZero$$$Ba$c"></a><br>
+instance&nbsp;&nbsp;MonadZero&nbsp;[]&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;zero&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+<br>
+<a name="$iMonadPlus$$$Ba$c"></a><br>
+instance&nbsp;&nbsp;MonadPlus&nbsp;[]&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;xs&nbsp;++&nbsp;ys&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldr&nbsp;(:)&nbsp;ys&nbsp;xs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;<br>
+--&nbsp;Tuples<br>
+<br>
+<a name="$t$Pa$xb$C"></a><br>
+data&nbsp;&nbsp;(a,b)&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;(a,b)&nbsp;&nbsp;&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Bounded)<br>
+<a name="$t$Pa$xb$xc$C"></a><br>
+data&nbsp;&nbsp;(a,b,c)&nbsp;=&nbsp;&nbsp;(a,b,c)&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Bounded)<br>
+<br>
+<br>
+--&nbsp;component&nbsp;projections&nbsp;for&nbsp;pairs:<br>
+--&nbsp;(NB:&nbsp;not&nbsp;provided&nbsp;for&nbsp;triples,&nbsp;quadruples,&nbsp;etc.)<br>
+<a name="$vfst"></a><br>
+fst&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a,b)&nbsp;-&gt;&nbsp;a<br>
+fst&nbsp;(x,y)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x<br>
+<br>
+<a name="$vsnd"></a><br>
+snd&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a,b)&nbsp;-&gt;&nbsp;b<br>
+snd&nbsp;(x,y)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;y<br>
+<br>
+--&nbsp;curry&nbsp;converts&nbsp;an&nbsp;uncurried&nbsp;function&nbsp;to&nbsp;a&nbsp;curried&nbsp;function;<br>
+--&nbsp;uncurry&nbsp;converts&nbsp;a&nbsp;curried&nbsp;function&nbsp;to&nbsp;a&nbsp;function&nbsp;on&nbsp;pairs.<br>
+<a name="$vcurry"></a><br>
+curry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;((a,&nbsp;b)&nbsp;-&gt;&nbsp;c)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;c<br>
+curry&nbsp;f&nbsp;x&nbsp;y&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;f&nbsp;(x,&nbsp;y)<br>
+<br>
+<a name="$vuncurry"></a><br>
+uncurry&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;c)&nbsp;-&gt;&nbsp;((a,&nbsp;b)&nbsp;-&gt;&nbsp;c)<br>
+uncurry&nbsp;f&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;f&nbsp;(fst&nbsp;p)&nbsp;(snd&nbsp;p)<br>
+<br>
+--&nbsp;Misc&nbsp;functions<br>
+<br>
+--&nbsp;until&nbsp;p&nbsp;f&nbsp;&nbsp;yields&nbsp;the&nbsp;result&nbsp;of&nbsp;applying&nbsp;f&nbsp;until&nbsp;p&nbsp;holds.<br>
+<a name="$vuntil"></a><br>
+until&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;(a&nbsp;-&gt;&nbsp;a)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+until&nbsp;p&nbsp;f&nbsp;x&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;p&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;=&nbsp;&nbsp;until&nbsp;p&nbsp;f&nbsp;(f&nbsp;x)<br>
+<br>
+--&nbsp;asTypeOf&nbsp;is&nbsp;a&nbsp;type-restricted&nbsp;version&nbsp;of&nbsp;const.&nbsp;&nbsp;It&nbsp;is&nbsp;usually&nbsp;used<br>
+--&nbsp;as&nbsp;an&nbsp;infix&nbsp;operator,&nbsp;and&nbsp;its&nbsp;typing&nbsp;forces&nbsp;its&nbsp;first&nbsp;argument<br>
+--&nbsp;(which&nbsp;is&nbsp;usually&nbsp;overloaded)&nbsp;to&nbsp;have&nbsp;the&nbsp;same&nbsp;type&nbsp;as&nbsp;the&nbsp;second.<br>
+<a name="$vasTypeOf"></a><br>
+asTypeOf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+asTypeOf&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;const<br>
+<br>
+--&nbsp;error&nbsp;stops&nbsp;execution&nbsp;and&nbsp;displays&nbsp;an&nbsp;error&nbsp;message<br>
+<br>
+<a name="$verror"></a><br>
+error&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;String&nbsp;-&gt;&nbsp;a<br>
+error&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;primError<br>
+<br>
+--&nbsp;It&nbsp;is&nbsp;expected&nbsp;that&nbsp;compilers&nbsp;will&nbsp;recognize&nbsp;this&nbsp;and&nbsp;insert&nbsp;error<br>
+--&nbsp;messages&nbsp;that&nbsp;are&nbsp;more&nbsp;appropriate&nbsp;to&nbsp;the&nbsp;context&nbsp;in&nbsp;which&nbsp;undefined&nbsp;<br>
+--&nbsp;appears.&nbsp;<br>
+<br>
+<a name="$vundefined"></a><br>
+undefined&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a<br>
+undefined&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"Prelude.undefined"<br>
+<br>
+<a name="preludelist"></a><p>
+</tt><a name="sectA.1"></a>
+<h3>A.1<tt>&nbsp;&nbsp;</tt>Prelude <tt>PreludeList</tt></h3>
+
+<tt><br>
+--&nbsp;Standard&nbsp;list&nbsp;functions<br>
+<br>
+module&nbsp;PreludeList&nbsp;(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;head,&nbsp;last,&nbsp;tail,&nbsp;init,&nbsp;null,&nbsp;length,&nbsp;(!!),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;foldl,&nbsp;foldl1,&nbsp;scanl,&nbsp;scanl1,&nbsp;foldr,&nbsp;foldr1,&nbsp;scanr,&nbsp;scanr1,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;iterate,&nbsp;repeat,&nbsp;replicate,&nbsp;cycle,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;take,&nbsp;drop,&nbsp;splitAt,&nbsp;takeWhile,&nbsp;dropWhile,&nbsp;span,&nbsp;break,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;lines,&nbsp;words,&nbsp;unlines,&nbsp;unwords,&nbsp;reverse,&nbsp;and,&nbsp;or,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;any,&nbsp;all,&nbsp;elem,&nbsp;notElem,&nbsp;lookup,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;sum,&nbsp;product,&nbsp;maximum,&nbsp;minimum,&nbsp;concatMap,&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;zip,&nbsp;zip3,&nbsp;zipWith,&nbsp;zipWith3,&nbsp;unzip,&nbsp;unzip3)<br>
+&nbsp;&nbsp;where<br>
+<br>
+import&nbsp;qualified&nbsp;Char(isSpace)<br>
+<br>
+infixl&nbsp;9&nbsp;&nbsp;!!<br>
+infix&nbsp;&nbsp;4&nbsp;&nbsp;`elem`,&nbsp;`notElem`<br>
+<br>
+--&nbsp;head&nbsp;and&nbsp;tail&nbsp;extract&nbsp;the&nbsp;first&nbsp;element&nbsp;and&nbsp;remaining&nbsp;elements,<br>
+--&nbsp;respectively,&nbsp;of&nbsp;a&nbsp;list,&nbsp;which&nbsp;must&nbsp;be&nbsp;non-empty.&nbsp;&nbsp;last&nbsp;and&nbsp;init<br>
+--&nbsp;are&nbsp;the&nbsp;dual&nbsp;functions&nbsp;working&nbsp;from&nbsp;the&nbsp;end&nbsp;of&nbsp;a&nbsp;finite&nbsp;list,<br>
+--&nbsp;rather&nbsp;than&nbsp;the&nbsp;beginning.<br>
+<br>
+<a name="$vhead"></a><br>
+head&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;a<br>
+head&nbsp;(x:_)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x<br>
+head&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"PreludeList.head:&nbsp;empty&nbsp;list"<br>
+<br>
+<a name="$vlast"></a><br>
+last&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;a<br>
+last&nbsp;[x]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x<br>
+last&nbsp;(_:xs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;last&nbsp;xs<br>
+last&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"PreludeList.last:&nbsp;empty&nbsp;list"<br>
+<br>
+<a name="$vtail"></a><br>
+tail&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+tail&nbsp;(_:xs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;xs<br>
+tail&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"PreludeList.tail:&nbsp;empty&nbsp;list"<br>
+<br>
+<a name="$vinit"></a><br>
+init&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+init&nbsp;[x]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+init&nbsp;(x:xs)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;:&nbsp;init&nbsp;xs<br>
+init&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"PreludeList.init:&nbsp;empty&nbsp;list"<br>
+<br>
+<a name="$vnull"></a><br>
+null&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;Bool<br>
+null&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;True<br>
+null&nbsp;(_:_)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;False<br>
+<br>
+--&nbsp;length&nbsp;returns&nbsp;the&nbsp;length&nbsp;of&nbsp;a&nbsp;finite&nbsp;list&nbsp;as&nbsp;an&nbsp;Int.<br>
+<a name="$vlength"></a><br>
+length&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;Int<br>
+length&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;0<br>
+length&nbsp;(_:l)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;1&nbsp;+&nbsp;length&nbsp;l<br>
+<br>
+--&nbsp;List&nbsp;index&nbsp;(subscript)&nbsp;operator,&nbsp;0-origin<br>
+<a name="$v$E$E"></a><br>
+(!!)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;Int&nbsp;-&gt;&nbsp;a<br>
+(x:_)&nbsp;&nbsp;!!&nbsp;0&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x<br>
+(_:xs)&nbsp;!!&nbsp;n&nbsp;|&nbsp;n&nbsp;&gt;&nbsp;0&nbsp;=&nbsp;&nbsp;xs&nbsp;!!&nbsp;(n-1)<br>
+(_:_)&nbsp;&nbsp;!!&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"PreludeList.!!:&nbsp;negative&nbsp;index"<br>
+[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;!!&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"PreludeList.!!:&nbsp;index&nbsp;too&nbsp;large"<br>
+<br>
+--&nbsp;foldl,&nbsp;applied&nbsp;to&nbsp;a&nbsp;binary&nbsp;operator,&nbsp;a&nbsp;starting&nbsp;value&nbsp;(typically&nbsp;the<br>
+--&nbsp;left-identity&nbsp;of&nbsp;the&nbsp;operator),&nbsp;and&nbsp;a&nbsp;list,&nbsp;reduces&nbsp;the&nbsp;list&nbsp;using<br>
+--&nbsp;the&nbsp;binary&nbsp;operator,&nbsp;from&nbsp;left&nbsp;to&nbsp;right:<br>
+--&nbsp;&nbsp;foldl&nbsp;f&nbsp;z&nbsp;[x1,&nbsp;x2,&nbsp;...,&nbsp;xn]&nbsp;==&nbsp;(...((z&nbsp;`f`&nbsp;x1)&nbsp;`f`&nbsp;x2)&nbsp;`f`...)&nbsp;`f`&nbsp;xn<br>
+--&nbsp;foldl1&nbsp;is&nbsp;a&nbsp;variant&nbsp;that&nbsp;has&nbsp;no&nbsp;starting&nbsp;value&nbsp;argument,&nbsp;and&nbsp;&nbsp;thus&nbsp;must<br>
+--&nbsp;be&nbsp;applied&nbsp;to&nbsp;non-empty&nbsp;lists.&nbsp;&nbsp;scanl&nbsp;is&nbsp;similar&nbsp;to&nbsp;foldl,&nbsp;but&nbsp;returns<br>
+--&nbsp;a&nbsp;list&nbsp;of&nbsp;successive&nbsp;reduced&nbsp;values&nbsp;from&nbsp;the&nbsp;left:<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scanl&nbsp;f&nbsp;z&nbsp;[x1,&nbsp;x2,&nbsp;...]&nbsp;==&nbsp;[z,&nbsp;z&nbsp;`f`&nbsp;x1,&nbsp;(z&nbsp;`f`&nbsp;x1)&nbsp;`f`&nbsp;x2,&nbsp;...]<br>
+--&nbsp;Note&nbsp;that&nbsp;&nbsp;last&nbsp;(scanl&nbsp;f&nbsp;z&nbsp;xs)&nbsp;==&nbsp;foldl&nbsp;f&nbsp;z&nbsp;xs.<br>
+--&nbsp;scanl1&nbsp;is&nbsp;similar,&nbsp;again&nbsp;without&nbsp;the&nbsp;starting&nbsp;element:<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;scanl1&nbsp;f&nbsp;[x1,&nbsp;x2,&nbsp;...]&nbsp;==&nbsp;[x1,&nbsp;x1&nbsp;`f`&nbsp;x2,&nbsp;...]<br>
+<br>
+<a name="$vfoldl"></a><br>
+foldl&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;a)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;a<br>
+foldl&nbsp;f&nbsp;z&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;z<br>
+foldl&nbsp;f&nbsp;z&nbsp;(x:xs)&nbsp;=&nbsp;&nbsp;foldl&nbsp;f&nbsp;(f&nbsp;z&nbsp;x)&nbsp;xs<br>
+<br>
+<a name="$vfoldl1"></a><br>
+foldl1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;a<br>
+foldl1&nbsp;f&nbsp;(x:xs)&nbsp;&nbsp;=&nbsp;&nbsp;foldl&nbsp;f&nbsp;x&nbsp;xs<br>
+foldl1&nbsp;_&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"PreludeList.foldl1:&nbsp;empty&nbsp;list"<br>
+<br>
+<a name="$vscanl"></a><br>
+scanl&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;a)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;[a]<br>
+scanl&nbsp;f&nbsp;q&nbsp;xs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;q&nbsp;:&nbsp;(case&nbsp;xs&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[]&nbsp;&nbsp;&nbsp;-&gt;&nbsp;[]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x:xs&nbsp;-&gt;&nbsp;scanl&nbsp;f&nbsp;(f&nbsp;q&nbsp;x)&nbsp;xs)<br>
+<br>
+<a name="$vscanl1"></a><br>
+scanl1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+scanl1&nbsp;f&nbsp;(x:xs)&nbsp;&nbsp;=&nbsp;&nbsp;scanl&nbsp;f&nbsp;x&nbsp;xs<br>
+scanl1&nbsp;_&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"PreludeList.scanl1:&nbsp;empty&nbsp;list"<br>
+<br>
+--&nbsp;foldr,&nbsp;foldr1,&nbsp;scanr,&nbsp;and&nbsp;scanr1&nbsp;are&nbsp;the&nbsp;right-to-left&nbsp;duals&nbsp;of&nbsp;the<br>
+--&nbsp;above&nbsp;functions.<br>
+<br>
+<a name="$vfoldr"></a><br>
+foldr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;b<br>
+foldr&nbsp;f&nbsp;z&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;z<br>
+foldr&nbsp;f&nbsp;z&nbsp;(x:xs)&nbsp;=&nbsp;&nbsp;f&nbsp;x&nbsp;(foldr&nbsp;f&nbsp;z&nbsp;xs)<br>
+<br>
+<a name="$vfoldr1"></a><br>
+foldr1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;a<br>
+foldr1&nbsp;f&nbsp;[x]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x<br>
+foldr1&nbsp;f&nbsp;(x:xs)&nbsp;&nbsp;=&nbsp;&nbsp;f&nbsp;x&nbsp;(foldr1&nbsp;f&nbsp;xs)<br>
+foldr1&nbsp;_&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"PreludeList.foldr1:&nbsp;empty&nbsp;list"<br>
+<br>
+<a name="$vscanr"></a><br>
+scanr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;b)&nbsp;-&gt;&nbsp;b&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[b]<br>
+scanr&nbsp;f&nbsp;q0&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[q0]<br>
+scanr&nbsp;f&nbsp;q0&nbsp;(x:xs)&nbsp;=&nbsp;&nbsp;f&nbsp;x&nbsp;q&nbsp;:&nbsp;qs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;qs@(q:_)&nbsp;=&nbsp;scanr&nbsp;f&nbsp;q0&nbsp;xs&nbsp;<br>
+<br>
+<a name="$vscanr1"></a><br>
+scanr1&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;a)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+scanr1&nbsp;f&nbsp;&nbsp;[x]&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[x]<br>
+scanr1&nbsp;f&nbsp;&nbsp;(x:xs)&nbsp;=&nbsp;&nbsp;f&nbsp;x&nbsp;q&nbsp;:&nbsp;qs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;qs@(q:_)&nbsp;=&nbsp;scanr1&nbsp;f&nbsp;xs&nbsp;<br>
+scanr1&nbsp;_&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"PreludeList.scanr1:&nbsp;empty&nbsp;list"<br>
+<br>
+--&nbsp;iterate&nbsp;f&nbsp;x&nbsp;returns&nbsp;an&nbsp;infinite&nbsp;list&nbsp;of&nbsp;repeated&nbsp;applications&nbsp;of&nbsp;f&nbsp;to&nbsp;x:<br>
+--&nbsp;iterate&nbsp;f&nbsp;x&nbsp;==&nbsp;[x,&nbsp;f&nbsp;x,&nbsp;f&nbsp;(f&nbsp;x),&nbsp;...]<br>
+<a name="$viterate"></a><br>
+iterate&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;a)&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]<br>
+iterate&nbsp;f&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;:&nbsp;iterate&nbsp;f&nbsp;(f&nbsp;x)<br>
+<br>
+--&nbsp;repeat&nbsp;x&nbsp;is&nbsp;an&nbsp;infinite&nbsp;list,&nbsp;with&nbsp;x&nbsp;the&nbsp;value&nbsp;of&nbsp;every&nbsp;element.<br>
+<a name="$vrepeat"></a><br>
+repeat&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;[a]<br>
+repeat&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;xs&nbsp;where&nbsp;xs&nbsp;=&nbsp;x:xs<br>
+<br>
+--&nbsp;replicate&nbsp;n&nbsp;x&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;length&nbsp;n&nbsp;with&nbsp;x&nbsp;the&nbsp;value&nbsp;of&nbsp;every&nbsp;element<br>
+<a name="$vreplicate"></a><br>
+replicate&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]<br>
+replicate&nbsp;n&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;take&nbsp;n&nbsp;(repeat&nbsp;x)<br>
+<br>
+--&nbsp;cycle&nbsp;ties&nbsp;a&nbsp;finite&nbsp;list&nbsp;into&nbsp;a&nbsp;circular&nbsp;one,&nbsp;or&nbsp;equivalently,<br>
+--&nbsp;the&nbsp;infinite&nbsp;repetition&nbsp;of&nbsp;the&nbsp;original&nbsp;list.&nbsp;&nbsp;It&nbsp;is&nbsp;the&nbsp;identity<br>
+--&nbsp;on&nbsp;infinite&nbsp;lists.<br>
+<br>
+<a name="$vcycle"></a><br>
+cycle&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+cycle&nbsp;xs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;xs'&nbsp;where&nbsp;xs'&nbsp;=&nbsp;xs&nbsp;++&nbsp;xs'<br>
+<br>
+--&nbsp;take&nbsp;n,&nbsp;applied&nbsp;to&nbsp;a&nbsp;list&nbsp;xs,&nbsp;returns&nbsp;the&nbsp;prefix&nbsp;of&nbsp;xs&nbsp;of&nbsp;length&nbsp;n,<br>
+--&nbsp;or&nbsp;xs&nbsp;itself&nbsp;if&nbsp;n&nbsp;&gt;&nbsp;length&nbsp;xs.&nbsp;&nbsp;drop&nbsp;n&nbsp;xs&nbsp;returns&nbsp;the&nbsp;suffix&nbsp;of&nbsp;xs<br>
+--&nbsp;after&nbsp;the&nbsp;first&nbsp;n&nbsp;elements,&nbsp;or&nbsp;[]&nbsp;if&nbsp;n&nbsp;&gt;&nbsp;length&nbsp;xs.&nbsp;&nbsp;splitAt&nbsp;n&nbsp;xs<br>
+--&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;(take&nbsp;n&nbsp;xs,&nbsp;drop&nbsp;n&nbsp;xs).<br>
+<br>
+<a name="$vtake"></a><br>
+take&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+take&nbsp;0&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+take&nbsp;_&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+take&nbsp;n&nbsp;(x:xs)&nbsp;|&nbsp;n&nbsp;&gt;&nbsp;0&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;:&nbsp;take&nbsp;(n-1)&nbsp;xs<br>
+take&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"PreludeList.take:&nbsp;negative&nbsp;argument"<br>
+<br>
+<a name="$vdrop"></a><br>
+drop&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+drop&nbsp;0&nbsp;xs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;xs<br>
+drop&nbsp;_&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+drop&nbsp;n&nbsp;(_:xs)&nbsp;|&nbsp;n&nbsp;&gt;&nbsp;0&nbsp;&nbsp;=&nbsp;&nbsp;drop&nbsp;(n-1)&nbsp;xs<br>
+drop&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"PreludeList.drop:&nbsp;negative&nbsp;argument"<br>
+<br>
+<a name="$vsplitAt"></a><br>
+splitAt&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;([a],[a])<br>
+splitAt&nbsp;0&nbsp;xs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;([],xs)<br>
+splitAt&nbsp;_&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;([],[])<br>
+splitAt&nbsp;n&nbsp;(x:xs)&nbsp;|&nbsp;n&nbsp;&gt;&nbsp;0&nbsp;=&nbsp;&nbsp;(x:xs',xs'')&nbsp;where&nbsp;(xs',xs'')&nbsp;=&nbsp;splitAt&nbsp;(n-1)&nbsp;xs<br>
+splitAt&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"PreludeList.splitAt:&nbsp;negative&nbsp;argument"<br>
+<br>
+--&nbsp;takeWhile,&nbsp;applied&nbsp;to&nbsp;a&nbsp;predicate&nbsp;p&nbsp;and&nbsp;a&nbsp;list&nbsp;xs,&nbsp;returns&nbsp;the&nbsp;longest<br>
+--&nbsp;prefix&nbsp;(possibly&nbsp;empty)&nbsp;of&nbsp;xs&nbsp;of&nbsp;elements&nbsp;that&nbsp;satisfy&nbsp;p.&nbsp;&nbsp;dropWhile&nbsp;p&nbsp;xs<br>
+--&nbsp;returns&nbsp;the&nbsp;remaining&nbsp;suffix.&nbsp;&nbsp;Span&nbsp;p&nbsp;xs&nbsp;is&nbsp;equivalent&nbsp;to&nbsp;<br>
+--&nbsp;(takeWhile&nbsp;p&nbsp;xs,&nbsp;dropWhile&nbsp;p&nbsp;xs),&nbsp;while&nbsp;break&nbsp;p&nbsp;uses&nbsp;the&nbsp;negation&nbsp;of&nbsp;p.<br>
+<br>
+<a name="$vtakeWhile"></a><br>
+takeWhile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+takeWhile&nbsp;p&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+takeWhile&nbsp;p&nbsp;(x:xs)&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;p&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;x&nbsp;:&nbsp;takeWhile&nbsp;p&nbsp;xs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;=&nbsp;&nbsp;[]<br>
+<br>
+<a name="$vdropWhile"></a><br>
+dropWhile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+dropWhile&nbsp;p&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+dropWhile&nbsp;p&nbsp;xs@(x:xs')<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;p&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;dropWhile&nbsp;p&nbsp;xs'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;=&nbsp;&nbsp;xs<br>
+<br>
+<a name="$vspan"></a><a name="$vbreak"></a><br>
+span,&nbsp;break&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;([a],[a])<br>
+span&nbsp;p&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;([],[])<br>
+span&nbsp;p&nbsp;xs@(x:xs')&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;p&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;(x:xs',xs'')&nbsp;where&nbsp;(xs',xs'')&nbsp;=&nbsp;span&nbsp;p&nbsp;xs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;=&nbsp;&nbsp;(xs,[])<br>
+break&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;span&nbsp;(not&nbsp;.&nbsp;p)<br>
+<br>
+--&nbsp;lines&nbsp;breaks&nbsp;a&nbsp;string&nbsp;up&nbsp;into&nbsp;a&nbsp;list&nbsp;of&nbsp;strings&nbsp;at&nbsp;newline&nbsp;characters.<br>
+--&nbsp;The&nbsp;resulting&nbsp;strings&nbsp;do&nbsp;not&nbsp;contain&nbsp;newlines.&nbsp;&nbsp;Similary,&nbsp;words<br>
+--&nbsp;breaks&nbsp;a&nbsp;string&nbsp;up&nbsp;into&nbsp;a&nbsp;list&nbsp;of&nbsp;words,&nbsp;which&nbsp;were&nbsp;delimited&nbsp;by<br>
+--&nbsp;white&nbsp;space.&nbsp;&nbsp;unlines&nbsp;and&nbsp;unwords&nbsp;are&nbsp;the&nbsp;inverse&nbsp;operations.<br>
+--&nbsp;unlines&nbsp;joins&nbsp;lines&nbsp;with&nbsp;terminating&nbsp;newlines,&nbsp;and&nbsp;unwords&nbsp;joins<br>
+--&nbsp;words&nbsp;with&nbsp;separating&nbsp;spaces.<br>
+<br>
+<a name="$vlines"></a><br>
+lines&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;String&nbsp;-&gt;&nbsp;[String]<br>
+lines&nbsp;""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+lines&nbsp;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;let&nbsp;(l,&nbsp;s')&nbsp;=&nbsp;break&nbsp;(==&nbsp;'\n')&nbsp;s<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;&nbsp;l&nbsp;:&nbsp;case&nbsp;s'&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&gt;&nbsp;[]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(_:s'')&nbsp;-&gt;&nbsp;lines&nbsp;s''<br>
+<br>
+<a name="$vwords"></a><br>
+words&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;String&nbsp;-&gt;&nbsp;[String]<br>
+words&nbsp;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;case&nbsp;dropWhile&nbsp;Char.isSpace&nbsp;s&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;""&nbsp;-&gt;&nbsp;[]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;s'&nbsp;-&gt;&nbsp;w&nbsp;:&nbsp;words&nbsp;s''<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;(w,&nbsp;s'')&nbsp;=&nbsp;break&nbsp;Char.isSpace&nbsp;s'<br>
+<br>
+<a name="$vunlines"></a><br>
+unlines&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[String]&nbsp;-&gt;&nbsp;String<br>
+unlines&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;concatMap&nbsp;(++&nbsp;"\n")<br>
+<br>
+<a name="$vunwords"></a><br>
+unwords&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[String]&nbsp;-&gt;&nbsp;String<br>
+unwords&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;""<br>
+unwords&nbsp;ws&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldr1&nbsp;(\w&nbsp;s&nbsp;-&gt;&nbsp;w&nbsp;++&nbsp;'&nbsp;':s)&nbsp;ws<br>
+<br>
+--&nbsp;reverse&nbsp;xs&nbsp;returns&nbsp;the&nbsp;elements&nbsp;of&nbsp;xs&nbsp;in&nbsp;reverse&nbsp;order.&nbsp;&nbsp;xs&nbsp;must&nbsp;be&nbsp;finite.<br>
+<a name="$vreverse"></a><br>
+reverse&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[a]<br>
+reverse&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldl&nbsp;(flip&nbsp;(:))&nbsp;[]<br>
+<br>
+--&nbsp;and&nbsp;returns&nbsp;the&nbsp;conjunction&nbsp;of&nbsp;a&nbsp;Boolean&nbsp;list.&nbsp;&nbsp;For&nbsp;the&nbsp;result&nbsp;to&nbsp;be<br>
+--&nbsp;True,&nbsp;the&nbsp;list&nbsp;must&nbsp;be&nbsp;finite;&nbsp;False,&nbsp;however,&nbsp;results&nbsp;from&nbsp;a&nbsp;False<br>
+--&nbsp;value&nbsp;at&nbsp;a&nbsp;finite&nbsp;index&nbsp;of&nbsp;a&nbsp;finite&nbsp;or&nbsp;infinite&nbsp;list.&nbsp;&nbsp;or&nbsp;is&nbsp;the<br>
+--&nbsp;disjunctive&nbsp;dual&nbsp;of&nbsp;and.<br>
+<a name="$vand"></a><a name="$vor"></a><br>
+and,&nbsp;or&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[Bool]&nbsp;-&gt;&nbsp;Bool<br>
+and&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldr&nbsp;(&amp;&amp;)&nbsp;True<br>
+or&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldr&nbsp;(||)&nbsp;False<br>
+<br>
+--&nbsp;Applied&nbsp;to&nbsp;a&nbsp;predicate&nbsp;and&nbsp;a&nbsp;list,&nbsp;an&nbsp;determines&nbsp;if&nbsp;any&nbsp;element<br>
+--&nbsp;of&nbsp;the&nbsp;list&nbsp;satisfies&nbsp;the&nbsp;predicate.&nbsp;&nbsp;Similarly,&nbsp;for&nbsp;all.<br>
+<a name="$vany"></a><a name="$vall"></a><br>
+any,&nbsp;all&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;Bool)&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;Bool<br>
+any&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;or&nbsp;.&nbsp;map&nbsp;p<br>
+all&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;and&nbsp;.&nbsp;map&nbsp;p<br>
+<br>
+--&nbsp;elem&nbsp;is&nbsp;the&nbsp;list&nbsp;membership&nbsp;predicate,&nbsp;usually&nbsp;written&nbsp;in&nbsp;infix&nbsp;form,<br>
+--&nbsp;e.g.,&nbsp;x&nbsp;`elem`&nbsp;xs.&nbsp;&nbsp;notElem&nbsp;is&nbsp;the&nbsp;negation.<br>
+<a name="$velem"></a><a name="$vnotElem"></a><br>
+elem,&nbsp;notElem&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Eq&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;Bool<br>
+elem&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;any&nbsp;(==&nbsp;x)<br>
+notElem&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;all&nbsp;(/=&nbsp;x)<br>
+<br>
+--&nbsp;lookupB&nbsp;key&nbsp;assocs&nbsp;looks&nbsp;up&nbsp;a&nbsp;key&nbsp;in&nbsp;an&nbsp;association&nbsp;list.<br>
+<a name="$vlookup"></a><br>
+lookup&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Eq&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;[(a,b)]&nbsp;-&gt;&nbsp;Maybe&nbsp;b<br>
+lookup&nbsp;key&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;Nothing<br>
+lookup&nbsp;key&nbsp;((x,y):xys)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;key&nbsp;==&nbsp;x&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;Just&nbsp;y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;&nbsp;=&nbsp;&nbsp;lookup&nbsp;key&nbsp;xys<br>
+<br>
+--&nbsp;sum&nbsp;and&nbsp;product&nbsp;compute&nbsp;the&nbsp;sum&nbsp;or&nbsp;product&nbsp;of&nbsp;a&nbsp;finite&nbsp;list&nbsp;of&nbsp;numbers.<br>
+<a name="$vsum"></a><a name="$vproduct"></a><br>
+sum,&nbsp;product&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Num&nbsp;a)&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;a<br>
+sum&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldl&nbsp;(+)&nbsp;0&nbsp;&nbsp;<br>
+product&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldl&nbsp;(*)&nbsp;1<br>
+<br>
+--&nbsp;maximum&nbsp;and&nbsp;minimum&nbsp;return&nbsp;the&nbsp;maximum&nbsp;or&nbsp;minimum&nbsp;value&nbsp;from&nbsp;a&nbsp;list,<br>
+--&nbsp;which&nbsp;must&nbsp;be&nbsp;non-empty,&nbsp;finite,&nbsp;and&nbsp;of&nbsp;an&nbsp;ordered&nbsp;type.<br>
+<a name="$vmaximum"></a><a name="$vminimum"></a><br>
+maximum,&nbsp;minimum&nbsp;::&nbsp;(Ord&nbsp;a)&nbsp;=&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;a<br>
+maximum&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"PreludeList.maximum:&nbsp;empty&nbsp;list"<br>
+maximum&nbsp;xs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldl1&nbsp;max&nbsp;xs<br>
+<br>
+minimum&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;error&nbsp;"PreludeList.minimum:&nbsp;empty&nbsp;list"<br>
+minimum&nbsp;xs&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldl1&nbsp;min&nbsp;xs<br>
+<br>
+<a name="$vconcatMap"></a><br>
+concatMap&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a&nbsp;-&gt;&nbsp;[b])&nbsp;-&gt;&nbsp;[a]&nbsp;-&gt;&nbsp;[b]<br>
+concatMap&nbsp;f&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;concat&nbsp;.&nbsp;map&nbsp;f<br>
+<br>
+--&nbsp;zip&nbsp;takes&nbsp;two&nbsp;lists&nbsp;and&nbsp;returns&nbsp;a&nbsp;list&nbsp;of&nbsp;corresponding&nbsp;pairs.&nbsp;&nbsp;If&nbsp;one<br>
+--&nbsp;input&nbsp;list&nbsp;is&nbsp;short,&nbsp;excess&nbsp;elements&nbsp;of&nbsp;the&nbsp;longer&nbsp;list&nbsp;are&nbsp;discarded.<br>
+--&nbsp;zip3&nbsp;takes&nbsp;three&nbsp;lists&nbsp;and&nbsp;returns&nbsp;a&nbsp;list&nbsp;of&nbsp;triples.&nbsp;&nbsp;Zips&nbsp;for&nbsp;larger<br>
+--&nbsp;tuples&nbsp;are&nbsp;in&nbsp;the&nbsp;List&nbsp;library<br>
+<br>
+<a name="$vzip"></a><br>
+zip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;[(a,b)]<br>
+zip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;zipWith&nbsp;(,)<br>
+<br>
+<a name="$vzip3"></a><br>
+zip3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;[b]&nbsp;-&gt;&nbsp;[c]&nbsp;-&gt;&nbsp;[(a,b,c)]<br>
+zip3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;zipWith3&nbsp;(,,)<br>
+<br>
+--&nbsp;The&nbsp;zipWith&nbsp;family&nbsp;generalises&nbsp;the&nbsp;zip&nbsp;family&nbsp;by&nbsp;zipping&nbsp;with&nbsp;the<br>
+--&nbsp;function&nbsp;given&nbsp;as&nbsp;the&nbsp;first&nbsp;argument,&nbsp;instead&nbsp;of&nbsp;a&nbsp;tupling&nbsp;function.<br>
+--&nbsp;For&nbsp;example,&nbsp;zipWith&nbsp;(+)&nbsp;is&nbsp;applied&nbsp;to&nbsp;two&nbsp;lists&nbsp;to&nbsp;produce&nbsp;the&nbsp;list<br>
+--&nbsp;of&nbsp;corresponding&nbsp;sums.<br>
+<br>
+<a name="$vzipWith"></a><br>
+zipWith&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a-&gt;b-&gt;c)&nbsp;-&gt;&nbsp;[a]-&gt;[b]-&gt;[c]<br>
+zipWith&nbsp;z&nbsp;(a:as)&nbsp;(b:bs)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;z&nbsp;a&nbsp;b&nbsp;:&nbsp;zipWith&nbsp;z&nbsp;as&nbsp;bs<br>
+zipWith&nbsp;_&nbsp;_&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[]<br>
+<br>
+<a name="$vzipWith3"></a><br>
+zipWith3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(a-&gt;b-&gt;c-&gt;d)&nbsp;-&gt;&nbsp;[a]-&gt;[b]-&gt;[c]-&gt;[d]<br>
+zipWith3&nbsp;z&nbsp;(a:as)&nbsp;(b:bs)&nbsp;(c:cs)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;z&nbsp;a&nbsp;b&nbsp;c&nbsp;:&nbsp;zipWith3&nbsp;z&nbsp;as&nbsp;bs&nbsp;cs<br>
+zipWith3&nbsp;_&nbsp;_&nbsp;_&nbsp;_&nbsp;=&nbsp;&nbsp;[]<br>
+<br>
+<br>
+--&nbsp;unzip&nbsp;transforms&nbsp;a&nbsp;list&nbsp;of&nbsp;pairs&nbsp;into&nbsp;a&nbsp;pair&nbsp;of&nbsp;lists.&nbsp;&nbsp;<br>
+<br>
+<a name="$vunzip"></a><br>
+unzip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[(a,b)]&nbsp;-&gt;&nbsp;([a],[b])<br>
+unzip&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldr&nbsp;(\(a,b)&nbsp;~(as,bs)&nbsp;-&gt;&nbsp;(a:as,b:bs))&nbsp;([],[])<br>
+<br>
+<a name="$vunzip3"></a><br>
+unzip3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[(a,b,c)]&nbsp;-&gt;&nbsp;([a],[b],[c])<br>
+unzip3&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;foldr&nbsp;(\(a,b,c)&nbsp;~(as,bs,cs)&nbsp;-&gt;&nbsp;(a:as,b:bs,c:cs))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;([],[],[])<br>
+<br>
+<br>
+<a name="preludetext"></a><p>
+</tt><a name="sectA.2"></a>
+<h3>A.2<tt>&nbsp;&nbsp;</tt>Prelude <tt>PreludeText</tt></h3>
+
+<tt><br>
+module&nbsp;PreludeText&nbsp;(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;ReadS,&nbsp;ShowS,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Read(readsPrec,&nbsp;readList),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;Show(showsPrec,&nbsp;showList),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;reads,&nbsp;shows,&nbsp;show,&nbsp;read,&nbsp;lex,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showChar,&nbsp;showString,&nbsp;readParen,&nbsp;showParen&nbsp;)&nbsp;where<br>
+<br>
+--&nbsp;The&nbsp;omitted&nbsp;instances&nbsp;can&nbsp;be&nbsp;implemented&nbsp;in&nbsp;standard&nbsp;Haskell&nbsp;but<br>
+--&nbsp;they&nbsp;have&nbsp;been&nbsp;omitted&nbsp;for&nbsp;the&nbsp;sake&nbsp;of&nbsp;brevity<br>
+<br>
+import&nbsp;Char(isSpace,&nbsp;isAlpha,&nbsp;isDigit,&nbsp;isAlphanum,&nbsp;isHexDigit,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;showLitChar,&nbsp;readLitChar,&nbsp;lexLitChar)<br>
+<br>
+import&nbsp;Numeric(showSigned,&nbsp;showInt,&nbsp;readSigned,&nbsp;readDec,&nbsp;showFloat,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;readFloat,&nbsp;lexDigits)<br>
+<br>
+<a name="$tReadS"></a><br>
+type&nbsp;&nbsp;ReadS&nbsp;a&nbsp;&nbsp;=&nbsp;String&nbsp;-&gt;&nbsp;[(a,String)]<br>
+<a name="$tShowS"></a><br>
+type&nbsp;&nbsp;ShowS&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;String&nbsp;-&gt;&nbsp;String<br>
+<br>
+<a name="$tRead"></a><br>
+class&nbsp;&nbsp;Read&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readsPrec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;ReadS&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readList&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;ReadS&nbsp;[a]<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readList&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;readParen&nbsp;False&nbsp;(\r&nbsp;-&gt;&nbsp;[pr&nbsp;|&nbsp;("[",s)&nbsp;&nbsp;&lt;-&nbsp;lex&nbsp;r,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;pr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&nbsp;readl&nbsp;s])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;readl&nbsp;&nbsp;s&nbsp;=&nbsp;[([],t)&nbsp;&nbsp;&nbsp;|&nbsp;("]",t)&nbsp;&nbsp;&lt;-&nbsp;lex&nbsp;s]&nbsp;++<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[(x:xs,u)&nbsp;|&nbsp;(x,t)&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&nbsp;reads&nbsp;s,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(xs,u)&nbsp;&nbsp;&nbsp;&lt;-&nbsp;readl'&nbsp;t]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;readl'&nbsp;s&nbsp;=&nbsp;[([],t)&nbsp;&nbsp;&nbsp;|&nbsp;("]",t)&nbsp;&nbsp;&lt;-&nbsp;lex&nbsp;s]&nbsp;++<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[(x:xs,v)&nbsp;|&nbsp;(",",t)&nbsp;&nbsp;&lt;-&nbsp;lex&nbsp;s,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(x,u)&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&nbsp;reads&nbsp;t,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(xs,v)&nbsp;&nbsp;&nbsp;&lt;-&nbsp;readl'&nbsp;u]<br>
+<br>
+<a name="$tShow"></a><br>
+class&nbsp;&nbsp;Show&nbsp;a&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Int&nbsp;-&gt;&nbsp;a&nbsp;-&gt;&nbsp;ShowS<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showList&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;[a]&nbsp;-&gt;&nbsp;ShowS<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showList&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;showString&nbsp;"[]"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showList&nbsp;(x:xs)&nbsp;&nbsp;&nbsp;=&nbsp;showChar&nbsp;'['&nbsp;.&nbsp;shows&nbsp;x&nbsp;.&nbsp;showl&nbsp;xs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;showl&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;showChar&nbsp;']'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;showl&nbsp;(x:xs)&nbsp;=&nbsp;showString&nbsp;",&nbsp;"&nbsp;.&nbsp;shows&nbsp;x&nbsp;.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;showl&nbsp;xs<br>
+<br>
+<a name="$vreads"></a><br>
+reads&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Read&nbsp;a)&nbsp;=&gt;&nbsp;ReadS&nbsp;a<br>
+reads&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;readsPrec&nbsp;0<br>
+<br>
+<a name="$vshows"></a><br>
+shows&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Show&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;ShowS<br>
+shows&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;showsPrec&nbsp;0<br>
+<br>
+<a name="$vread"></a><br>
+read&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Read&nbsp;a)&nbsp;=&gt;&nbsp;String&nbsp;-&gt;&nbsp;a<br>
+read&nbsp;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;case&nbsp;[x&nbsp;|&nbsp;(x,t)&nbsp;&lt;-&nbsp;reads&nbsp;s,&nbsp;("","")&nbsp;&lt;-&nbsp;lex&nbsp;t]&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[x]&nbsp;-&gt;&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[]&nbsp;&nbsp;-&gt;&nbsp;error&nbsp;"PreludeText.read:&nbsp;no&nbsp;parse"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;-&gt;&nbsp;error&nbsp;"PreludeText.read:&nbsp;ambiguous&nbsp;parse"<br>
+<br>
+<a name="$vshow"></a><br>
+show&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Show&nbsp;a)&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;String<br>
+show&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;shows&nbsp;x&nbsp;""<br>
+<br>
+<a name="$vshowChar"></a><br>
+showChar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Char&nbsp;-&gt;&nbsp;ShowS<br>
+showChar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;(:)<br>
+<br>
+<a name="$vshowString"></a><br>
+showString&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;String&nbsp;-&gt;&nbsp;ShowS<br>
+showString&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;(++)<br>
+<br>
+<a name="$vshowParen"></a><br>
+showParen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Bool&nbsp;-&gt;&nbsp;ShowS&nbsp;-&gt;&nbsp;ShowS<br>
+showParen&nbsp;b&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;if&nbsp;b&nbsp;then&nbsp;showChar&nbsp;'('&nbsp;.&nbsp;p&nbsp;.&nbsp;showChar&nbsp;')'&nbsp;else&nbsp;p<br>
+<br>
+<a name="$vreadParen"></a><br>
+readParen&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Bool&nbsp;-&gt;&nbsp;ReadS&nbsp;a&nbsp;-&gt;&nbsp;ReadS&nbsp;a<br>
+readParen&nbsp;b&nbsp;g&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;if&nbsp;b&nbsp;then&nbsp;mandatory&nbsp;else&nbsp;optional<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;optional&nbsp;r&nbsp;&nbsp;=&nbsp;g&nbsp;r&nbsp;++&nbsp;mandatory&nbsp;r<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;mandatory&nbsp;r&nbsp;=&nbsp;[(x,u)&nbsp;|&nbsp;("(",s)&nbsp;&lt;-&nbsp;lex&nbsp;r,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(x,t)&nbsp;&nbsp;&nbsp;&lt;-&nbsp;optional&nbsp;s,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(")",u)&nbsp;&lt;-&nbsp;lex&nbsp;t&nbsp;&nbsp;&nbsp;&nbsp;]<br>
+<br>
+--&nbsp;This&nbsp;lexer&nbsp;is&nbsp;not&nbsp;completely&nbsp;faithful&nbsp;to&nbsp;the&nbsp;Haskell&nbsp;lexical&nbsp;syntax.<br>
+--&nbsp;Current&nbsp;limitations:<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;Qualified&nbsp;names&nbsp;are&nbsp;not&nbsp;handled&nbsp;properly<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;A&nbsp;`--'&nbsp;does&nbsp;not&nbsp;terminate&nbsp;a&nbsp;symbol<br>
+--&nbsp;&nbsp;&nbsp;&nbsp;Octal&nbsp;and&nbsp;hexidecimal&nbsp;numerics&nbsp;are&nbsp;not&nbsp;recognized&nbsp;as&nbsp;a&nbsp;single&nbsp;token<br>
+<br>
+<a name="$vlex"></a><br>
+lex&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;ReadS&nbsp;String<br>
+lex&nbsp;""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[("","")]<br>
+lex&nbsp;(c:s)<br>
+&nbsp;&nbsp;&nbsp;|&nbsp;isSpace&nbsp;c&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;lex&nbsp;(dropWhile&nbsp;isSpace&nbsp;s)<br>
+lex&nbsp;('\'':s)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[('\'':ch++"'",&nbsp;t)&nbsp;|&nbsp;(ch,'\'':t)&nbsp;&nbsp;&lt;-&nbsp;lexLitChar&nbsp;s,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ch&nbsp;/=&nbsp;"'"&nbsp;]<br>
+lex&nbsp;('"':s)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[('"':str,&nbsp;t)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;(str,t)&nbsp;&lt;-&nbsp;lexString&nbsp;s]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lexString&nbsp;('"':s)&nbsp;=&nbsp;[("\"",s)]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lexString&nbsp;s&nbsp;=&nbsp;[(ch++str,&nbsp;u)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;(ch,t)&nbsp;&nbsp;&lt;-&nbsp;lexStrItem&nbsp;s,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(str,u)&nbsp;&lt;-&nbsp;lexString&nbsp;t&nbsp;&nbsp;]<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lexStrItem&nbsp;('\\':'&amp;':s)&nbsp;=&nbsp;&nbsp;[("\\&amp;",s)]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lexStrItem&nbsp;('\\':c:s)&nbsp;|&nbsp;isSpace&nbsp;c<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;[("\\&amp;",t)&nbsp;|&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;'\\':t&nbsp;&lt;-<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[dropWhile&nbsp;isSpace&nbsp;s]]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lexStrItem&nbsp;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;lexLitChar&nbsp;s<br>
+<br>
+lex&nbsp;(c:s)&nbsp;|&nbsp;isSingle&nbsp;c&nbsp;=&nbsp;[([c],s)]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;isSym&nbsp;c&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;[(c:sym,t)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;(sym,t)&nbsp;&lt;-&nbsp;[span&nbsp;isSym&nbsp;s]]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;isAlpha&nbsp;c&nbsp;&nbsp;=&nbsp;[(c:nam,t)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;(nam,t)&nbsp;&lt;-&nbsp;[span&nbsp;isIdChar&nbsp;s]]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;isDigit&nbsp;c&nbsp;&nbsp;=&nbsp;[(c:ds++fe,t)&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;(ds,s)&nbsp;&nbsp;&lt;-&nbsp;[span&nbsp;isDigit&nbsp;s],<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(fe,t)&nbsp;&nbsp;&lt;-&nbsp;lexFracExp&nbsp;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;otherwise&nbsp;&nbsp;=&nbsp;[]&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;bad&nbsp;character<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;isSingle&nbsp;c&nbsp;=&nbsp;&nbsp;c&nbsp;`elem`&nbsp;",;()[]{}_`"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;isSym&nbsp;c&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;isPrint&nbsp;c&nbsp;&amp;&amp;&nbsp;not&nbsp;(isAlphaNum&nbsp;c)&nbsp;&amp;&amp;&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;not&nbsp;(isSingle&nbsp;c)&nbsp;&amp;&amp;&nbsp;not&nbsp;(c&nbsp;`elem`&nbsp;"_'")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;isIdChar&nbsp;c&nbsp;=&nbsp;&nbsp;isAlphanum&nbsp;c&nbsp;||&nbsp;c&nbsp;`elem`&nbsp;"_'"<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lexFracExp&nbsp;('.':c:cs)&nbsp;|&nbsp;isDigit&nbsp;c<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;[('.':ds++e,u)&nbsp;|&nbsp;(ds,t)&nbsp;&lt;-&nbsp;lexDigits&nbsp;(c:cs),<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(e,u)&nbsp;&nbsp;&lt;-&nbsp;lexExp&nbsp;t]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lexFracExp&nbsp;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;[("",s)]<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lexExp&nbsp;(e:s)&nbsp;|&nbsp;e&nbsp;`elem`&nbsp;"eE"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;[(e:c:ds,u)&nbsp;|&nbsp;(c:t)&nbsp;&nbsp;&lt;-&nbsp;[s],&nbsp;c&nbsp;`elem`&nbsp;"+-",<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(ds,u)&nbsp;&lt;-&nbsp;lexDigits&nbsp;t]&nbsp;++<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[(e:ds,t)&nbsp;&nbsp;&nbsp;|&nbsp;(ds,t)&nbsp;&lt;-&nbsp;lexDigits&nbsp;s]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;lexExp&nbsp;s&nbsp;=&nbsp;[("",s)]<br>
+<br>
+<a name="$iShow$$Int"></a><br>
+instance&nbsp;&nbsp;Show&nbsp;Int&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;showSigned&nbsp;showInt<br>
+<br>
+<a name="$iRead$$Int"></a><br>
+instance&nbsp;&nbsp;Read&nbsp;Int&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readsPrec&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;readSigned&nbsp;readDec<br>
+<br>
+<a name="$iShow$$Integer"></a><br>
+instance&nbsp;&nbsp;Show&nbsp;Integer&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;showSigned&nbsp;showInt<br>
+<br>
+<a name="$iRead$$Integer"></a><br>
+instance&nbsp;&nbsp;Read&nbsp;Integer&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readsPrec&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;readSigned&nbsp;readDec<br>
+<br>
+<a name="$iShow$$Float"></a><br>
+instance&nbsp;&nbsp;Show&nbsp;Float&nbsp;&nbsp;where&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;showFloat<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+<a name="$iRead$$Float"></a><br>
+instance&nbsp;&nbsp;Read&nbsp;Float&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readsPrec&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;readFloat<br>
+<br>
+<a name="$iShow$$Double"></a><br>
+instance&nbsp;&nbsp;Show&nbsp;Double&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;showFloat<br>
+<br>
+<a name="$iRead$$Double"></a><br>
+instance&nbsp;&nbsp;Read&nbsp;Double&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readsPrec&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;readFloat<br>
+<br>
+<a name="$iShow$$$P$C"></a><br>
+instance&nbsp;&nbsp;Show&nbsp;()&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;p&nbsp;()&nbsp;=&nbsp;showString&nbsp;"()"<br>
+<br>
+<a name="$iRead$$$P$C"></a><br>
+instance&nbsp;Read&nbsp;()&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readsPrec&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;readParen&nbsp;False<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(\r&nbsp;-&gt;&nbsp;[((),t)&nbsp;|&nbsp;("(",s)&nbsp;&lt;-&nbsp;lex&nbsp;r,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(")",t)&nbsp;&lt;-&nbsp;lex&nbsp;s&nbsp;]&nbsp;)<br>
+<a name="$iShow$$Char"></a><br>
+instance&nbsp;&nbsp;Show&nbsp;Char&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;p&nbsp;'\''&nbsp;=&nbsp;showString&nbsp;"'\\''"<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;p&nbsp;c&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;showChar&nbsp;'\''&nbsp;.&nbsp;showLitChar&nbsp;c&nbsp;.&nbsp;showChar&nbsp;'\''<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showList&nbsp;cs&nbsp;=&nbsp;showChar&nbsp;'"'&nbsp;.&nbsp;showl&nbsp;cs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;showl&nbsp;""&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;showChar&nbsp;'"'<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;showl&nbsp;('"':cs)&nbsp;=&nbsp;showString&nbsp;"\\\""&nbsp;.&nbsp;showl&nbsp;cs<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;showl&nbsp;(c:cs)&nbsp;&nbsp;&nbsp;=&nbsp;showLitChar&nbsp;c&nbsp;.&nbsp;showl&nbsp;cs<br>
+<br>
+<a name="$iRead$$Char"></a><br>
+instance&nbsp;&nbsp;Read&nbsp;Char&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readsPrec&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;readParen&nbsp;False<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(\r&nbsp;-&gt;&nbsp;[(c,t)&nbsp;|&nbsp;('\'':s,t)&lt;-&nbsp;lex&nbsp;r,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(c,'\'')&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&nbsp;readLitChar&nbsp;s])<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readList&nbsp;=&nbsp;readParen&nbsp;False&nbsp;(\r&nbsp;-&gt;&nbsp;[(l,t)&nbsp;|&nbsp;('"':s,&nbsp;t)&nbsp;&lt;-&nbsp;lex&nbsp;r,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(l,_)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&lt;-&nbsp;readl&nbsp;s&nbsp;])<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;where&nbsp;readl&nbsp;('"':s)&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;[("",s)]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;readl&nbsp;('\\':'&amp;':s)&nbsp;=&nbsp;readl&nbsp;s<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;readl&nbsp;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;[(c:cs,u)&nbsp;|&nbsp;(c&nbsp;,t)&nbsp;&lt;-&nbsp;readLitChar&nbsp;s,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(cs,u)&nbsp;&lt;-&nbsp;readl&nbsp;t&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;]<br>
+<br>
+<a name="$iShow$$$Ba$c"></a><br>
+instance&nbsp;&nbsp;(Show&nbsp;a)&nbsp;=&gt;&nbsp;Show&nbsp;[a]&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;showList<br>
+<br>
+<a name="$iRead$$$Ba$c"></a><br>
+instance&nbsp;&nbsp;(Read&nbsp;a)&nbsp;=&gt;&nbsp;Read&nbsp;[a]&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readsPrec&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;readList<br>
+<br>
+--&nbsp;Tuples<br>
+<br>
+<a name="$iShow$$$Pa$xb$C"></a><br>
+instance&nbsp;&nbsp;(Show&nbsp;a,&nbsp;Show&nbsp;b)&nbsp;=&gt;&nbsp;Show&nbsp;(a,b)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;p&nbsp;(x,y)&nbsp;=&nbsp;showChar&nbsp;'('&nbsp;.&nbsp;shows&nbsp;x&nbsp;.&nbsp;showChar&nbsp;','&nbsp;.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;shows&nbsp;y&nbsp;.&nbsp;showChar&nbsp;')'<br>
+<br>
+<a name="$iRead$$$Pa$xb$C"></a><br>
+instance&nbsp;&nbsp;(Read&nbsp;a,&nbsp;Read&nbsp;b)&nbsp;=&gt;&nbsp;Read&nbsp;(a,b)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readsPrec&nbsp;p&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;readParen&nbsp;False<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(\r&nbsp;-&gt;&nbsp;[((x,y),&nbsp;w)&nbsp;|&nbsp;("(",s)&nbsp;&lt;-&nbsp;lex&nbsp;r,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(x,t)&nbsp;&nbsp;&nbsp;&lt;-&nbsp;reads&nbsp;s,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(",",u)&nbsp;&lt;-&nbsp;lex&nbsp;t,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(y,v)&nbsp;&nbsp;&nbsp;&lt;-&nbsp;reads&nbsp;u,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;(")",w)&nbsp;&lt;-&nbsp;lex&nbsp;v&nbsp;]&nbsp;)<br>
+<br>
+--&nbsp;Other&nbsp;tuples&nbsp;have&nbsp;similar&nbsp;Read&nbsp;and&nbsp;Show&nbsp;instances<br>
+<br>
+--&nbsp;Functions<br>
+<br>
+<a name="$iShow$$a$D$Ab"></a><br>
+instance&nbsp;&nbsp;Show&nbsp;(a-&gt;b)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;p&nbsp;f&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;showString&nbsp;"&lt;&lt;function&gt;&gt;"<br>
+<br>
+<br>
+<a name="$iShow$$IO"></a><br>
+instance&nbsp;&nbsp;Show&nbsp;(IO&nbsp;a)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;p&nbsp;f&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;showString&nbsp;"&lt;&lt;IO&nbsp;action&gt;&gt;"<br>
+<br>
+<a name="preludeio"></a><p>
+</tt><a name="sectA.3"></a>
+<h3>A.3<tt>&nbsp;&nbsp;</tt>Prelude <tt>PreludeIO</tt></h3>
+
+<tt><br>
+module&nbsp;PreludeIO&nbsp;(<br>
+&nbsp;&nbsp;&nbsp;&nbsp;FilePath,&nbsp;IOError,&nbsp;fail,&nbsp;userError,&nbsp;catch,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;putChar,&nbsp;putStr,&nbsp;putStrLn,&nbsp;print,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;getChar,&nbsp;getLine,&nbsp;getContents,&nbsp;interact,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;readFile,&nbsp;writeFile,&nbsp;appendFile,&nbsp;readIO,&nbsp;readLn<br>
+&nbsp;&nbsp;)&nbsp;where<br>
+<br>
+import&nbsp;PreludeBuiltin<br>
+<br>
+<br>
+<a name="$tFilePath"></a><br>
+type&nbsp;&nbsp;FilePath&nbsp;=&nbsp;String<br>
+<br>
+<a name="$tIOError"></a><br>
+data&nbsp;IOError&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;The&nbsp;internals&nbsp;of&nbsp;this&nbsp;type&nbsp;are&nbsp;system&nbsp;dependent<br>
+<br>
+<a name="$iShow$$IOError"></a><br>
+instance&nbsp;&nbsp;Show&nbsp;IOError&nbsp;&nbsp;where&nbsp;...<br>
+<a name="$iEq$$IOError"></a><br>
+instance&nbsp;&nbsp;Eq&nbsp;IOError&nbsp;&nbsp;where&nbsp;...<br>
+<br>
+<a name="$vfail"></a><br>
+fail&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;&nbsp;IOError&nbsp;-&gt;&nbsp;IO&nbsp;a&nbsp;<br>
+fail&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;primFail<br>
+<br>
+<a name="$vuserError"></a><br>
+userError&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;&nbsp;String&nbsp;-&gt;&nbsp;IOError<br>
+userError&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;primUserError<br>
+<br>
+<a name="$vcatch"></a><br>
+catch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;&nbsp;IO&nbsp;a&nbsp;-&gt;&nbsp;(IOError&nbsp;-&gt;&nbsp;IO&nbsp;a)&nbsp;-&gt;&nbsp;IO&nbsp;a&nbsp;<br>
+catch&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;primCatch<br>
+<br>
+<a name="$vputChar"></a><br>
+putChar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Char&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+putChar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;primPutChar<br>
+<br>
+<a name="$vputStr"></a><br>
+putStr&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;String&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+putStr&nbsp;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;mapM_&nbsp;s&nbsp;putChar<br>
+<br>
+<a name="$vputStrLn"></a><br>
+putStrLn&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;String&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+putStrLn&nbsp;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;do&nbsp;putStr&nbsp;s<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;putStr&nbsp;"\n"<br>
+<br>
+<a name="$vprint"></a><br>
+print&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Show&nbsp;a&nbsp;=&gt;&nbsp;a&nbsp;-&gt;&nbsp;rIO&nbsp;()<br>
+print&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;putStrLn&nbsp;(show&nbsp;x)<br>
+<br>
+<a name="$vgetChar"></a><br>
+getChar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;Char<br>
+getChar&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;primGetChar<br>
+<br>
+<a name="$vgetLine"></a><br>
+getLine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;String<br>
+getLine&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;do&nbsp;c&nbsp;&lt;-&nbsp;getChar<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;c&nbsp;==&nbsp;'\n'&nbsp;then&nbsp;return&nbsp;""&nbsp;else&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;do&nbsp;s&nbsp;&lt;-&nbsp;getLine<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;(c:s)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br>
+<a name="$vgetContents"></a><br>
+getContents&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;IO&nbsp;String<br>
+getContents&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;primGetContents<br>
+<br>
+<a name="$vinteract"></a><br>
+interact&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;&nbsp;(String&nbsp;-&gt;&nbsp;String)&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+interact&nbsp;f&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;&nbsp;do&nbsp;s&nbsp;&lt;-&nbsp;getContents<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;putStr&nbsp;(f&nbsp;s)<br>
+<br>
+<a name="$vreadFile"></a><br>
+readFile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;FilePath&nbsp;-&gt;&nbsp;IO&nbsp;String<br>
+readFile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;primReadFile<br>
+<br>
+<a name="$vwriteFile"></a><br>
+writeFile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;FilePath&nbsp;-&gt;&nbsp;String&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+writeFile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;primWriteFile<br>
+<br>
+<a name="$vappendFile"></a><br>
+appendFile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;FilePath&nbsp;-&gt;&nbsp;String&nbsp;-&gt;&nbsp;IO&nbsp;()<br>
+appendFile&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;primAppendFile<br>
+<br>
+&nbsp;&nbsp;--&nbsp;raises&nbsp;an&nbsp;exception&nbsp;instead&nbsp;of&nbsp;an&nbsp;error<br>
+<a name="$vreadIO"></a><br>
+readIO&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Read&nbsp;a&nbsp;=&gt;&nbsp;String&nbsp;-&gt;&nbsp;IO&nbsp;a<br>
+readIO&nbsp;s&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;case&nbsp;[x&nbsp;|&nbsp;(x,t)&nbsp;&lt;-&nbsp;reads&nbsp;s,&nbsp;("","")&nbsp;&lt;-&nbsp;lex&nbsp;t]&nbsp;of<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[x]&nbsp;-&gt;&nbsp;return&nbsp;x<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;[]&nbsp;&nbsp;-&gt;&nbsp;fail&nbsp;(userError&nbsp;"PreludeIO.readIO:&nbsp;no&nbsp;parse")<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;&nbsp;&nbsp;-&gt;&nbsp;fail&nbsp;(userError&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"PreludeIO.readIO:&nbsp;ambiguous&nbsp;parse")<br>
+<br>
+<a name="$vreadLn"></a><br>
+readLn&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;Read&nbsp;a&nbsp;=&gt;&nbsp;IO&nbsp;a<br>
+readLn&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;do&nbsp;l&nbsp;&lt;-&nbsp;getLine<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;r&nbsp;&lt;-&nbsp;readIO&nbsp;l<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;return&nbsp;r<br>
+<p>
+<hr><i>The Haskell 1.4 Report</i><br><a href="index.html">top</a> | <a href="io-13.html">back</a> | <a href="syntax-iso.html">next</a> | <a href="index14.html">contents</a> | <a href="prelude-index.html">function index</a> <br><font size=2>March 27, 1997</font>
+<p>
+</tt>

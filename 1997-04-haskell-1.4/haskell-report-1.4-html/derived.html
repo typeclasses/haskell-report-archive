@@ -1,0 +1,322 @@
+<p>
+<title>The Haskell 1.3 Report: Derived Instances</title>
+<body bgcolor="#ffffff"> <i>The Haskell 1.4 Report</i><br> <a href="index.html">top</a> | <a href="literate.html">back</a> | <a href="pragmas.html">next</a> | <a href="index14.html">contents</a> | <a href="prelude-index.html">function index</a> <br><hr>
+<a name="derived-appendix"></a><p>
+<a name="sectD"></a>
+<h2>D<tt>&nbsp;&nbsp;</tt>Specification of Derived Instances</h2>
+
+A <I>derived instance</I> is an instance declaration that is generated
+automatically in conjunction with a <tt>data</tt> or <tt>newtype</tt> declaration.
+The body of a derived instance declaration is derived syntacticly from
+the definition of the associated type.  Derived instances are
+possible only for classes known to the compiler: those defined in
+either the Prelude or a standard library.  In this appendix, we
+describe the derivation of classes defined by the Prelude.<p>
+If <I>T</I> is an algebraic datatype declared by:
+<p>
+<table >
+<tr><td>
+<tt>data&nbsp;</tt><I>c</I><tt>&nbsp;=&gt;</tt><I> T u</I><sub><I>1</I></sub><I> ... u</I><sub><I>k</I></sub></td><td align=center><tt>=</tt></td><td><I>K</I><sub><I>1</I></sub><I> t</I><sub><I>11</I></sub><I> ... t</I><sub><I>1k</I><sub><I>1</I></sub></sub><I> </I><tt>|</tt><I> ...</I><tt>|</tt><I> K</I><sub><I>n</I></sub><I> t</I><sub><I>n1</I></sub><I> ... t</I><sub><I>nk</I><sub><I>n</I></sub></sub></td></tr><tr><td></td><td align=center> </td><td> <tt>deriving&nbsp;(</tt><I>C</I><sub><I>1</I></sub><tt>,</tt><I> ...</I><tt>,</tt><I> C</I><sub><I>m</I></sub><tt>)
+</tt></td></tr></table>
+<p>
+
+(where <I>m&gt;=0</I> and the parentheses may be omitted if <I>m=1</I>) then
+a derived instance declaration is possible for a class <I>C</I> 
+if these conditions hold:
+<OL><LI>
+<I>C</I> is one of <tt>Eq</tt>, <tt>Ord</tt>, <tt>Enum</tt>, <tt>Bounded</tt>, <tt>Show</tt>, or <tt>Read</tt>.<p>
+<LI>
+There is a context <I>c'</I> such that <I>c' =&gt;C t</I><sub><I>ij</I></sub>
+holds for each of the constituent types <I>t</I><sub><I>ij</I></sub>.<p>
+<LI>
+If <I>C</I> is <tt>Bounded</tt>, the type must be either an enumeration (all
+constructors must by nullary) or have only one constructor.<p>
+<LI>
+If <I>C</I> is <tt>Enum</tt>, the type must be an enumeration.<p>
+<LI>
+There must be no explicit instance declaration elsewhere in the program that
+makes <I>T u</I><sub><I>1</I></sub><I> ... u</I><sub><I>k</I></sub> an instance of <I>C</I>.
+</OL>
+For the purposes of derived instances, a <tt>newtype</tt> declaration is
+treated as a <tt>data</tt> declaration with a single constructor.<p>
+If the <tt>deriving</tt> form is present,
+an instance declaration is automatically generated for <I>T u</I><sub><I>1</I></sub><I> ... u</I><sub><I>k</I></sub>
+over each class <I>C</I><sub><I>i</I></sub>.
+If the derived instance declaration is impossible for any of the <I>C</I><sub><I>i</I></sub>
+then a static error results.
+If no derived instances are required, the <tt>deriving</tt> form may be
+omitted or the form <tt>deriving&nbsp;()</tt> may be used.<p>
+Each derived instance declaration will have the form:
+<p>
+
+<tt>instance&nbsp;(</tt><I>c</I><tt>,</tt><I> C'</I><sub><I>1</I></sub><I> u'</I><sub><I>1</I></sub><tt>,</tt><I> ...</I><tt>,</tt><I> C'</I><sub><I>j</I></sub><I> u'</I><sub><I>j</I></sub><I> </I><tt>)&nbsp;=&gt;</tt><I> C</I><sub><I>i</I></sub><I> (T u</I><sub><I>1</I></sub><I> ... u</I><sub><I>k</I></sub><I>) </I><tt>where</tt><I> </I><tt>{</tt><I> d </I><tt>}
+<p>
+
+</tt>where <I>d</I> is derived automatically depending on <I>C</I><sub><I>i</I></sub> and the data
+type declaration for <I>T</I> (as will be described in the remainder of
+this section), and <I>u'</I><sub><I>1</I></sub> through <I>u'</I><sub><I>j</I></sub> form a subset of <I>u</I><sub><I>1</I></sub>
+through <I>u</I><sub><I>k</I></sub>.
+When inferring the context for the derived instances, type synonyms
+must be expanded out first.
+Free names in the declarations d are all
+defined in the Prelude; the qualifier `<tt>Prelude.</tt>' is
+implicit here.  The remaining details of the derived
+instances for each of the derivable Prelude classes are now given.<p>
+<h3>Derived instances of <tt>Eq</tt> and <tt>Ord</tt>.</h3>
+
+
+The class methods automatically introduced by derived instances
+of <tt>Eq</tt> and <tt>Ord</tt> are <tt>(==)</tt>,
+
+<tt>(/=)</tt>,
+
+<tt>compare</tt>,
+<tt>(&lt;)</tt>,
+
+<tt>(&lt;=)</tt>,
+
+<tt>(&gt;)</tt>,
+
+<tt>(&gt;=)</tt>,
+
+<tt>max</tt>, and 
+<tt>min</tt>.  The latter seven operators are defined so
+as to compare their arguments lexicographically with respect to
+the constructor set given, with earlier constructors in the datatype
+declaration counting as smaller than later ones.  For example, for the
+<tt>Bool</tt> datatype, we have that <tt>(True&nbsp;&gt;&nbsp;False)&nbsp;==&nbsp;True</tt>.<p>
+Derived comparisons always traverse constructors from left to right.
+These examples illustrate this property:
+<tt><br>
+
+<br>
+(1,undefined)&nbsp;==&nbsp;(2,undefined)&nbsp;</tt><I>=&gt;</I><tt>&nbsp;&nbsp;&nbsp;&nbsp;False<br>
+(undefined,1)&nbsp;==&nbsp;(undefined,2)&nbsp;</tt><I>=&gt;</I><tt>&nbsp;&nbsp;&nbsp;&nbsp;</tt><I>_|_</I><tt><br>
+
+<br>
+<p>
+</tt><h3>Derived instances of <tt>Enum</tt></h3>
+
+Derived instance declarations for the class <tt>Enum</tt> are only
+possible for enumerations.
+The nullary constructors are assumed to be
+numbered left-to-right with the indices 0 through n-1.
+<tt>Enum</tt> introduces the class methods
+<tt>toEnum</tt>,
+<tt>fromEnum</tt>,
+<tt>enumFrom</tt>,
+<tt>enumFromThen</tt>, <tt>enumFromTo</tt>, and
+<tt>enumFromThenTo</tt>,
+which are used to define arithmetic sequences as described
+in Section <a href="exps.html#arithmetic-sequences">3.10</a>. <p>
+The <tt>toEnum</tt> and <tt>fromEnum</tt> operators map enumerated values to and
+from the <tt>Int</tt> type.
+<tt>enumFrom&nbsp;n</tt> returns a list corresponding to the complete enumeration
+of <tt>n</tt>'s type starting at the value <tt>n</tt>.
+Similarly, <tt>enumFromThen&nbsp;n&nbsp;n'</tt> is the enumeration starting at <tt>n</tt>, but
+with second element <tt>n'</tt>, and with subsequent elements generated at a
+spacing equal to the difference between <tt>n</tt> and <tt>n'</tt>.
+<tt>enumFromTo</tt> and <tt>enumFromThenTo</tt> are as defined by the
+default class methods
+
+for <tt>Enum</tt> (see Figure <a href="basic.html#standard-classes">5</a>,
+page ).
+For example,
+given the datatype:
+<tt><br>
+
+<br>
+data&nbsp;&nbsp;Color&nbsp;=&nbsp;Red&nbsp;|&nbsp;Orange&nbsp;|&nbsp;Yellow&nbsp;|&nbsp;Green&nbsp;&nbsp;deriving&nbsp;(Enum)<br>
+
+<br>
+
+</tt>we would have:
+<tt><br>
+
+<br>
+[Orange..]&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;==&nbsp;&nbsp;[Orange,&nbsp;Yellow,&nbsp;Green]<br>
+fromEnum&nbsp;Yellow&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;==&nbsp;&nbsp;2<br>
+
+<br>
+<p>
+</tt><h3>Derived instances of <tt>Bounded</tt>.</h3>
+
+The <tt>Bounded</tt> class introduces the class
+methods 
+<tt>minBound</tt> and
+<tt>maxBound</tt>,
+which define the minimal and maximal elements of the type.
+For an enumeration, the first and last constructors listed in the
+<tt>data</tt> declaration are the bounds.  For a type with a single
+constructor, the constructor is applied to the bounds for the
+constituent types.  For example, the following datatype:
+<tt><br>
+
+<br>
+data&nbsp;&nbsp;Pair&nbsp;a&nbsp;b&nbsp;=&nbsp;Pair&nbsp;a&nbsp;b&nbsp;deriving&nbsp;Bounded<br>
+
+<br>
+
+</tt>would generate the following <tt>Bounded</tt> instance:
+<tt><br>
+
+<br>
+instance&nbsp;(Bounded&nbsp;a,Bounded&nbsp;b)&nbsp;=&gt;&nbsp;Bounded&nbsp;(Pair&nbsp;a&nbsp;b)&nbsp;where<br>
+&nbsp;&nbsp;minBound&nbsp;=&nbsp;Pair&nbsp;minBound&nbsp;minBound<br>
+&nbsp;&nbsp;maxBound&nbsp;=&nbsp;Pair&nbsp;maxBound&nbsp;maxBound<br>
+
+<br>
+<p>
+</tt><h3>Derived instances of <tt>Read</tt> and <tt>Show</tt>.</h3>
+
+
+The class methods automatically introduced by derived instances
+of <tt>Read</tt> and <tt>Show</tt> are <tt>showsPrec</tt>,
+<tt>readsPrec</tt>,
+<tt>showList</tt>, and <tt>readList</tt>.
+They are used to coerce values into strings and parse strings into
+values.<p>
+The function <tt>showsPrec&nbsp;d&nbsp;x&nbsp;r</tt> accepts a precedence level <tt>d
+</tt>(a number from <tt>0</tt> to <tt>10</tt>), a value <tt>x</tt>, and a string <tt>r</tt>.
+It returns a string representing <tt>x</tt> concatenated to <tt>r</tt>.
+<tt>showsPrec</tt> satisfies the law:
+<p>
+
+<tt>showsPrec&nbsp;d&nbsp;x&nbsp;r&nbsp;++&nbsp;s&nbsp;&nbsp;==&nbsp;&nbsp;showsPrec&nbsp;d&nbsp;x&nbsp;(r&nbsp;++&nbsp;s)
+<p>
+
+</tt>The representation will be enclosed in parentheses if the precedence
+of the top-level constructor operator in <tt>x</tt> is less than <tt>d</tt>.  Thus,
+if <tt>d</tt> is <tt>0</tt> then the result is never surrounded in parentheses; if
+<tt>d</tt> is <tt>10</tt> it is always surrounded in parentheses, unless it is an
+atomic expression.  The extra parameter <tt>r</tt> is essential if tree-like
+structures are to be printed in linear time rather than time quadratic
+in the size of the tree.<p>
+The function <tt>readsPrec&nbsp;d&nbsp;s</tt> accepts a precedence level <tt>d</tt> (a number
+from <tt>0</tt> to <tt>10</tt>) and a string <tt>s</tt>, and returns a list of pairs
+<tt>(x,r)</tt> such that <tt>showsPrec&nbsp;d&nbsp;x&nbsp;r&nbsp;==&nbsp;s</tt>.  <tt>readsPrec</tt> is a parse
+function, returning a list of (parsed value, remaining string) pairs.
+If there is no successful parse, the returned list is empty.<p>
+<tt>showList</tt> and <tt>readList</tt> allow lists of objects to be represented
+using non-standard denotations.  This is especially useful for strings
+(lists of <tt>Char</tt>).<p>
+<tt>readsPrec</tt> will parse any valid representation of the standard types 
+apart from lists, for
+which only the bracketed form <tt>[</tt>...<tt>]</tt> is accepted. See
+Appendix <a href="standard-prelude.html#stdprelude">A</a> for full details.<p>
+A precise definition of the derived <tt>Read</tt> and <tt>Show</tt> instances for
+general types is beyond the scope of this report.  However, the
+derived <tt>Read</tt> and <tt>Show</tt> instances have the following properties:
+<UL><LI>The result of <tt>show</tt> is a syntactically correct Haskell 
+      expression containing only constants
+      given the fixity declarations in force at the point where
+      the type is declared.
+<LI>The result of <tt>show</tt> is readable by <tt>read</tt> if all component
+      types are readable.  (This is true for all instances defined in
+      the Prelude but may not be true for user-defined instances.)
+<LI>The instance generated by <tt>Read</tt> allows arbitrary whitespace
+      between tokens on the input string.  Extra parenthesis are also 
+      allowed.
+<LI>The result of <tt>show</tt> contains only the constructor names defined
+      in the data type, parenthesis, and spaces.  When labeled
+      constructor fields are used, braces, commas, field names, and
+      equal signs are also used.
+      No leading or 
+      trailing spaces are generated.  Parenthesis are only added where
+      needed.  No line breaks are added.
+<LI>If a constructor is defined using labeled field syntax then the derived
+      <tt>show</tt> for that constructor will this same
+      syntax; the fields will be in the order declared in the
+      <tt>data</tt> declaration.  The derived <tt>Read</tt> instance will use
+      this same syntax: all fields must be present and the declared order
+      must be maintained.
+<LI>If a constructor is defined in the infix style, the derived <tt>Show
+</tt>      instance will also use infix style.  The derived <tt>Read</tt> instance will
+      require that the constructor be infix.
+</UL><p>
+The derived <tt>Read</tt> and <tt>Show</tt> instances may be unsuitable for some
+uses.  Some problems include:
+<UL><LI>Circular structures cannot be printed or read by these
+instances.
+<LI>The printer loses shared substructure; the printed
+representation of an object may be much larger that necessary.
+<LI>The parsing techniques used by the reader are very inefficient;
+reading a large structure may be quite slow.
+<LI>There is no user control over the printing of types defined in
+the Prelude.  For example, there is no way to change the
+formatting of floating point numbers.
+</UL><p>
+<a name="sectD.1"></a>
+<h3>D.1<tt>&nbsp;&nbsp;</tt>An example</h3><p>
+As a complete example, consider a tree datatype:<tt><br>
+
+<br>
+data&nbsp;Tree&nbsp;a&nbsp;=&nbsp;Leaf&nbsp;a&nbsp;|&nbsp;Tree&nbsp;a&nbsp;:^:&nbsp;Tree&nbsp;a<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;deriving&nbsp;(Eq,&nbsp;Ord,&nbsp;Read,&nbsp;Show)<br>
+
+<br>
+
+</tt>Automatic derivation of
+instance
+declarations for <tt>Bounded</tt> and <tt>Enum</tt> are not possible, as <tt>Tree</tt> is not
+an enumeration or single-constructor datatype.  The complete
+instance declarations for <tt>Tree</tt> are shown in Figure <a href="derived.html#tree-inst">8</a>,
+Note the implicit use of default class method
+
+definitions---for
+example, only <tt>&lt;=</tt> is defined for <tt>Ord</tt>, with the other
+class methods (<tt>&lt;</tt>, <tt>&gt;</tt>, <tt>&gt;=</tt>, <tt>max</tt>, and <tt>min</tt>) being defined by the defaults given in
+the class declaration shown in Figure <a href="basic.html#standard-classes">5</a>
+(page ).<p>
+<table border=2 cellpadding=3>
+<tr><td>
+<div align=center><table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+infix&nbsp;4&nbsp;:^:<br>
+data&nbsp;Tree&nbsp;a&nbsp;=&nbsp;&nbsp;Leaf&nbsp;a&nbsp;&nbsp;|&nbsp;&nbsp;Tree&nbsp;a&nbsp;:^:&nbsp;Tree&nbsp;a<br>
+<br>
+instance&nbsp;(Eq&nbsp;a)&nbsp;=&gt;&nbsp;Eq&nbsp;(Tree&nbsp;a)&nbsp;where<br>
+	Leaf&nbsp;m&nbsp;==&nbsp;Leaf&nbsp;n&nbsp;&nbsp;=&nbsp;&nbsp;m==n<br>
+	u:^:v&nbsp;&nbsp;==&nbsp;x:^:y	&nbsp;&nbsp;=&nbsp;&nbsp;u==x&nbsp;&amp;&amp;&nbsp;v==y<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_&nbsp;==&nbsp;_&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;&nbsp;False<br>
+<br>
+instance&nbsp;(Ord&nbsp;a)&nbsp;=&gt;&nbsp;Ord&nbsp;(Tree&nbsp;a)&nbsp;where<br>
+	Leaf&nbsp;m&nbsp;&lt;=&nbsp;Leaf&nbsp;n&nbsp;&nbsp;=&nbsp;&nbsp;m&lt;=n<br>
+	Leaf&nbsp;m&nbsp;&lt;=&nbsp;x:^:y	&nbsp;&nbsp;=&nbsp;&nbsp;True<br>
+	u:^:v&nbsp;&nbsp;&lt;=&nbsp;Leaf&nbsp;n&nbsp;&nbsp;=&nbsp;&nbsp;False<br>
+	u:^:v&nbsp;&nbsp;&lt;=&nbsp;x:^:y	&nbsp;&nbsp;=&nbsp;&nbsp;u&lt;x&nbsp;||&nbsp;u==x&nbsp;&amp;&amp;&nbsp;v&lt;=y<br>
+<br>
+instance&nbsp;(Show&nbsp;a)&nbsp;=&gt;&nbsp;Show&nbsp;(Tree&nbsp;a)&nbsp;where<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;d&nbsp;(Leaf&nbsp;m)&nbsp;=&nbsp;showParen&nbsp;(d&nbsp;&gt;=&nbsp;10)&nbsp;showStr<br>
+&nbsp;&nbsp;&nbsp;&nbsp;	&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;showStr&nbsp;=&nbsp;showString&nbsp;"Leaf&nbsp;"&nbsp;.&nbsp;showsPrec&nbsp;10&nbsp;m<br>
+<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;d&nbsp;(u&nbsp;:^:&nbsp;v)&nbsp;=&nbsp;showParen&nbsp;(d&nbsp;&gt;&nbsp;4)&nbsp;showStr<br>
+&nbsp;&nbsp;&nbsp;&nbsp;	&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;showStr&nbsp;=&nbsp;showsPrec&nbsp;5&nbsp;u&nbsp;.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;showString&nbsp;"&nbsp;:^:&nbsp;"&nbsp;.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;showsPrec&nbsp;5&nbsp;v<br>
+<br>
+instance&nbsp;(Read&nbsp;a)&nbsp;=&gt;&nbsp;Read&nbsp;(Tree&nbsp;a)&nbsp;where<br>
+<br>
+	readsPrec&nbsp;d&nbsp;r&nbsp;=&nbsp;&nbsp;readParen&nbsp;(d&nbsp;&gt;&nbsp;4)<br>
+			&nbsp;(\r&nbsp;-&gt;&nbsp;[(u:^:v,w)&nbsp;|<br>
+				&nbsp;(u,s)&nbsp;&lt;-&nbsp;readsPrec&nbsp;5&nbsp;r,<br>
+				&nbsp;(":^:",t)&nbsp;&lt;-&nbsp;lex&nbsp;s,<br>
+				&nbsp;(v,w)&nbsp;&lt;-&nbsp;readsPrec&nbsp;5&nbsp;t])&nbsp;r<br>
+<br>
+		&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;++&nbsp;readParen&nbsp;(d&nbsp;&gt;&nbsp;9)<br>
+			&nbsp;(\r&nbsp;-&gt;&nbsp;[(Leaf&nbsp;m,t)&nbsp;|<br>
+				&nbsp;("Leaf",s)&nbsp;&lt;-&nbsp;lex&nbsp;r,<br>
+				&nbsp;(m,t)&nbsp;&lt;-&nbsp;readsPrec&nbsp;10&nbsp;s])&nbsp;r<br>
+
+</tt></td></tr></table>
+</div>
+<div align=center> <h4>Figure 8</h4> </div>
+<div align=center><h3>Example of Derived Instances</h3></div><a name="tree-inst"></a>
+
+</td></tr></table>
+<p>
+<hr><i>The Haskell 1.4 Report</i><br><a href="index.html">top</a> | <a href="literate.html">back</a> | <a href="pragmas.html">next</a> | <a href="index14.html">contents</a> | <a href="prelude-index.html">function index</a> <br><font size=2>March 27, 1997</font>

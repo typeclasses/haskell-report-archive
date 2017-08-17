@@ -1,0 +1,28 @@
+
+<title>The Haskell 1.3 Library Report: Random Numbers</title>
+<body bgcolor="#ffffff"> <i>The Haskell 1.4 Library Report</i><br> <a href="index.html">top</a> | <a href="cputime.html">back</a> | next | <a href="libindex.html">contents</a> <br><hr>
+<a name="random numbers"></a><a name="sect17"></a>
+<h2>17<tt>&nbsp;&nbsp;</tt>Random Numbers</h2>
+<p>
+<table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module&nbsp;Random(&nbsp;random&nbsp;)&nbsp;where<br>
+<br>
+random&nbsp;&nbsp;&nbsp;&nbsp;::&nbsp;(Integer,Integer)&nbsp;-&gt;&nbsp;Integer&nbsp;-&gt;&nbsp;[Integer]<br>
+randomIO&nbsp;&nbsp;::&nbsp;(Integer,Integer)&nbsp;-&gt;&nbsp;IO&nbsp;[Integer]<br>
+<br>
+
+</tt></td></tr></table>
+<p>
+The <tt>Random</tt> library is a standard interface to a random value
+generator.  The <tt>random</tt> function takes two arguments, a pair of
+integers <tt>(l,h)</tt> which represents the range of the random values that
+are to be generated, and an integer seed.  It produces a list of
+random values as its result.  The range of values is exactly as given
+by the <tt>range</tt> operation, that is <tt>[l..h]</tt>.  The <tt>error</tt> function
+is called if this range is empty.
+The <tt>randomIO</tt> function is similar to <tt>random</tt> except that it obtains
+an initial seed in some system-dependent manner.  <p>
+<hr><i>The Haskell 1.4 Library Report</i><br><a href="index.html">top</a> | <a href="cputime.html">back</a> | next | <a href="libindex.html">contents</a> <br><font size=2>April 4, 1997</font>
+<p>

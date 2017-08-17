@@ -1,0 +1,283 @@
+
+<title>The Haskell 1.4 Report: Introduction</title>
+<body bgcolor="#ffffff"> <i>The Haskell 1.4 Report</i><br> <a href="index.html">top</a> | <a href="preface-13.html">back</a> | <a href="lexemes.html">next</a> | <a href="index14.html">contents</a> | <a href="prelude-index.html">function index</a> <br><hr>
+<a name="introduction"></a><a name="sect1"></a>
+<h2>1<tt>&nbsp;&nbsp;</tt>Introduction</h2>
+<p>
+Haskell  is a general purpose, purely functional
+programming language incorporating many recent innovations in
+programming language design.  Haskell  provides 
+higher-order functions,
+non-strict semantics, static polymorphic typing, user-defined
+algebraic datatypes, pattern-matching, list comprehensions, a module
+system, a monadic I/O system, and a rich set of primitive datatypes,
+including lists,
+arrays, arbitrary and fixed precision integers, and floating-point
+numbers.  Haskell  is both the culmination
+and solidification of many years of research on lazy functional
+languages.<p>
+This report defines the syntax for Haskell  programs and an
+informal abstract semantics for the meaning of such
+programs.
+
+We leave as implementation
+dependent the ways in which Haskell  programs are to be
+manipulated, interpreted, compiled, etc.  This includes such issues as
+the nature of programming environments and
+the error messages returned for undefined programs
+(i.e. programs that formally evaluate to _|_).<a name="programs"></a><p>
+<a name="sect1.1"></a>
+<h3>1.1<tt>&nbsp;&nbsp;</tt>Program Structure</h3>
+<p>
+In this section, we describe the abstract syntactic and semantic structure of
+Haskell , as well as how it relates to the organization of the
+rest of the report.
+<OL><LI>At the topmost level a Haskell  program is a set
+of <I>modules</I>, described in Section <a href="modules.html#modules">5</a>.  Modules provide
+a way to control namespaces
+and to re-use software in large programs.<p>
+<LI>The top level of a module consists of a collection of
+<I>declarations</I>, of which there are several kinds, all described
+in Section <a href="decls.html#declarations">4</a>.  Declarations
+define things such as ordinary values, datatypes, type
+classes, and fixity information.<p>
+<LI>At the next lower level are <I>expressions</I>, described
+in Section <a href="exps.html#expressions">3</a>.  An expression denotes a <I>value
+</I>and has a <I>static type</I>; expressions are at the heart of
+Haskell  programming "in the small."<p>
+<LI>At the bottom level is Haskell 's 
+<I>lexical structure</I>, defined in Section <a href="lexemes.html#lexical-structure">2</a>.  The
+lexical structure captures the concrete
+representation of Haskell  programs in text files.<p>
+</OL>
+This report proceeds bottom-up with respect
+to Haskell 's syntactic structure.<p>
+The sections not mentioned above are
+Section <a href="basic.html#basic-types-and-classes">6</a>, which
+describes the standard built-in datatypes and classes in Haskell , and
+Section <a href="io-13.html#io">7</a>, which discusses the I/O facility in Haskell 
+(i.e. how Haskell  programs communicate with the outside world).
+Also, there are several appendices describing the Prelude,
+the concrete syntax, literate programming, the specification of derived
+instances, and pragmas supported by most Haskell  compilers.<p>
+Examples of Haskell  program fragments in running text are given
+in typewriter font:
+<tt><br>
+
+<br>
+&nbsp;let&nbsp;x&nbsp;=&nbsp;1<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;z&nbsp;=&nbsp;x+y<br>
+&nbsp;in&nbsp;&nbsp;z+1<br>
+
+<br>
+
+</tt>"Holes" in program fragments representing arbitrary
+pieces of Haskell  code are written in italics, as in 
+<tt>if</tt><I> e</I><sub><I>1</I></sub><I> </I><tt>then</tt><I> e</I><sub><I>2</I></sub><I> </I><tt>else</tt><I> e</I><sub><I>3</I></sub>.  Generally the italicized names are
+mnemonic, such as <I>e</I> for expressions, <I>d</I> for
+declarations, <I>t</I> for types, etc.<a name="intro-kernel"></a><p>
+<a name="sect1.2"></a>
+<h3>1.2<tt>&nbsp;&nbsp;</tt>The Haskell  Kernel</h3>
+
+<p>
+Haskell  has adopted many of the convenient syntactic structures
+that have become popular
+in functional programming.  In all cases, their formal
+semantics can be given via translation into a proper subset of
+Haskell  called the Haskell  <I>kernel</I>.  It is
+essentially a slightly sugared variant of the lambda calculus with
+a straightforward denotational semantics.  The translation of each
+syntactic structure into the kernel is given as the syntax is
+introduced.
+This modular design facilitates
+reasoning about Haskell  programs and provides useful guidelines
+for implementors of the language.<a name="errors"></a><p>
+<a name="sect1.3"></a>
+<h3>1.3<tt>&nbsp;&nbsp;</tt>Values and Types</h3>
+
+<p>
+An expression evaluates to a <I>value</I> and has a
+static <I>type</I>.  Values and types are not mixed in
+Haskell .
+However, the type system
+allows user-defined datatypes of various sorts, and permits not only
+parametric polymorphism (using a
+traditional Hindley-Milner type structure) but
+also <I>ad hoc</I> polymorphism, or <I>overloading</I> (using
+<I>type classes</I>).<p>
+Errors in Haskell  are semantically equivalent to
+_|_.  Technically, they are not distinguishable
+from nontermination, so the language includes no mechanism
+for detecting or acting upon errors.  Of course, implementations
+will probably try to provide useful information about
+errors.<a name="namespaces"></a><p>
+<a name="sect1.4"></a>
+<h3>1.4<tt>&nbsp;&nbsp;</tt>Namespaces</h3>
+
+<p>
+Haskell  provides a lexical syntax for infix 
+<I>operators</I> (either functions or constructors).  To emphasize
+that operators are bound to the same things as identifiers, and to
+allow the two to be used interchangeably, there is a simple way to
+convert between the two: any function or constructor identifier may be
+converted into an operator by enclosing it in backquotes, and any
+operator may be converted into an identifier by enclosing it in
+parentheses.  For example, <tt>x&nbsp;+&nbsp;y</tt> is equivalent to
+<tt>(+)&nbsp;x&nbsp;y</tt>, and <tt>f&nbsp;x&nbsp;y</tt> is the same as
+<tt>x</tt> `<tt>f</tt>`<tt>&nbsp;y</tt>.
+These lexical matters are discussed further in
+Section <a href="lexemes.html#lexical-structure">2</a>.<p>
+There are six kinds of names in Haskell : those for <I>variables</I> and
+<I>constructors</I> denote values; those for <I>type variables</I>, 
+<I>type constructors</I>, and <I>type classes</I> refer to entities related
+to the type system; and <I>module names</I> refer to modules.
+There are three constraints on naming:
+<OL><LI>Names for variables and type variables are identifiers beginning
+      with lowercase letters; the other four kinds of names are
+      identifiers beginning with uppercase letters.
+<LI>Constructor operators are operators beginning with "<tt>:</tt>";
+      variable operators are operators not beginning with "<tt>:</tt>".
+<LI>An identifier must not be used as the name of a type constructor
+      and a class in the same scope.
+</OL>
+These are the only constraints; for example,
+<tt>Int</tt> may simultaneously be the name of a module, class, and constructor
+within a single scope.<a name="lexemes-layout"></a><p>
+<a name="sect1.5"></a>
+<h3>1.5<tt>&nbsp;&nbsp;</tt>Layout</h3>
+<p>
+In the syntax given in the rest of the report, <I>layout 
+lists</I> are always preceded by the keyword <tt>where</tt>, <tt>let</tt>, <tt>do</tt>,
+or <tt>of</tt>, and are
+enclosed within curly braces (<tt>{&nbsp;}</tt>) with the individual declarations
+separated by semicolons (<tt>;</tt>).  Layout lists usually contain
+declarations, but <tt>do</tt> and <tt>case</tt> introduce lists of other sorts.
+For example, the syntax of a <tt>let
+</tt>expression is:
+<p>
+
+<tt>let&nbsp;{</tt> decl<sub>1</sub> <tt>;</tt> decl<sub>2</sub> <tt>;</tt> ... <tt>;</tt> decl<sub>n</sub> [<tt>;</tt>] <tt>}&nbsp;in</tt> exp
+<p>
+<p>
+Haskell  permits the omission of the braces and semicolons by
+using <I>layout</I> to convey the same information.  This allows both
+layout-sensitive and -insensitive styles of coding, which
+can be freely mixed within one program.  Because layout is
+not required, Haskell  programs can be straightforwardly
+produced by other programs.<p>
+The layout (or "off-side") rule takes effect
+whenever the open brace is omitted after the keyword <tt>where</tt>, <tt>let</tt>,
+<tt>do</tt>, or
+<tt>of</tt>.  When this happens, the indentation of the next lexeme (whether
+or not on a new line) is remembered and the omitted open brace is
+inserted (the whitespace preceding the lexeme may include comments).
+For each subsequent line, if it contains only whitespace or is
+indented more, then the previous item is continued (nothing is
+inserted); if it is indented the same amount, then a new item begins
+(a semicolon is inserted); and if it is indented less, then the
+layout list ends (a close brace is inserted).  A close brace is
+also inserted whenever the syntactic category containing the
+layout list ends; that is, if an illegal lexeme is encountered at
+a point where a close brace would be legal, a close brace is inserted.
+The layout rule matches only those open braces that it has
+inserted; an explicit open brace must be matched by
+an explicit close brace.  Within these explicit open braces,
+<I>no</I> layout processing is performed for constructs outside the
+braces, even if a line is 
+indented to the left of an earlier implicit open brace.<p>
+Given these rules, a single newline may actually terminate several
+layout lists.  Also, these rules permit:
+<tt><br>
+
+<br>
+f&nbsp;x&nbsp;=&nbsp;let&nbsp;a&nbsp;=&nbsp;1;&nbsp;b&nbsp;=&nbsp;2&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;g&nbsp;y&nbsp;=&nbsp;exp2<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;in&nbsp;exp1<br>
+
+<br>
+
+</tt>making <tt>a</tt>, <tt>b</tt> and <tt>g</tt> all part of the same layout
+list.<p>
+To facilitate the use of layout at the top level of a module
+(an implementation may allow several modules may reside in one file),
+the keyword 
+<tt>module</tt> and the end-of-file token are assumed to occur in column
+0 (whereas normally the first column is 1).  Otherwise, all
+top-level declarations would have to be indented.<p>
+See also Section <a href="syntax-iso.html#layout">B.3</a>.<p>
+As an example, Figure <a href="intro.html#layout-before">1</a> shows a (somewhat contrived)
+module and Figure <a href="intro.html#layout-after">2</a> shows the result of applying the
+layout rule to it.  Note in particular: (a) the line beginning <tt>}};pop</tt>,
+where the termination of the previous line invokes three applications
+of the layout rule, corresponding to the depth (3) of the nested
+<tt>where</tt> clauses, (b) the close braces in the <tt>where</tt> clause nested
+within the tuple and <tt>case</tt> expression, inserted because the end of the
+tuple was detected, and (c) the close brace at the very end, inserted
+because of the column 0 indentation of the end-of-file token.<p>
+<table border=2 cellpadding=3>
+<tr><td><div align=center><table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module&nbsp;AStack(&nbsp;Stack,&nbsp;push,&nbsp;pop,&nbsp;top,&nbsp;size&nbsp;)&nbsp;where<br>
+data&nbsp;Stack&nbsp;a&nbsp;=&nbsp;Empty&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;MkStack&nbsp;a&nbsp;(Stack&nbsp;a)<br>
+<br>
+push&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;Stack&nbsp;a&nbsp;-&gt;&nbsp;Stack&nbsp;a<br>
+push&nbsp;x&nbsp;s&nbsp;=&nbsp;MkStack&nbsp;x&nbsp;s<br>
+<br>
+size&nbsp;::&nbsp;Stack&nbsp;a&nbsp;-&gt;&nbsp;Integer<br>
+size&nbsp;s&nbsp;=&nbsp;length&nbsp;(stkToLst&nbsp;s)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stkToLst&nbsp;&nbsp;Empty&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;[]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;stkToLst&nbsp;(MkStack&nbsp;x&nbsp;s)&nbsp;&nbsp;=&nbsp;x:xs&nbsp;where&nbsp;xs&nbsp;=&nbsp;stkToLst&nbsp;s<br>
+<br>
+pop&nbsp;::&nbsp;Stack&nbsp;a&nbsp;-&gt;&nbsp;(a,&nbsp;Stack&nbsp;a)<br>
+pop&nbsp;(MkStack&nbsp;x&nbsp;s)<br>
+&nbsp;&nbsp;=&nbsp;(x,&nbsp;case&nbsp;s&nbsp;of&nbsp;r&nbsp;-&gt;&nbsp;i&nbsp;r&nbsp;where&nbsp;i&nbsp;x&nbsp;=&nbsp;x)&nbsp;--&nbsp;(pop&nbsp;Empty)&nbsp;is&nbsp;an&nbsp;error<br>
+<br>
+top&nbsp;::&nbsp;Stack&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+top&nbsp;(MkStack&nbsp;x&nbsp;s)&nbsp;=&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;(top&nbsp;Empty)&nbsp;is&nbsp;an&nbsp;error<br>
+
+</tt></td></tr></table>
+</div>
+<div align=center> <h4>Figure 1</h4> </div>
+<div align=center><h3>A sample program</h3></div><a name="layout-before"></a>
+
+<div align=center><table border=2 cellpadding=3>
+<tr><td>
+<tt><br>
+module&nbsp;AStack(&nbsp;Stack,&nbsp;push,&nbsp;pop,&nbsp;top,&nbsp;size&nbsp;)&nbsp;where<br>
+{data&nbsp;Stack&nbsp;a&nbsp;=&nbsp;Empty&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;|&nbsp;MkStack&nbsp;a&nbsp;(Stack&nbsp;a)<br>
+<br>
+;push&nbsp;::&nbsp;a&nbsp;-&gt;&nbsp;Stack&nbsp;a&nbsp;-&gt;&nbsp;Stack&nbsp;a<br>
+;push&nbsp;x&nbsp;s&nbsp;=&nbsp;MkStack&nbsp;x&nbsp;s<br>
+<br>
+;size&nbsp;::&nbsp;Stack&nbsp;a&nbsp;-&gt;&nbsp;Integer<br>
+;size&nbsp;s&nbsp;=&nbsp;length&nbsp;(stkToLst&nbsp;s)&nbsp;&nbsp;where<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{stkToLst&nbsp;&nbsp;Empty&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;=&nbsp;[]<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;;stkToLst&nbsp;(MkStack&nbsp;x&nbsp;s)&nbsp;&nbsp;=&nbsp;x:xs&nbsp;where&nbsp;{xs&nbsp;=&nbsp;stkToLst&nbsp;s<br>
+<br>
+}};pop&nbsp;::&nbsp;Stack&nbsp;a&nbsp;-&gt;&nbsp;(a,&nbsp;Stack&nbsp;a)<br>
+;pop&nbsp;(MkStack&nbsp;x&nbsp;s)<br>
+&nbsp;&nbsp;=&nbsp;(x,&nbsp;case&nbsp;s&nbsp;of&nbsp;{r&nbsp;-&gt;&nbsp;i&nbsp;r&nbsp;where&nbsp;{i&nbsp;x&nbsp;=&nbsp;x}})&nbsp;--&nbsp;(pop&nbsp;Empty)&nbsp;is&nbsp;an&nbsp;error<br>
+<br>
+;top&nbsp;::&nbsp;Stack&nbsp;a&nbsp;-&gt;&nbsp;a<br>
+;top&nbsp;(MkStack&nbsp;x&nbsp;s)&nbsp;=&nbsp;x&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;--&nbsp;(top&nbsp;Empty)&nbsp;is&nbsp;an&nbsp;error<br>
+}<br>
+
+</tt></td></tr></table>
+</div>
+<div align=center> <h4>Figure 2</h4> </div>
+<div align=center><h3>Sample program with layout expanded</h3></div><a name="layout-after"></a>
+<p>
+</td></tr></table>
+<p>
+When comparing indentations for standard Haskell  programs, a
+fixed-width font with this tab convention is assumed: tab
+stops are 8 characters apart (with the first tab stop in column 9),
+and a tab character causes the insertion of enough spaces (always
+&gt;=1) to align the current position with the next tab stop.
+Particular implementations may alter this rule to accommodate
+variable-width fonts and alternate tab conventions, but standard
+Haskell  programs must observe this rule.<p>
+<hr><i>The Haskell 1.4 Report</i><br><a href="index.html">top</a> | <a href="preface-13.html">back</a> | <a href="lexemes.html">next</a> | <a href="index14.html">contents</a> | <a href="prelude-index.html">function index</a> <br><font size=2>March 27, 1997</font>
